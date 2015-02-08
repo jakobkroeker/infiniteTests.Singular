@@ -1,0 +1,52 @@
+/////////////////////
+version="version test.intersect.vs.intersectZ";
+category="Commutative Algebra";
+info="
+";
+
+
+LIB "primdecint.lib";
+LIB "randomIdeal.lib";
+ 
+
+proc testIntersect( rng, idealG, trials )
+{
+    if (defined(basering) ) {   def BAS=basering; }
+    setring rng;
+
+    int trial;
+    ideal cs,  I, J;
+
+    while( trial<trials )
+    {   
+       dbprint( 1, "ring rng = "+string(basering)+";" );
+       dbprint( 1, "int trial= "+string( trial)+";" );
+       I = idealG( );
+       J = idealG( );
+       dbprint( 1, "ideal I = "+string( I )+";");
+       dbprint( 1, "ideal J = "+string( J)+";" );
+       dbprint( 1, "  intersect(I,J);" );
+       intersect(I,J);
+       dbprint( 1, "  intersectZ(I,J);" );
+       intersectZ(I,J);
+       // ASSUME(0, idealsAreEqual( intersect(I,J), intersectZ(I,J) ) );
+       ASSUME(0, idealsEqual( intersect(I,J), intersectZ(I,J) ) );
+       trial = trial+1;
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+
+
+proc  testIntersectWrapper( cchar, ordering, numVars, genParams, trials )
+{
+    def rng = createRing( cchar,ordering, numVars ) ;
+
+    def idealG = idealGeneratorFromParams( genParams  );
+
+	testIntersect( rng, idealG, trials);
+}
+
+	
+

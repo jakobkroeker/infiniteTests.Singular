@@ -1,0 +1,106 @@
+/////////////////////
+version="version test.std";
+category="Commutative Algebra";
+info="
+";
+
+LIB "primdecint.lib";
+LIB "randomIdeal.lib";
+LIB "ringutils.lib";
+LIB "wrappers.lib";
+ 
+proc testGroebner( rng, idealG, trials )
+{
+    if (defined(basering) ) {   def BAS=basering; }
+    setring rng;
+
+    int trial;
+    ideal cs,  I, J, gI, gJ, ggI, ggJ;
+    while( trial<trials )
+    {   
+
+       if (defined(qrng)) {kill qrng; }
+       dbprint(1, "option(redSB);");
+       dbprint(1, "LIB \"primdec.lib\";");
+       dbprint(1, "LIB \"wrappers.lib\";");
+       dbprint( 1, "ring rng = "  + string( basering)+";" );
+       dbprint( 1, "int trial = " + string( trial) + ";" );
+
+       I = idealG( );
+       J = idealG( );
+       dbprint( 1, "system(\"random\", " + string( system("currentSeed") ) + ");" );
+       dbprint( 1, "ideal I = " + string( I ) + ";" );
+       dbprint( 1, "ideal J = " + string( J ) + ";" );
+       
+       dbprint( 1, "       ideal gI =   groebner(I);" );
+       gI =   groebner(I);
+       //dbprint( 1, "//        gI = "+string(gI) );
+       dbprint( 1, "       ideal ggI =   groebner(gI);" );
+       ggI =   groebner(gI);
+       //dbprint( 1, "//        ggI = "+string(ggI) );
+
+       dbprint( 1, "       ideal gJ =   groebner(J);" );
+
+       gJ =   groebner(J);
+       //dbprint( 1, "//        gJ = "+string(gJ) );
+       dbprint( 1, "       ideal ggJ =   groebner(gJ);" );
+       ggJ =   groebner(gJ);
+       //dbprint( 1, "//        ggJ = "+string(ggJ) );
+
+       dbprint(1, "ASSUME(0, 0== size(  groebner(reduce (I,gI ) ))  );");
+       ASSUME(0, 0== size(  groebner(reduce (I,gI ) ))  );
+        dbprint(1, "ASSUME(0, 0== size(  groebner(reduce (J,gJ ) ))  );");
+       ASSUME(0, 0== size(  groebner(reduce (J,gJ ) ))  );
+
+       ASSUME(0, size(gJ)== size(ggJ) );
+       ASSUME(0, size(gI)== size(ggI) );
+
+
+        dbprint(1,"ASSUME(0, idealsEqual(gI,ggI ));");
+       ASSUME(0, idealsEqual(gI,ggI ));
+
+        dbprint(1,"ASSUME(0, idealsEqual(gJ,ggJ ));");
+       ASSUME(0, idealsEqual(gJ,ggJ ));
+
+        dbprint(1,"ASSUME(0, idealsAreEqual(gI,ggI ));");
+       ASSUME(0, idealsAreEqual(gI,ggI ));
+
+        dbprint(1,"ASSUME(0, idealsAreEqual(gJ,ggJ ));");
+       ASSUME(0, idealsAreEqual(gJ,ggJ ));
+
+   dbprint(1,"ASSUME(0, idealRepresentationsEqual(gI,ggI ));");
+       ASSUME(0, idealRepresentationsEqual(gI,ggI ));
+        dbprint(1,"ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));");
+       ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));
+
+  /*      dbprint(1,"intersect(gJ,gI );");
+        intersect(gJ,gI );
+
+        dbprint(1, "intersect(J,I );");
+        intersect(J,I );
+
+      // dbprint(1, "ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );");
+      //ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );
+
+      //   dbprint(1,"ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );");
+      //ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );
+
+      dbprint(1,"ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );");
+      ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );
+
+      dbprint(1,"ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );");
+      ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );
+
+  */
+
+       trial = trial+1;
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+
+ 
+
+	
+

@@ -1,0 +1,26 @@
+
+LIB("bugs/test.finduni");
+
+
+proc  testFinduniWrapper( cchar, ordering )
+{
+    echo = 0;
+    option("redSB");
+
+    init_randomIdeal();
+    int numVars = 3;
+    def rng = createRing( cchar, ordering, numVars ) ;
+    // seems doable
+    def genParams = defaultIdealGeneratorParams();
+    // adjust random ideal generator params:
+    genParams.absMaxCoeff = 14;
+    genParams.maxMonomialDegree = 5;
+    genParams.maxTermsPerGen = 7;
+    genParams.maxGens = 4;
+    int trials = 1000000;
+    def idealG = idealGeneratorFromParams( genParams  );
+	testFinduni( rng, idealG, trials );
+}
+
+
+ testFinduniWrapper("0", "dp");

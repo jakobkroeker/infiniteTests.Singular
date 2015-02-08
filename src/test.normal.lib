@@ -1,0 +1,204 @@
+version="version test.normal.lib";
+category="Commutative Algebra";
+info="
+";
+
+
+
+LIB "primdec.lib";
+LIB "ringutils.lib";
+LIB "wrappers.lib";
+LIB "reslipman.lib";
+LIB "randomIdeal.lib";
+LIB "normal.lib";
+
+
+
+
+proc testNormal( rng, idealG, trials, oFileName   )
+{
+    dbprint(printlevel-voice+3, "testNormal");
+
+
+    if (defined(basering) )
+    { 
+        def BAS=basering;
+    }
+
+
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+    int npos;
+    def primes;
+    def L, L1, L2 ;
+
+    intvec v=1,1,1;
+    def testResult;
+    int printlevelOffset = 3 ; // required, since otherwise normal() prints dbinfo because it increases printlevel
+
+    trial = 0;
+    while( trial<trials )
+    {   
+       setring rng;
+
+       if ( defined(J) ) { kill J; }
+       ideal J = idealG();
+  
+       //dbprint( printlevel - voice + printlevelOffset, "J ", J,"");
+       
+       // J = radical(J);
+       // if  ( isZero(J) ||  idealsAreEqual( ideal(1), J ) || idealsAreEqual( ideal(1), slocus(J) )  )
+       if  (   idealsAreEqual(ideal(1), J)   )    
+       {
+          continue;
+       }
+       // trial = trial+1;
+       dbprint(1, " LIB(\"normal.lib\"); ");
+       dbprint(1, " int trial; ");
+
+       dbprint(1, "int voiceLvl = "+string(voice)+";");
+
+       dbprint(1, "ring rng = "+string(basering)+";");
+       dbprint(1, "ideal J = "+string(J)+";");
+       dbprint(1, "def  currentFactorySeed = "+string(system("currentFactorySeed"))+";");
+       dbprint(1, "def  currentSeed = "+string(system("currentSeed"))+";");
+       dbprint(1, "system(\"currentFactorySeed\",currentFactorySeed);");
+       dbprint(1, "system(\"currentSeed\",currentSeed );");
+
+       write(":w "+oFileName,"LIB(\"normal.lib\");");
+       write(":a "+oFileName, "int trial;");
+       write(":a "+oFileName, "intvec v=1,1,1;");
+       write(":a "+oFileName, "option(warn);");
+       write(":a "+oFileName, "option(redSB);");
+       write(":a "+oFileName, "system(\"currentFactorySeed\","+string(system("currentFactorySeed"))+");");
+       write(":a "+oFileName, "system(\"currentSeed\","+string(system("currentSeed"))+");");
+       write(":a "+oFileName, "int voiceLvl = "+string(voice)+";");
+       write(":a "+oFileName, "ring rng = "+string(basering)+";");
+       write(":a "+oFileName, "def L1,L2;");
+       write(":a "+oFileName, "ideal component;");
+       write(":a "+oFileName, "ideal J = "+string(J)+";");
+
+       write(":a "+oFileName, "def L = primdecGTZ(J);");
+       L = primdecGTZ(J);
+       dbprint(1, "L ", L);
+       write(":a "+oFileName, " if (not testPrimary(L,J)) { ERROR(\"failed testPrimary(L,J) \");  } ");
+       ASSUME(0, testPrimary(L,J) );
+  
+       for ( npos=1; npos<=size(L); npos++ )
+       {
+
+           if ( defined(component) ) { kill component; }
+           ideal component = L[npos][2];
+           dbprint(1, "component ", component);
+           write(":a "+oFileName, "component = "+string(component)+";");
+           write(":a "+oFileName, "// option = "+string(option())+";");
+
+           dbprint(1, "//options: "+string(option()));
+           ASSUME(0, isPrime(component) );
+           //ASSUME(0, not isZero(component) );
+           //ASSUME(0, (not idealsAreEqual(ideal(1),component ))  );
+ 
+           if (isPrime(component) && (not isZero(component)) && (not idealsAreEqual(ideal(1),component)) && (not idealsAreEqual(ideal(1),slocus(component) ))  )
+           //if (isPrime(component)   )  
+           {
+               trial = trial+1;
+               dbprint(1, "int trial = "+string(trial)+";");
+               dbprint(1, " v=1,1,1;");
+               dbprint(1, "ideal component = "+string(component)+";");
+
+               write(":a "+oFileName, "trial = "+string(trial)+";");
+               write(":a "+oFileName, "component = "+string(component)+";");
+
+               if (char(rng)==0)
+               {
+                    
+                    /* L1 = normalC(component);
+                       testResult = norTest(component, L1);
+
+                    // dbprint(printlevel-voice+printlevelOffset, "normalC(component);= ", L1);
+                    // dbprint(printlevel-voice+printlevelOffset, "testResult= ", testResult);
+                    ASSUME(0, v == testResult);
+                    */
+
+                    dbprint(1, "def L1 = normal(component);");
+                    write(":a "+oFileName, " L1 = normal(component);");
+                    L2 = normal(component);
+                    testResult = norTest(component, L2);
+                    dbprint(1, "ASSUME(0, v == norTest(component, L2) );");
+                    write(":a "+oFileName, "ASSUME(0, v == norTest(component, L2) );");
+                    ASSUME(0, v == testResult);  
+               }
+                else
+                {
+                   dbprint(1, "def L1 = normalP(component);");
+                   write(":a "+oFileName, "L1 = normalP(component,\"withRing\");");
+                   L1 = normalP(component,"withRing");
+                   testResult = norTest(component, L1);                  
+                   dbprint(1, "ASSUME(0, v == norTest(component, L1) );");
+                   write(":a "+oFileName, "norTest(component, L1) ;");
+                   write(":a "+oFileName, "if ( not (v == norTest(component, L1) ) ) { ERROR(\"not (v == norTest(component, L1)) \"); }");
+                   ASSUME(0, v == testResult);
+                }                        
+           }
+       }
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+/*
+proc testNormalWrapper(string cchar,string cord)
+{
+     int numVars = 2; 
+
+      def rng = createRing(cchar,cord, numVars) ;
+
+
+      def genParams = defaultRandomConstructionParams();
+      // adjust random ideal generator params:
+      genParams.absMaxCoeff = 14;
+      genParams.minVarFactorsPerMonomial = 0;
+      genParams.maxVarFactorsPerMonomial = 4;
+      genParams.maxTermsPerGen = 3;
+      genParams.maxGens = 3;
+
+      def gens = createRandomGeneratorsByParams( genParams  );
+
+      int trials = 30000;
+      testNormal( rng, gens.idealG, trials );
+}
+
+
+//option("nowarn");
+
+TRACE = 0;
+printlevel = 1;
+echo = 0;
+
+testNormalWrapper("3","dp");
+testNormalWrapper("3","lp");
+testNormalWrapper("3","Wp");
+testNormalWrapper("3","Dp");
+
+testNormalWrapper("5","dp");
+testNormalWrapper("5","lp");
+testNormalWrapper("5","Wp");
+testNormalWrapper("5","Dp");
+
+testNormalWrapper("0","dp");
+testNormalWrapper("0","lp");
+testNormalWrapper("0","Dp");
+
+*/
+
+
+
+
+
+

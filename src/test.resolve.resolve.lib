@@ -1,0 +1,58 @@
+
+echo = 1;
+LIB("ringutils.lib");
+LIB("wrappers.lib");
+LIB("resolve.lib");
+
+proc testResolve( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials )
+{
+    print ("testResolve");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing("0","dp", numVars) ;
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+    for (trial = 1; trial<=trials; trial++)
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(j) ) { kill j; }
+       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       print ("j:");
+       j;
+      ideal i = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       print ("i:");
+       i;
+       
+       i = i+j;
+       if ((dimIdeal(i)>=0) && not (isZero(i)) )
+       {
+           resolve(i);
+       }
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+proc testResolverapper()
+{
+	printlevel = 0 ;
+    TRACE=1;
+	// seems doable
+	int numVars = 2;
+	int maxGens = 5;
+	int maxTermsPerGen = 3;
+	int maxMonomialDegree = 3;
+	int absMaxCoeff = 15 ;
+	int trials = 1000;
+	testResolve( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials);
+}
+
+testResolverapper();
+

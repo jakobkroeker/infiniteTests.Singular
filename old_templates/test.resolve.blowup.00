@@ -1,0 +1,44 @@
+
+
+LIB("bugs/test.resolve.blowup");
+monitor("log/test.resolve.blowup.00","io");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultIdealGeneratorParams();
+
+genParams.absMaxCoeff       = 50;
+genParams.minMonomialDegree = 0;
+genParams.maxMonomialDegree = 3;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 2;
+
+proc idealG = idealGeneratorFromParams( genParams  );
+
+//////// adjust ring  
+string cchar    = "0";
+string ordering = "dp";
+int    numVars  = 3;
+
+def rng = createRing( cchar, ordering, numVars ) ;
+
+option("nowarn");
+option("redSB");
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+
+testBlowUp( rng, idealG, trials);
+
+// ulimit -v 1000000 ; ulimit -t 500
+// ./singular-spielwiese < input/test.resolve.blowup.00 2>&1 | tee -a log/test.resolve.blowup.00.log ;
+// export cont=1; while [ $cont -eq 1 ] ; do nice -19 ./singular-spielwiese < input/test.resolve.blowup.00 2>&1 | tee -a log/test.resolve.blowup.00.log ; if [ $? -eq 123 ] ; then export cont=0; fi; done

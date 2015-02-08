@@ -1,0 +1,111 @@
+
+
+LIB("wrappers.lib");
+
+
+proc createRingX(string charStr, string modulus, string monomialOrderStr, int numOfVariables )
+{
+   def varNames=getVariableNames(numOfVariables);
+   def varStr = "(" + assembleStringArray( varNames, "," ) + ")" ;
+   string cmd = "ring rng = " + charStr + "," + varStr + "," + monomialOrderStr + ";";
+   execute (cmd);
+   string cmd = "minpoly = " + modulus  + ";";
+   execute (cmd);
+   return (rng);
+}
+
+
+proc reconstruct(fp)
+{
+
+  ASSUME(0, size(fp)==2 );
+  int fpsize = size(fp[1]);
+ 
+  poly result=1;
+  int pos;
+  for (pos=1;pos<=fpsize;pos++)
+  {
+     result = result*(fp[1][pos])^(fp[2][pos]);
+  }
+  return (result);
+}
+
+
+proc testFactorize( numVars,  absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials, cchar, cord  )
+{
+    dbprint(printlevel-voice, "testFactorize");
+    if (defined(basering) )
+    { 
+        def BAS=basering;
+    }
+
+    //def rng = createRing(cchar,cord, numVars) ;
+    def rng = createRing(cchar,cord, numVars) ;
+    setring rng;
+    export(rng);
+
+    int trial;
+
+    poly quot;
+    trial = 0;
+    while(trial<trials)
+    {   
+       setring rng;
+   
+       if ( defined(p) ) { kill p; }
+       poly p = randomGen(  random(-absMaxCoeff, absMaxCoeff), maxMonomialDegree, random(1, maxTermsPerGen) ) ;
+
+       if ( idealsAreEqual( ideal(p), ideal(0) ) ) {continue;}
+       dbprint( 1, "trial =", trial );
+       dbprint( 1, "p =", p, "" );       
+       def fp = factorize(p);
+       dbprint( 1, "trial =", trial);
+       dbprint( 1, "fp =", fp, "");     
+
+       dbprint( 1, "product(fp) =", product(fp), "");     
+       def rfp  = reconstruct(fp);
+       dbprint( 1, "product(rfp) =", product(rfp), "");     
+
+       quot = p/rfp;
+       dbprint( 1, "quot =", quot, "");     
+       ASSUME(0, idealsAreEqual( ideal(quot), ideal(1) ));
+       ASSUME(0, p == rfp );  
+           
+       trial = trial + 1;
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+proc testFactorizeWrapper(string cchar, string cord)
+{
+	int numVars = 3;
+	int maxTermsPerGen = 3;
+	int maxMonomialDegree = 3;
+	int absMaxCoeff = 10;
+	int trials = 3000;
+	testFactorize( numVars,  absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials, cchar, cord);
+}
+
+
+//option("nowarn");
+
+TRACE=0;
+printlevel = 4;
+echo = 0;
+
+testFactorizeWrapper("0","dp");
+testFactorizeWrapper("0","lp");
+testFactorizeWrapper("0","Dp");
+ 
+
+
+testFactorizeWrapper("7","dp");
+testFactorizeWrapper("7","lp");
+testFactorizeWrapper("7","Dp");
+
+
+testFactorizeWrapper("(9,a)","dp");
+

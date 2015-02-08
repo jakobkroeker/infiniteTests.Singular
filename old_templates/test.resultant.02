@@ -1,0 +1,40 @@
+
+LIB("randomIdeal.lib");
+LIB("bugs/test.resultant");
+
+
+option("warn");
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+
+def genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 14;
+genParams.minVarFactorsPerMonomial = 3;
+genParams.maxVarFactorsPerMonomial = 7;
+genParams.maxTermsPerGen    = 4;
+genParams.maxGens           = 4;
+
+def generators = createRandomGeneratorsByParams( genParams  );
+
+//////// adjust ring  
+string cchar    = "17";
+string ordering = "lp";
+int    numVars  = 5;
+
+//def rng = createRing( cchar, ordering, numVars ) ;
+ring rng = 17,(x,y,z,s,t),lp;
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+
+testResultant( rng, generators.polyG, trials, "log/test.resultant.02.out");
+
+

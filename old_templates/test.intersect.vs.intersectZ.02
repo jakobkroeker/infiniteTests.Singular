@@ -1,0 +1,45 @@
+
+
+LIB("bugs/test.intersect.vs.intersectZ");
+monitor("log/test.intersect.vs.intersectZ.02","io");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 15;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 2;
+
+def gens = createRandomGeneratorsByParams( genParams  );
+
+//////// adjust ring  
+string cchar    = "integer";
+string ordering = "(dp(1),dp(1))";
+int    numVars  = 2;
+
+//def rng = createRing( cchar, ordering, numVars ) ;
+ring rng = integer,(x,y),(dp(1),dp(1));
+
+option("warn");
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+
+//testIntersectVSintersectZ( rng, gens.idealG, trials);
+
+testIntersect( rng, gens.idealG, trials);
+
+// ./singular-spielwiese < input/test.intersect.vs.intersectZ.02 2>&1 | tee -a log/test.intersect.vs.intersectZ.02.log ;
+// ulimit -v 1000000 ; ulimit -t 5000
+// export cont=1; while [ $cont -eq 1 ] ; do ./singular-spielwiese < input/test.intersect.vs.intersectZ.02 2>&1 | tee -a log/test.intersect.vs.intersectZ.02.log ; if [ $? -eq 123 ] ; then export cont=0; fi; done

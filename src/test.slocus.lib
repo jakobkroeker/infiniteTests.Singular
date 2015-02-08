@@ -1,0 +1,62 @@
+
+echo = 1;
+LIB("ringutils.lib");
+LIB("wrappers.lib");
+LIB("sing.lib");
+
+proc testSlocus( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials, charr )
+{
+    print ("testSlocus");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing(charr,"dp", numVars) ;
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+    for (trial = 1; trial<=trials; )
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(j) ) { kill j; }
+       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       print ("j:");
+       j;
+       if ( defined(i) ) { kill i; }
+       ideal i = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       print ("i:");
+       i;
+       
+       i = i+j;
+       i = std(i);
+       slocus(i);
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+proc testSlocusWrapper()
+{
+	printlevel = 0 ;
+    TRACE = 0;
+	// seems doable
+	int numVars = 3;
+	int maxGens = 5;
+	int maxTermsPerGen = 3;
+	int maxMonomialDegree = 3;
+	int absMaxCoeff = 15 ;
+	int trials = 1000;
+	testSlocus( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials, "0");
+}
+
+ 
+testSlocusWrapper();
+
+ 
+
+
+

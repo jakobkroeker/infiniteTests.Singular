@@ -1,0 +1,240 @@
+version=" ";
+category = "Automated tests";
+info="";
+
+LIB "ellipticcovers.lib" ;
+
+
+proc chooseRandomOptionsFromList(list optionList)
+{
+   int i;
+   string cmd;
+
+   for (i=1;i<=size(optionList);i++)
+   {  
+      if (random(0,1))
+      {
+           cmd  ="option ("+ string(optionList[i]) +");";
+      }
+      else
+      {
+          cmd  ="option (no"+ string(optionList[i]) +");";
+      }
+      print(cmd);
+      execute(cmd);
+   }
+}
+
+proc getRandomMinpolyStr(characteristic, mpVarStr , genTable)
+{
+
+   def R=basering;
+   
+   string rngstr= "ring rng = "+string(characteristic)+","+mpVarStr+",dp;";
+   execute(rngstr);
+   setring rng;
+   poly p = genTable.polyG();
+   if (not (leadcoef(p)==0))      {        p = p-lead(p)+lead(p)/leadcoef(p);  }
+   //dbprint(1,"p=",p);
+   def l = factorize(p);
+  
+  poly mp;
+
+  while (mp==0)
+  {
+    while (size(l[1])<2)
+    {
+      p = genTable.polyG();
+      if (not (leadcoef(p)==0))      {        p = p-lead(p)+lead(p)/leadcoef(p);  }
+      //dbprint(1,"p=",p);
+      l = factorize(p);
+    }
+    if ( deg( l[1][2] )>1) 
+    {
+
+      mp = l[1][2];
+    }
+    else    {    mp=0;  l = list( list() );    }
+   }
+   string str_mp = "minpoly = "+string(mp ) +";";
+   setring R;
+   return (str_mp);
+}
+
+
+// add c++ implementation to kernel and interface to it
+
+proc unsortedPartitions(num)
+{
+    list parts;
+    intvec answer = num;
+    parts[ size(parts)+1 ] = answer;
+    int x,y;
+    intvec partpart, newpart;
+    list tmpPartition;
+
+    for (x=1 ; x < num; x++)
+    {   
+        tmpPartition = unsortedPartitions(num-x);
+
+        for (y=1; y <= size(tmpPartition); y++)
+        {
+             partpart = tmpPartition[y];
+             newpart = x, partpart;
+             // newpart = sort(newpart)[1];
+             //dbprint(1, newpart, sort(newpart));
+             parts[ size(parts)+1 ] = newpart;
+        }
+    }
+    return (parts);
+}
+
+proc sortedPartitions(num)
+{
+    list parts = partition(num);
+    parts = removeRedundantEntries(parts);
+    return (parts);
+}
+
+
+ 
+proc removeRedundantEntries(veclist)
+{
+     int i,j;
+    list result;
+
+    // result[size(veclist)] = 0;
+
+    i = 1;
+    // dbprint(1,"removeRedundantEntries");
+
+    while (i<=size(veclist) )
+    {
+        if (not (veclist[i] == intvec(0) ) )
+        {
+            for (j=i+1; j<=size(veclist); j++)
+            {
+                if ( veclist[i]== veclist[j] )
+                {
+                    veclist[j] =0;
+                }
+            }
+        }
+        i = i+1;
+    }
+    j = 1;
+
+    for ( i= 1 ; i <= size(veclist); i++ )
+    {
+        if (not (veclist[i]==intvec(0) ) )
+        {
+            result[j] = veclist[i];
+            j = j + 1;  
+        }
+    }
+    // dbprint(1,"removeRedundantEntries finished");
+
+    return( result );
+}
+
+
+proc listToStringList(l)
+{    
+    for ( i= 1 ; i <= size(l); i++ )
+    {
+        l[i]=string(l[i]);
+    }
+    return (l);
+}
+
+
+proc randomBlock(numVars)
+{
+    list part = unsortedPartitions(numVars);
+    return ( part[ random(1,size(part) ) ] );
+//    return (part);
+}
+
+
+proc randomChar(maxChar)
+{
+    ASSUME(0, maxChar>=0);
+    if (maxChar==0) { return (0); }
+
+    int zero = random(0,1);    
+    if ( (zero) ) { return (0); }
+
+    int preNextChar = random(0,maxChar);
+    return( prime(preNextChar) );
+}
+
+
+proc randomGlobalOrdering()
+{
+    list l = "lp","rp","dp","Dp";
+    return( l[random(1, size(l) ) ]);
+}
+
+
+proc randomBlockOrdering(randomOrdProc, numvars)
+{
+    string boType = randomOrdProc();
+    intvec block = randomBlock(numvars);
+
+    int zero = random(0,1);    
+    if ( (zero) ) { return (boType); }
+
+    int pos;
+    string result = "(";
+    for ( pos=1; pos <=size(block); pos++ )
+    {
+         result = result + boType + "("+ string(block[pos]) + ")";
+         if  (pos< size(block) )
+         {
+            result = result + ", ";
+         }
+    }
+      result = result + ")";
+    return (result);
+}
+
+proc randomLocalOrdering()
+{
+    list l = "ls","rs","ds","Ds";
+    return( l[random(1, size(l) ) ]);
+}
+
+
+proc randomOrdering()
+{
+    list l = "ls","rs","ds","Ds","lp","rp","dp","Dp";
+    return(l[random(1, size(l) ) ]);
+}
+
+/*
+
+// 0 in 50 % cases
+
+proc randomWeight(min,max,len)
+{
+    
+}
+
+
+
+LIB("infiniteTests/src/automatedTests.lib");
+LIB("general.lib");
+
+randomBlockOrdering(randomGlobalOrdering, 4);
+
+
+unsortedPartitions(4);
+
+
+def l2 = randomBlock(7);
+
+sort(l2);
+
+
+*/
+

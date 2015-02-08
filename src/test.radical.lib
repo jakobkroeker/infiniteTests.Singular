@@ -1,0 +1,69 @@
+
+
+echo = 1;
+
+
+LIB("primdec.lib");
+LIB("ringutils.lib");
+LIB("wrappers.lib");
+LIB("ehv.lib");
+
+proc testRadical( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials )
+{
+    print ("testSyzOverZZ");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing("0","dp", numVars) ;
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+    for (trial = 1; trial<=trials; trial++)
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(j) ) { kill j; }
+       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       print ("j:");
+       j;
+       if ( not idealsAreEqual(j,ideal(1)) and not  idealsAreEqual(j,ideal(0)))
+       {
+           ideal I1= radical(j);
+           I1;
+           ideal I2 = radEHV(j);
+           I2;
+ 
+           ideal I3 = radicalEHV(j);
+           I3;
+          
+           ASSUME(0, idealsAreEqual(I1,I2)  );
+           ASSUME(0, idealsAreEqual(I1,I3)  );
+           testIsRadical(I1);
+       }
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+proc testRadicalWrapper()
+{
+	
+	// seems doable
+	int numVars = 3;
+	int maxGens = 5;
+	int maxTermsPerGen = 4;
+	int maxMonomialDegree = 4;
+	int absMaxCoeff = 100;
+	int trials = 3000;
+	testRadical( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials);
+}
+
+printlevel = 0 ;
+TRACE=0;
+
+testRadicalWrapper();
+

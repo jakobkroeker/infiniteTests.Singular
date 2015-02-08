@@ -1,0 +1,59 @@
+
+echo = 1;
+LIB("primdec.lib");
+LIB("ringutils.lib");
+LIB("wrappers.lib");
+LIB("resolve.lib");
+
+proc testBlowUp2( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials )
+{
+    print ("testFacstd");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing("0","dp", numVars) ;
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+    for (trial = 1; trial<=trials; trial++)
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(j) ) { kill j; }
+       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       print ("j:");
+       j;
+      ideal i = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       print ("i:");
+       i;
+       
+       i = i+j;
+       if (dimIdeal(i)>=0)
+       {
+           blowUp2(j,i);
+       }
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+proc testBlowUp2rapper()
+{
+	printlevel = 0 ;
+    TRACE=1;
+	// seems doable
+	int numVars = 3;
+	int maxGens = 5;
+	int maxTermsPerGen = 5;
+	int maxMonomialDegree = 5;
+	int absMaxCoeff = 105;
+	int trials = 1000;
+	testBlowUp2( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials);
+}
+
+testBlowUp2rapper();
+

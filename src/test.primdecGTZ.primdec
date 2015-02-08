@@ -1,0 +1,120 @@
+
+
+option("redSB");
+
+echo = 1;
+LIB("primdec.lib");
+LIB("ringutils.lib");
+LIB("wrappers.lib");
+LIB("ehv.lib");
+ 
+proc testPrimdecZeroDim( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials )
+{
+    print ("testPrimdecZeroDim");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing("0","dp", numVars) ;
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+
+    // generating only zerodimensional ideals:
+    for (trial = 1; trial<=trials; trial=trial)
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(j) ) { kill j; }
+       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+     
+       if ( dimIdeal(j)==0 )
+       {
+          print(" dimIdeal(j)=0" );
+          trial=trial+1;
+		  zerodec(j); 
+       }
+    }
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+proc testPrimdec( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials ,cchar,cord)
+{
+    print ("testPrimdec");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing(cchar,cord, numVars) ;
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+   list L1,L2,L3;
+    for (trial = 1; trial<=trials; trial++)
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(j) ) { kill j; }
+       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       //system("random", random(0,5000000) ) ;
+       //system("random" ) ;
+       print ("j:");
+       j;
+
+       if (not isZero(j) && not idealsAreEqual(ideal(1),j) )
+       {
+            L1 = primdecGTZ(j);
+            L2 = primdecSY(j);
+           //ASSUME(0, primDecsAreEquivalent(L1,L2) );
+
+           // L3 = primdecEHV(j);
+           //ASSUME(0, primDecsAreEquivalent(L1,L3) );
+
+
+           minAssGTZ(j);
+           minAssChar(j);
+           testPrimary(primdecGTZ(j), j);
+           radical(j);
+           // radicalEHV(j); //fails: invalid size of minors
+           equiRadical(j);
+           prepareAss(j);    //  ? transpose(`nothing`) failed
+     
+           equidim(j);
+           equidimMax(j);
+           // equidimMaxEHV(j); //transpose nothing failed
+           //     zerodec(j); // rows must be greater than 0
+           absPrimdecGTZ(j);
+       }
+      
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+proc testPrimdecWrapper(cchar,cord)
+{
+
+	// seems doable
+	int numVars = 3;
+	int maxGens = 4;
+	int maxTermsPerGen = 4;
+	int maxMonomialDegree = 4;
+	int absMaxCoeff = 14;
+	int trials = 3000;
+	testPrimdec( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials,cchar,cord);
+}
+
+printlevel = 0 ;
+TRACE=1;
+testPrimdecWrapper("0","dp");
+
+testPrimdecWrapper("7","dp");
+
+

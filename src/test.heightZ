@@ -1,0 +1,37 @@
+/////////////////////
+version="version test.heightZ";
+category="Commutative Algebra";
+info="
+";
+
+
+LIB "primdecint.lib";
+LIB "randomIdeal.lib";
+LIB "ringutils.lib";
+LIB "wrappers.lib";
+
+proc testHeightZ( rng, idealG, trials )
+{
+    if (defined(basering) ) {   def BAS=basering; }
+    setring rng;
+
+    int trial;
+    ideal cs,  I, J;
+
+    while( trial<trials )
+    {   
+       dbprint( 1, "basering: ", basering );
+       dbprint( 1, "trial: ", trial );
+       I = idealG( );
+       dbprint( 1, "I = ", I );
+       heightZ( I );
+
+       trial = trial+1;
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+
+ 
+

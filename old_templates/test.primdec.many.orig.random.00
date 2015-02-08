@@ -1,0 +1,70 @@
+
+
+LIB("src/test.primdec.many.orig.mp");
+
+LIB("src/automatedTests.lib");
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 300;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 3;
+genParams.bFractionsOn      = 1;
+
+def genTable = createRandomGeneratorsByParams( genParams  );
+
+
+// def genTable = getGenTable();
+
+
+
+//proc getRing( genTable )
+proc getRandomRing(  )
+{
+
+   int maxChar = 32003;
+
+   //int maxChar = 100;
+
+   int c =  randomChar( maxChar );
+
+   string str_rng_mp = "ring rng = (c),(xx, yy, zz, ww),";
+
+   string orderingString = randomBlockOrdering(randomGlobalOrdering, 4);
+
+   str_rng_mp = str_rng_mp + orderingString + ";";
+
+   execute(str_rng_mp);
+
+   setring rng;
+
+   option(redTail);
+
+   return (basering);
+}
+
+
+option(warn);
+
+int trials = 10000000;
+
+testPrimdec( getRandomRing , genTable, trials, logfile);
+
+///////////////////////////////////////////////////////////
+
+// ./bin/infiniteTestX.sh ../singular-spielwiese test.primdec.many.orig.random_mp.00 randomsetup/ring/char_0__vars_3__ordering__lp__redSB_redTail randomsetup/genTable/maxCoeff_50__degree_0-3__maxTerms_2__maxGens_3__FractionsOff 30 1000000 1
+
+
+
+

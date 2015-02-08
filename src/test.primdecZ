@@ -1,0 +1,106 @@
+
+echo = 1;
+option("redSB");
+
+
+LIB("primdecint.lib");
+LIB("ringutils.lib");
+LIB("wrappers.lib");
+LIB("ehv.lib");
+ 
+ 
+proc testPrimaryZ(list pr, ideal k)
+"USAGE:   testPrimary(pr,k); pr a list, k an ideal.
+ASSUME:  pr is the result of primdecGTZ(k) or primdecSY(k).
+RETURN:  int, 1 if the intersection of the ideals in pr is k, 0 if not
+EXAMPLE: example testPrimary; shows an example
+"
+{
+   int i;
+   pr=Primdec::reconvList(pr);
+   ideal j=pr[1];
+   int tstRes;
+   for (i=2;i<=size(pr) div 2;i++)
+   {
+       ASSUME(0, (2*i-1) >0 && (2*i-1)<=size(pr));
+       ASSUME(0, (2*i-1) >0 && (2*i-1)<=size(pr));
+       dbprint(printlevel-voice,"intersectZ(j,pr[2*i-1]), j=",j);
+       dbprint(printlevel-voice,"intersectZ(j,pr[2*i-1]), pr[2*i-1]=",pr[2*i-1]);
+       j=intersectZ(j,pr[2*i-1]);
+       tstRes = idealsEqual(j, intersect(j,pr[2*i-1]) );
+       ASSUME(0, tstRes );
+   }
+   return(Primdec::idealsEqual(j,k));
+}
+
+proc testPrimdecZ( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, orderingStr,trials )
+{
+    print ("testPrimdecZ");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing("integer",orderingStr , numVars) ;
+    setring rng;
+    export(rng);
+    "bbasering";
+    basering;~;
+
+    list ideals;
+
+    int trial;
+    for (trial = 1; trial<=trials; )
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(I) ) { kill I; }
+       ideal I = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       print ("I:");
+       I;
+
+       if ( dimIdeal(I)>=0)
+       {
+           trial++;
+           if ( defined(L1) ) { kill L1; }
+           list L1 = primdecZ(I);
+           if (not idealsAreEqual(ideal(1), I))
+           { 
+               ASSUME(0, size(L1)>0);
+           }
+           //testPrimaryZ(L1, I); // intersection test
+           testPrimaryZ(L1, I); // intersection test
+       }
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+proc testPrimdecZWrapper(orderingStr)
+{
+	// seems doable
+	int numVars = 2;
+	int maxGens = 3;
+	int maxTermsPerGen = 3;
+	int maxMonomialDegree = 3;
+	int absMaxCoeff = 14;
+	int trials = 1000;
+	testPrimdecZ( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, orderingStr,trials);
+}
+
+	printlevel = 0 ;
+    TRACE=1;
+
+
+testPrimdecZWrapper("dp");
+
+
+testPrimdecZWrapper("lp");
+
+
+testPrimdecZWrapper("Dp");
+
+
+
+
+

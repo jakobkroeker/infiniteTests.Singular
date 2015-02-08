@@ -1,0 +1,52 @@
+
+
+LIB("bugs/test.primdec.many");
+
+//monitor("log/test.std.correct.02.cont"+contstr,"io");
+
+string logfile = "log/test.std.correct.02.cont"+contstr;
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 30;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 3;
+genParams.bFractionsOn      = 0;
+
+def genTable = createRandomGeneratorsByParams( genParams  );
+
+//////// adjust ring  
+string cchar    = "0";
+string ordering = "lp";
+int    numVars  = 3;
+
+def rng = createRing( cchar, ordering, numVars ) ;
+
+option("nowarn");
+option("redSB");
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+
+testPrimdec( rng, genTable.idealG, trials, logfile);
+
+// ulimit -v 1000000 ; ulimit -t 1500
+// nice -19 ./singular-spielwiese < input/test.primdec.many.02 2>&1 | tee -a log/test.primdec.many.02.log ;
+// export cont=0;
+// exit code 14: no memory 
+// exit code 137: ulimit timeout
+// while [ $cont -lt 6 ] ; do echo 'def contstr="'$cont'";' >input/test.primdec.many.02.cont$cont; cat input/test.primdec.many.02 >> input/test.primdec.many.02.cont$cont;  nice -19 ./singular-spielwiese < input/test.primdec.many.02.cont$cont 2>&1 | tee -a log/test.primdec.many.02.log; status=$?; echo "status"$status >> log/test.primdec.many.02.log; if [ $status -eq 14 ] || [ $status -eq 137 ] ; then  export cont=cont; else export cont=$(($cont + 1)); fi; done

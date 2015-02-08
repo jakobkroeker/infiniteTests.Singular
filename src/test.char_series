@@ -1,0 +1,56 @@
+/////////////////////
+version="version test.char_series";
+category="Commutative Algebra";
+info="
+";
+
+
+LIB "primdec.lib";
+LIB "ehv.lib";
+LIB "randomIdeal.lib";
+ 
+
+proc testCharSeries( rng, idealG, trials, filename )
+{
+ 
+    if (defined(basering) ) {   def BAS=basering; }
+    setring rng;
+
+
+    bigint trial;
+    ideal cs,  I;
+
+    while( trial<trials )
+    {   
+       //dbprint( 1, "basering: ", basering );
+       write(":w "+filename,"LIB(\"primdec.lib\");");
+       write(":a "+filename,"LIB(\"ehv.lib\");");
+       write(":a "+filename,"LIB(\"randomIdeal.lib\");");
+       write(":a "+filename,"ring rng = "+string(basering)+";");
+       write(":a "+filename,"bigint trial = "+string(trial)+";");
+       ///dbprint( 1, "trial: ", trial );
+       I = idealG( );
+       //dbprint( 1, "I = ", I );
+       write(":a "+filename,"ideal I= "+string(I)+";");
+       write(":a "+filename,"ideal cs = char_series(I);");
+       cs = char_series(I);
+       trial = trial+1;
+       ASSUME(0, 0);
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+
+/*
+proc  testCharSeriesWrapper( cchar, ordering, numVars, genParams, trials )
+{
+    def rng = createRing( cchar,ordering, numVars ) ;
+
+    def idealG = idealGeneratorFromParams( genParams  );
+
+	testCharSeries( rng, idealG, trials);
+}
+*/
+	
+

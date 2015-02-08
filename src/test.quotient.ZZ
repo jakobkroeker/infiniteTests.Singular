@@ -1,0 +1,156 @@
+version="version test.quotient.overZZ";
+category="Commutative Algebra";
+info="
+";
+
+LIB "primdec.lib";
+LIB "ehv.lib";
+LIB "ringutils.lib";
+LIB "wrappers.lib";
+LIB "primdecint.lib";
+LIB "randomIdeal.lib";
+
+
+proc quotientZWrapper(ideal A,ideal B)
+{
+        return(Primdecint::quotientZ(A,B));
+}
+
+proc quotientPropertySatisfied(ideal I, ideal J, colonIdeal, idealG, trials )
+{
+
+    /* TIdealGeneratingParameters genParams = defaultIdealGeneratorParams();
+      // adjust random ideal generator params:
+ 
+      genParams.absMaxCoeff = 10;
+      genParams.maxMonomialDegree = 6;
+      genParams.maxTermsPerGen = 6;
+      genParams.maxGens = 6;
+
+      proc idealG = idealGeneratorFromParams( genParams  );
+*/
+
+
+    int trial;
+    int genId;
+    ideal colonIdealElem, i ;
+    for (trial = 1; trial<=trials; trial++)
+    {  
+       colonIdealElem=0;
+
+	   for (genId=1; genId<=size(colonIdeal);genId++)
+       {
+            i = idealG();
+            colonIdealElem = colonIdealElem + i*colonIdeal[genId];
+       }
+       if (not isSubset( colonIdealElem*J , I )) {ERROR (" not quotientPropertySatisfied  !");  }     
+     
+    }
+    return(1);
+}
+
+
+proc testQuotientOverZZ( rng, idealG, trials , logfile )
+{
+    if (not (defined(assumeLevel)) ) { def Top::assumeLevel=3; }
+    print ("testQuotientOverZZ");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+    ideal quotient_JI, quotientZ_JI, quotient_gJgI, quotientZWrapper_gJgI,I,J,gI,gJ;
+    for (trial = 1; trial<=trials; trial++)
+    {   
+       setring rng;
+       write(":w "+logfile, emptystring);
+       monitor(logfile,"io");
+       write(":w "+logfile, emptystring);
+
+        J = idealG( );
+        I =  idealG( );
+
+       dbprint(1, "////////////////////////////////////////////////////////////////////////////////////////");
+       dbprint(1, "def assumeLevel = "+string( assumeLevel ) + ";" );
+       dbprint(1, " // voice = "+string( voice ) + ";" );
+       dbprint(1, "system(\"random\","+string( system("random") ) + ");" );
+       dbprint(1, "//random: "+ string( system("random") )  );
+       dbprint(1, "LIB(\"bugs/test.quotient.ZZ\");");
+       //dbprint(1, "LIB(\"primdec.lib\");");
+       //dbprint(1, "LIB(\"ehv.lib\");");
+       dbprint(1, "intvec op = "+string( option(get) )+";");
+       dbprint(1, "ring rng = "+string(basering)+";");
+       dbprint(1, " ideal quotient_JI, quotientZ_JI, quotient_gJgI, quotientZWrapper_gJgI, I, J, gI, gJ;");
+       dbprint(1, " I = "+string(I)+";");
+       dbprint(1, " J = "+string(J)+";");
+       dbprint(1, "bigint trial = "+string(trial)+";");
+
+
+
+       dbprint(1, " quotientZ_JI = quotientZWrapper(J,I);");
+       quotientZ_JI = quotientZWrapper(J,I); 
+
+       dbprint(1, "// ASSUME(0, quotientPropertySatisfied( J,I , quotientZ_JI ,idealG, 300 ) );");   
+       ASSUME(0, quotientPropertySatisfied( J,I , quotientZ_JI , idealG, 300 ) );
+
+       dbprint(1, "quotient_JI = quotient(J,I); ");
+       quotient_JI = quotient(J,I); 
+
+       dbprint(1, "ASSUME(0, idealsAreEqual(quotient_JI,quotientZ_JI) );");
+       ASSUME(0, idealsAreEqual(quotient_JI,quotientZ_JI) );
+
+
+       dbprint(1, " gI = std(gI);");
+       gI = std(gI);
+       dbprint(1, " gJ =std(gJ);");
+       gJ = std(gJ);
+
+       dbprint(1, "quotientZWrapper_gJgI = quotientZWrapper(gJ,gI); ");
+       quotientZWrapper_gJgI = quotientZWrapper(gJ,gI); 
+
+       dbprint(1, "// ASSUME(0, quotientPropertySatisfied( gJ,gI , quotientZWrapper_gJgI , idealG, 300 ) );");   
+       ASSUME(0, quotientPropertySatisfied( gJ,gI , quotientZWrapper_gJgI ,idealG,  300 ) );
+
+       dbprint(1, "quotient_gJgI = quotient(gJ,gI); ");
+       quotient_gJgI = quotient( gJ, gI ); 
+
+       dbprint(1, "ASSUME(0, idealsAreEqual(quotient_gJgI, quotientZWrapper_gJgI) );");
+       ASSUME(0, idealsAreEqual(quotient_gJgI, quotientZWrapper_gJgI) );
+
+
+    }
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+/*
+proc testQuotientOverZZWrapper()
+{
+      //printlevel = 0 ;
+      //TRACE = 1;
+
+      init_randomIdeal();
+             
+      TIdealGeneratingParameters genParams = defaultIdealGeneratorParams();
+      // adjust random ideal generator params:
+      genParams.absMaxCoeff = 4;
+      genParams.maxMonomialDegree = 4;
+      genParams.maxTermsPerGen = 4;
+      genParams.maxGens = 4;
+
+      proc idealG = idealGeneratorFromParams( genParams  );
+
+ 
+	int trials = 300;
+    int numVars = 4;
+	testQuotientOverZZ( numVars, idealG, trials);
+}
+
+testQuotientOverZZWrapper();
+*/
+
+

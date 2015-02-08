@@ -1,0 +1,55 @@
+
+LIB("bugs/test.normal.lib");
+
+option("warn");
+option("redSB");
+
+echo = 0;
+
+
+proc testNormalWrapper(rng, oFileName)
+{
+      def genParams = defaultRandomConstructionParams();
+      // adjust random ideal generator params:
+      genParams.absMaxCoeff = 54;
+      genParams.maxVarFactorsPerMonomial = 5;
+      genParams.maxTermsPerGen = 3;
+      genParams.maxGens = 3;
+
+      def gens = createRandomGeneratorsByParams( genParams  );
+
+      int trials = 3000000;
+      testNormal( rng, gens.idealG, trials,oFileName );
+}
+
+
+option("nowarn");
+
+TRACE = 0;
+printlevel = 1;
+echo = 0;
+
+
+def oFileName = "log/test.normal.lib.out.04a";
+
+monitor("log/test.normal.lib.out.04.mon ","io");
+system("random",1412157699 );
+// system("random",1412166476);
+option("redSB");
+
+
+printlevel = 1 ;
+TRACE=0;
+int numVars = 3;
+
+// def rng = createRing("3", "( dp(2),dp(1) )", numVars) ;
+
+ring rng = 3,(x,y,z),( dp(2),dp(1) );
+
+testNormalWrapper(rng,oFileName);
+
+
+// ulimit -v 500000 ; ulimit -t 500
+// ./singular-spielwiese -v  < input/test.normal.lib.04a 2>&1 | tee -a log/test.normal.lib.04a.log ;
+// export cont=1; while [ $cont -eq 1 ] ; do set -o pipefail; ./singular-spielwiese -v < input/test.normal.lib.04a 2>&1 | tee -a log/test.normal.lib.out.04a.log ;   export bla=$?; echo $bla; if [ $bla -ne  ] ; then export cont=0; fi; done
+

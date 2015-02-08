@@ -1,0 +1,302 @@
+/////////////////////
+version="version test.equidimMax.ehv";
+category="Commutative Algebra";
+info="
+";
+
+
+LIB "ringutils.lib";
+LIB "primdec.lib";
+LIB "ehv.lib";
+//LIB "wrappers.lib";
+LIB "randomIdeal.lib";
+ 
+
+proc testGenus( rng, idealG, trials )
+{
+    print ("testGenus");
+    if ( defined(basering) ) {   def BAS=basering; }
+
+    setring rng;
+    export(rng);
+    basering;
+    list ideals;
+
+    int trial;
+    int g1,g2,g3;
+    def I, I1, IE, EI ;
+    while( trial<=trials)
+    {   
+       setring rng;
+       dbprint (1, "trial: ", trial );
+
+       I = idealG();
+       EI = equidim(I)[1];
+       EI;
+       if (dim(std(EI))!=1) { continue; }
+
+       I1 = minAssGTZ(EI)[1];
+       EI = equidim(I1)[1];
+       EI;
+
+       trial = trial+1;
+       g1 = genus(EI);
+       g2 = genus(EI,"nor");
+       g3 = genus(EI,"pri");
+       //if (g1!=g2 and g2 !=g3 and g3!=g1)
+       if ((g1!=g2) or (g2 !=g3) or (g3!=g1))
+       { 
+            ERROR("found bad exanple");
+       }
+        
+
+    }
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+proc testGenusWrapper(cchar, ordering)
+{
+    echo = 0;
+    def assumeLevel = 3;
+
+    int numVars = 4;
+    def rng = createRing(cchar,ordering, numVars) ;
+    setring rng;
+
+    def genParams = defaultIdealGeneratorParams();
+    // adjust random ideal generator params:
+    genParams.absMaxCoeff = 15;
+    genParams.maxMonomialDegree = 5;
+    genParams.minMonomialDegree = 1;
+    genParams.maxTermsPerGen = 1;
+    genParams.maxGens = 4;
+    int trials = 1000000;
+    def idealG = idealGeneratorFromParams( genParams  );
+    testGenus( rng, idealG, trials );
+}
+
+
+
+
+testGenusWrapper("0","dp");
+
+/*
+
+//   characteristic : 0
+//   number of vars : 3
+//        block   1 : ordering dp
+//                  : names    xp xc xb
+//        block   2 : ordering C
+trial: 
+0
+EI[1]=xb^2
+EI[2]=xp*xc
+
+LIB("normal.lib");
+ring rng = 0,(xp, xc, xb),dp;
+
+ideal EI = xb^2, xp*xc;
+genus(EI);
+genus(EI,"nor");
+genus(EI,"pri");
+
+> ring rng = 0,(xp, xc, xb),dp;
+// ** redefining rng **
+> 
+. ideal EI = xb^2, xp*xc;
+> genus(EI);
+-1
+> genus(EI,"nor");
+-1
+> genus(EI,"pri");
+   ? wrong range[2] in ideal/module _(1)
+   ? error occurred in or before normal.lib::deltaLoc line 2655: `whileif (!((deg(lead(singL[1]))>1)&&(deg(lead(singL[2]))>1))) break;`
+   ? leaving normal.lib::deltaLoc
+   skipping text from `;` error at token `)`
+   ? leaving normal.lib::genus
+
+
+
+EI[1]=xp^2*xz^2
+EI[2]=xt^3*xz-6*xt*xp
+EI[3]=xt*xp^3*xz
+EI[4]=xt*xp^4
+
+characteristic : 0
+//   number of vars : 3
+//        block   1 : ordering dp
+//                  : names    xa xp xn
+//        block   2 : ordering C
+trial: 
+0
+EI[1]=-11*xa
+trial: 
+0
+EI[1]=9*xp^2*xn-xp+6*xn
+EI[2]=6*xp^2*xn-9
+trial: 
+1
+EI[1]=4*xp^2*xn+2*xp*xn-8
+trial: 
+1
+EI[1]=-8*xa^2*xp+xa*xp^2+5
+EI[2]=-5*xa^2*xp^2*xn+8*xa^2*xp
+trial: 
+2
+EI[1]=-14*xa
+trial: 
+2
+EI[1]=5*xp^2*xn-9
+EI[2]=0
+trial: 
+2
+EI[1]=-11*xa*xp
+trial: 
+2
+EI[1]=3*xa^3*xp*xn+9*xa*xp^3
+EI[2]=-13*xa*xp^2+8*xa+13*xp
+   ? exponent must be non-negative
+   ? error occurred in or before normal.lib::deltaLoc line 2757: `      poly g=f+var(1)^mu+var(2)^mu;  //to obtain a convenient Newton-polygon`
+
+LIB("normal.lib");
+ring rng = 0,(xa, xp, xn),dp;
+
+ideal EI = 3*xa^3*xp*xn+9*xa*xp^3, -13*xa*xp^2+8*xa+13*xp;
+genus(EI);
+genus(EI,"nor");
+genus(EI,"pri");
+> ring rng = 0,(xa, xp, xn),dp;
+// ** redefining rng **
+> 
+. ideal EI = 3*xa^3*xp*xn+9*xa*xp^3, -13*xa*xp^2+8*xa+13*xp;
+> genus(EI);
+-1
+> genus(EI,"nor");
+-1
+> genus(EI,"pri");
+   ? exponent must be non-negative
+   ? error occurred in or before normal.lib::deltaLoc line 2739: `      poly g=f+var(1)^mu+var(2)^mu;  //to obtain a convenient Newton-polygon`
+   ? expected poly-expression. type 'help poly;'
+   ? leaving normal.lib::deltaLoc
+   skipping text from `;` error at token `)`
+   ? leaving normal.lib::genus
+
+
+
+0
+EI[1]=xe*xo^2-8*xo^2
+EI[2]=5*xe^2*xd-3*xe*xo-7*xd*xo
+EI[3]=7*xd*xo^3-320*xd*xo^2+24*xo^3
+   ? wrong range[2] in ideal/module _(1)
+   ? error occurred in or before normal.lib::deltaLoc line 2673: `whileif (!((deg(lead(singL[1]))>1)&&(deg(lead(singL[2]))>1))) break;`
+   ? leaving normal.lib::deltaLoc
+   skipping text from `;` error at token `)`
+LIB("normal.lib");
+ring rng = 0,(xe,xd,xo),lp;
+
+ideal EI = xe*xo^2-8*xo^2, 5*xe^2*xd-3*xe*xo-7*xd*xo, 7*xd*xo^3-320*xd*xo^2+24*xo^3;
+genus(EI);
+genus(EI,"nor");
+genus(EI,"pri");
+
+
+// ** redefining rng
+//   characteristic : 0
+//   number of vars : 3
+//        block   1 : ordering dp
+//                  : names    xd xx xr
+//        block   2 : ordering C
+trial: 
+0
+EI[1]=-5*xd-11*xx
+trial: 
+0
+EI[1]=-12*xd*xx-15*xr
+trial: 
+0
+EI[1]=2*xd*xx*xr-8*xx^2*xr+2*xd
+trial: 
+0
+EI[1]=9*xd*xx^2-8*xr^2
+EI[2]=-9*xr^2
+   ? genus: did not find a good projection for to
+                           the plain
+   ? leaving normal.lib::genus
+   ? leaving ::testGenus
+
+LIB("normal.lib");
+ring rng = 0, ( xd, xx, xr),dp;
+ideal EI = 9*xd*xx^2-8*xr^2,-9*xr^2;
+genus(EI);
+genus(EI,"nor");
+genus(EI,"pri");
+
+hard:
+//   characteristic : 0
+//   number of vars : 3
+//        block   1 : ordering dp
+//                  : names    xw xd xr
+
+EI[1]=-5*xw^2*xd
+EI[2]=-9*xr^3+5
+
+LIB("normal.lib");
+ring rng = 0,( xw, xd, xr),dp;
+
+ideal EI =  -5*xw^2*xd, -9*xr^3+5;
+genus(EI);
+genus(EI,"nor");
+genus(EI,"pri");
+> ring rng = 0,( xw, xd, xr),dp;
+// ** redefining rng **
+> 
+. ideal EI =  -5*xw^2*xd, -9*xr^3+5;
+> genus(EI);
+-5
+> genus(EI,"nor");
+-5
+> genus(EI,"pri");
+   ? exponent must be non-negative
+   ? error occurred in or before normal.lib::deltaLoc line 2739: `      poly g=f+var(1)^mu+var(2)^mu;  //to obtain a convenient Newton-polygon`
+   ? expected poly-expression. type 'help poly;'
+   ? leaving normal.lib::deltaLoc
+   skipping text from `;` error at token `)`
+   ? leaving normal.lib::genus
+
+Singular for i686-Linux version 4.0.0 (4.0.0, 32 bit) Jun  8 2014 07:47:04 #6e06227|MM
+with
+	GMP(4.3.1),NTL(5.5.2),factory(@(#) factoryVersion = 4.0.0),
+	fgets,Plural,DBM,
+	dynamic modules,dynamic p_Procs,OM_NDEBUG,SING_NDEBUG,CC:OPTIMIZE,random=1402216122
+built-in modules: {}
+AC_CONFIGURE_ARGS =  '--prefix=/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/release' '--enable-gfanlib' --enable-omalloc  OMALLOC_LIBS='/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/omalloc/libomalloc.la' OMALLOC_INCLUDES='-I/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/.. -I/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD' --with-Singular RESOURCES_LIBS='/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/resources/libresources.la' RESOURCES_INCLUDES='-I/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/.. ' FACTORY_LIBS='/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/factory/libfactory.la' FACTORY_INCLUDES='-I/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/.. -I/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/../factory/include -I/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD -I/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/factory/include',
+CC = gcc,FLAGS : -g -O2  -pipe -fno-common -O3 -Wno-unused-function -Wno-trigraphs -Wno-unused-parameter -Wno-unused-variable -fomit-frame-pointer -fwrapv -fvisibility=default -finline-functions -fno-exceptions -funroll-loops -Qunused-arguments,
+CXX = g++,FLAGS :  -pipe -fno-common -O3 -Wno-unused-function -Wno-trigraphs -Wno-unused-parameter -Wno-unused-variable -fomit-frame-pointer -fwrapv -fvisibility=default -finline-functions -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-enforce-eh-specs -fconserve-space -funroll-loops -Qunused-arguments,
+DEFS : ,CPPFLAGS : ,
+LDFLAGS :  -pipe -fno-common -O3 -Wno-unused-function -Wno-trigraphs -Wno-unused-parameter -Wno-unused-variable -fomit-frame-pointer -fwrapv -fvisibility=default -finline-functions -fno-exceptions -funroll-loops -Qunused-arguments -rdynamic -Wl,-undefined,dynamic_lookup,LIBS : -lrt  (ver: 4.5.1 20100924 (Red Hat 4.5.1-4))
+argv[0]   :	./singular-spielwiese
+SearchPath:	/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/Singular/LIB:/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/Singular/../factory:/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/Singular/MOD:/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/Singular
+Singular  :	/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/Singular/Singular
+BinDir    :	/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/Singular
+ProcDir   :	/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/Singular/MOD
+RootDir   :	/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/Singular/..
+DataDir   :	
+DefaultDir:	/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/release
+InfoFile  :	
+IdxFile   :	
+HtmlDir   :	
+ManualUrl :	http://www.singular.uni-kl.de/index.php/singular-manual.html
+ExDir     :	
+Path      :	/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/Singular:/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/Singular/MOD:/usr/lib/qt-3.3/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
+emacs     :	
+xemacs    :	
+SingularEmacs:	/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/Singular/Singular
+EmacsLoad :	
+EmacsDir  :	
+SingularXterm:	/home/kroeker/lipmanresolve/Singular-spielwiese/BUILD/Singular/Singular
+xterm     :	
+
+*/
+

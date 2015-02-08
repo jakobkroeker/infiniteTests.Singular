@@ -1,0 +1,51 @@
+/////////////////////
+version="version test.finduni";
+category="Commutative Algebra";
+info="
+";
+
+LIB "randomIdeal.lib";
+
+
+ 
+
+proc testFinduni( rng, idealG, trials )
+{
+    print ("testFinduni");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    setring rng;
+    export(rng);
+
+    int trial;
+    ideal I,IS;
+    while(1)
+    {   
+       dbprint(1, "trial: ", trial );
+       setring rng;
+       basering;
+       kill I;
+       kill IS;
+       ideal I = idealG( );
+       ideal IS = std(I);
+       if (dim(IS) !=0 ) { continue;}
+       I;
+       finduni(IS);
+       trial = trial + 1;
+    }
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+
+//	printlevel = 0 ;
+//    TRACE = 0;
+
+// testFactorWrapper("0", "dp");
+// testFactorWrapper("3", "lp");
+// testFactorWrapper("23","Dp");
+
+
+

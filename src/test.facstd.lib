@@ -1,0 +1,51 @@
+
+echo = 1;
+LIB("primdec.lib");
+LIB("ringutils.lib");
+LIB("wrappers.lib");
+LIB("ehv.lib");
+
+proc testFacstd( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials )
+{
+    print ("testFacstd");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing("0","dp", numVars) ;
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+    for (trial = 1; trial<=trials; trial++)
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(j) ) { kill j; }
+       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       print ("j:");
+       j;
+       facstd(j);
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+proc testFacstdWrapper()
+{
+	printlevel = 0 ;
+    TRACE=1;
+	// seems doable
+	int numVars = 3;
+	int maxGens = 6;
+	int maxTermsPerGen = 5;
+	int maxMonomialDegree = 5;
+	int absMaxCoeff = 1005;
+	int trials = 3000;
+	testFacstd( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials);
+}
+
+testFacstdWrapper();
+

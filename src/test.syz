@@ -1,0 +1,75 @@
+/////////////////////
+version="version test.syz";
+category="Commutative Algebra";
+info="
+";
+
+LIB "primdecint.lib";
+LIB "randomIdeal.lib";
+LIB "ringutils.lib";
+LIB "wrappers.lib";
+ 
+proc testSyz( rng, idealG, trials )
+{
+    if (defined(basering) ) {   def BAS=basering; }
+    setring rng;
+    short  = 0;
+    int trial;
+    ideal cs,  I, J, gI, gJ, ggI, ggJ;
+    def syzI,syzgI;
+    while( trial<trials )
+    {   
+
+       if (defined(qrng)) {kill qrng; }
+       dbprint(1, "option(redSB);");
+       dbprint(1, "LIB \"primdec.lib\";");
+       dbprint(1, "LIB \"wrappers.lib\";");
+       dbprint( 1, "ring rng = "  + string( basering)+";" );
+       dbprint( 1, "int trial = " + string( trial) + ";" );
+       short = 0;
+       I = idealG( );
+       dbprint( 1, "system(\"random\", " + string( system("random") ) + ");" );
+       dbprint( 1, "ideal I = " + string( I ) + ";" );
+       
+       dbprint( 1, "       ideal gI =  std(I);" );
+       gI =  std(I);
+       //dbprint( 1, "//        gI = "+string(gI) );
+       dbprint( 1, "       ideal ggI =  std(gI);" );
+       ggI =  std(gI);
+       //dbprint( 1, "//        ggI = "+string(ggI)+";" );
+   
+
+       dbprint(1, "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
+       ASSUME(0, 0== size( std(reduce (I,gI ) ))  );
+
+       ASSUME(0, size(gI)== size(ggI) );
+
+
+        dbprint(1,"ASSUME(0, idealsEqual(gI,ggI ));");
+       ASSUME(0, idealsEqual(gI,ggI ));
+
+
+      // ASSUME(0, idealRepresentationsEqual(gI,ggI ));
+      // ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));
+       syzI = syz (I);
+       syzgI = syz (gI);
+    
+
+      dbprint(1, "ASSUME(0, idealsEqual(ideal(zero),transpose(syzI)*transpose(I) ) );");
+      ASSUME(0, idealsEqual(ideal(0),transpose(syzI)*transpose(I) ) );
+
+       dbprint(1, "ASSUME(0, idealsEqual(ideal(zero),transpose(syzgI)*transpose(gI) ) );");
+      ASSUME(0, idealsEqual(ideal(0),transpose(syzgI)*transpose(gI) ) );
+
+
+       trial = trial+1;
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+
+ 
+
+	
+

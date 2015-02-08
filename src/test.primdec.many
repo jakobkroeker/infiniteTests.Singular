@@ -1,0 +1,404 @@
+version="version test.primdecGTZ.only.primdec";
+category="Commutative Algebra";
+info="
+";
+
+LIB "randomIdeal.lib";LIB "primdec.lib";LIB "ringutils.lib";LIB "wrappers.lib";LIB "ehv.lib";
+
+
+//proc wDecompE (I)         {    return ( Primdec::decompE(I) );     }
+proc wDecomp (I)          {    return ( Primdec::convList(Primdec::decomp(I) ) );     }
+
+
+proc primdecGTZEkeepKomp (I)         {    return ( primdecGTZE(I,"keep_comp") );     }
+proc primdecGTZkeepKomp (I)          {    return ( primdecGTZ (I,"keep_comp") );     }
+
+proc minAssGTZEFacSTD (I)            {    return ( minAssGTZE(I,"facstd") );         }
+proc minAssGTZFacSTD  (I)            {    return ( minAssGTZ (I,"facstd") );         }
+
+proc minAssGTZEnoFacSTD (I)          {    return ( minAssGTZE(I,"noFacstd") );       }
+proc minAssGTZnoFacSTD  (I)          {    return ( minAssGTZ (I,"noFacstd") );       }
+
+proc minAssGTZEorigNoFacSTD (I)      {    return ( minAssGTZE(I,"GTZ","noFacstd") ); }
+proc minAssGTZorigNoFacSTD (I)       {    return ( minAssGTZ (I,"GTZ","noFacstd") ); }
+
+proc minAssGTZEGTZ (I)               {    return ( minAssGTZE(I,"GTZ") );            }
+proc minAssGTZGTZ  (I)               {    return ( minAssGTZ (I,"GTZ") );            }
+
+proc primdecSYENoOptimalOrdering (I) {    return ( primdecSYE(I,0) );                }
+proc primdecSYNoOptimalOrdering  (I) {    return ( primdecSY (I,0) );                }
+
+proc minAssCharENoOptimalOrdering(I) {    return ( minAssCharE(I,0) );               }
+proc minAssCharNoOptimalOrdering (I) {    return ( minAssChar (I,0) );               }
+
+proc primdecEUsingMinAssChar  (I)    {    return ( Primdec::prim_dec_i(1,I,0) );        }
+proc primdecUsingMinAssChar   (I)    {    return ( Primdec::prim_dec_i(0,I,0) );         }
+
+
+proc minAssGTZorig      (I)          {    return ( minAssGTZ(I,"GTZ") );              }
+
+
+proc minAssPrimesNew  (I)           {    return ( Primdec::minAssPrimesE(I) );        }
+proc minAssPrimesOrig (I)           {    return ( Primdec::minAssPrimes(I) );         }
+
+
+proc minAssPrimesOldNew  (I)        {    return ( Primdec::minAssPrimesoldE(I) );    }
+proc minAssPrimesOldOrig (I)        {    return ( Primdec::minAssPrimesold (I) );    }
+
+proc minAssNew  (I)                 {    return ( Primdec::minAssE(I) );             }
+proc minAssOrig (I)                 {    return ( Primdec::minAss (I) );             }
+
+
+proc minAssPrimCharsetsECurrentOrd(I)    {    return ( Primdec::min_ass_prim_charsets_i(1,I,0)) ; }
+proc minAssPrimCharsetsCurrentOrd (I)    {    return ( Primdec::min_ass_prim_charsets_i(0,I,0)) ; }
+
+proc minAssPrimCharsetsEOptimalOrd (I)    {    return ( Primdec::min_ass_prim_charsets_i(1,I,1)) ; }
+proc minAssPrimCharsetsOptimalOrd  (I)    {    return ( Primdec::min_ass_prim_charsets_i(0,I,1)) ; }
+
+
+proc minAssPrimCharsets0New  (I)    {    return ( Primdec::min_ass_prim_charsets0_i(1,I,0)) ; }
+proc minAssPrimCharsets0Orig (I)    {    return ( Primdec::min_ass_prim_charsets0_i(0,I,0)) ; }
+
+proc minAssPrimCharsets1New   (I)   {    return ( Primdec::min_ass_prim_charsets1_i(1,I,1)) ; }
+proc minAssPrimCharsets1Orig  (I)   {    return ( Primdec::min_ass_prim_charsets1_i(0,I,1)) ; }
+
+ 
+proc testPrimdecZeroDim( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials )
+{
+    print ("testPrimdecZeroDim");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing("0","dp", numVars) ;
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+
+    // generating only zerodimensional ideals:
+    for (trial = 1; trial<=trials; trial=trial)
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(j) ) { kill j; }
+       basering;
+       system("random");
+       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+     
+       if ( dimIdeal(j)==0 )
+       {
+          print(" dimIdeal(j)=0" );
+          trial=trial+1;
+          zerodec(j); 
+       }
+    }
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+proc testPrimdec( rng, idealG, trials, logfile )
+{
+    print ("testPrimdec");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+    list L1,L2,L3;
+
+
+    def ma1,ma2,ma3,ma4,ma5,ma6,ma7,ma8;
+
+    def map1,map2,map3,map4,map5,map6,map7,map8;
+
+    def ma1e,ma2e,ma3e,ma4e,ma5e,ma6e,ma7e,ma8e;
+
+
+    
+    def map1e,map2e,map3e,map4e,map5e,map6e,map7e,map8e;
+
+    def pd1,pd2,pd3,pd4,pd5;
+
+    def pd1e,pd2e,pd3e,pd4e,pd5e;
+
+    
+    def wdec;
+
+    def minAss1,minAss1e;
+
+    ideal I;
+    string emptystring="";
+    // while (trial<trials)
+    while(1)
+    {   
+       setring rng;
+       I = idealG(  );
+       //system("random", random(0,5000000) ) ;
+       //system("random" ) ;
+       
+       write(":w "+logfile,emptystring);
+       monitor(logfile,"io");
+       dbprint(1, "LIB(\"bugs/test.primdec.many\");");
+       dbprint(1, "intvec op = "+string( option(get) )+";");
+       dbprint(1, "ring rng = "+string(basering)+";");
+       dbprint(1, "ideal I = "+string(I)+";");
+       dbprint(1, "bigint trial = "+string(trial)+";");
+      
+
+       if (not isZero(I) && not idealsAreEqual( ideal(1), I ) )
+       {
+             dbprint(1, "list  L1,L2,L3;");
+             dbprint(1, "def  ma1,ma2,ma3,ma4,ma5,ma6,ma7,ma8;");
+             dbprint(1, "def  map1,map2,map3,map4,map5,map6,map7,map8;");
+             dbprint(1, "def  ma1e,ma2e,ma3e,ma4e,ma5e,ma6e,ma7e,ma8e;");
+             dbprint(1, "def  map1e,map2e,map3e,map4e,map5e,map6e,map7e,map8e;");
+             dbprint(1, "def  pd1,pd2,pd3,pd4,pd5;");
+             dbprint(1, "def  pd1e,pd2e,pd3e,pd4e,pd5e;");
+             dbprint(1, "def  wdec;");
+             dbprint(1, "def  minAss1,minAss1e;");
+
+             // dbprint(1, "wdec = wDecompE (I);");
+             //             wdec = wDecompE (I);
+
+             dbprint(1, "  pd1 = primdecGTZ (I);");
+                           pd1 = primdecGTZ (I);
+
+             dbprint(1, "  pd2 = primdecGTZkeepKomp (I);");
+                           pd2 = primdecGTZkeepKomp (I);
+
+             dbprint(1, "  pd3 = primdecUsingMinAssChar (I);");
+                           pd3 = primdecUsingMinAssChar (I);
+
+             dbprint(1, "  pd4 = primdecSY (I);");
+                           pd4 = primdecSY (I);
+
+             dbprint(1, "  pd5 = primdecSYNoOptimalOrdering (I);");
+                           pd5 = primdecSYNoOptimalOrdering (I);
+
+
+             dbprint(1, "  pd1e = primdecGTZE (I);");
+                           pd1e = primdecGTZE (I);
+
+             dbprint(1, "  pd2e = primdecGTZEkeepKomp (I);");
+                           pd2e = primdecGTZEkeepKomp (I);
+
+             dbprint(1, "  pd3e = primdecEUsingMinAssChar (I);");
+                           pd3e = primdecEUsingMinAssChar (I);
+
+             dbprint(1, "  pd4e = primdecSYE (I);");
+                           pd4e = primdecSYE (I);
+
+             dbprint(1, "  pd5e = primdecSYENoOptimalOrdering (I);");
+                           pd5e = primdecSYENoOptimalOrdering (I);
+
+
+            dbprint(1, "ASSUME(0, primDecsAreEquivalent(pd1, pd1e));");
+                        ASSUME(0, primDecsAreEquivalent(pd1, pd1e));
+
+            dbprint(1, "ASSUME(0, primDecsAreEquivalent(pd1, pd2));");
+                        ASSUME(0, primDecsAreEquivalent(pd1, pd2));
+
+            dbprint(1, "ASSUME(0, primDecsAreEquivalent(pd2, pd2e));");
+                        ASSUME(0, primDecsAreEquivalent(pd2, pd2e));
+
+            dbprint(1, "ASSUME(0, primDecsAreEquivalent(pd2, pd3));");
+                        ASSUME(0, primDecsAreEquivalent(pd2, pd3));
+
+            dbprint(1, "ASSUME(0, primDecsAreEquivalent(pd3, pd3e));");
+                        ASSUME(0, primDecsAreEquivalent(pd3, pd3e));
+
+            dbprint(1, "ASSUME(0, primDecsAreEquivalent(pd3, pd4));");
+                        ASSUME(0, primDecsAreEquivalent(pd3, pd4));
+
+            dbprint(1, "ASSUME(0, primDecsAreEquivalent(pd4, pd4e));");
+                        ASSUME(0, primDecsAreEquivalent(pd4, pd4e));
+
+            dbprint(1, "ASSUME(0, primDecsAreEquivalent(pd4, pd5));");
+                        ASSUME(0, primDecsAreEquivalent(pd4, pd5));
+
+            dbprint(1, "ASSUME(0, primDecsAreEquivalent(pd5, pd5e));");
+                        ASSUME(0, primDecsAreEquivalent(pd5, pd5e));
+
+
+
+            dbprint(1, "ma1e = minAssGTZE (I);");          
+                        ma1e = minAssGTZE (I);
+
+            //dbprint(1, "ma2e = minAssGTZEFacSTD (I);");
+//                        ma2e = minAssGTZEFacSTD (I);
+
+//            dbprint(1, "ma3e = minAssGTZEnoFacSTD (I);");
+//                        ma3e = minAssGTZEnoFacSTD (  I );
+
+            dbprint(1, "ma4e = minAssGTZEGTZ (I);");
+                        ma4e = minAssGTZEGTZ (I);
+
+//            dbprint(1, "ma5e = minAssGTZEorigNoFacSTD (I);");
+//                        ma5e = minAssGTZEorigNoFacSTD (I);
+
+            dbprint(1, "ma6e = minAssCharE (I);");
+                        ma6e = minAssCharE (I);
+
+            dbprint(1, "ma7e = minAssCharENoOptimalOrdering (I);");
+                        ma7e = minAssCharENoOptimalOrdering (I);
+
+
+            dbprint(1, "ma1 = minAssGTZ (I);");
+                        ma1 = minAssGTZ (I);
+
+            dbprint(1, "ma2 = minAssGTZFacSTD (I);");
+                        ma2 = minAssGTZFacSTD (I);
+
+//            dbprint(1, "ma3 = minAssGTZnoFacSTD (I);");
+//                        ma3 = minAssGTZnoFacSTD (I);
+
+            dbprint(1, "ma4 = minAssGTZGTZ (I);");
+                        ma4 = minAssGTZGTZ (I);
+
+//            dbprint(1, "ma5 = minAssGTZorigNoFacSTD (I);");
+//                        ma5 = minAssGTZorigNoFacSTD (I);
+
+            dbprint(1, "ma6 = minAssChar (I);");
+                        ma6 = minAssChar (I);
+
+            dbprint(1, "ma7 = minAssCharNoOptimalOrdering (I);");
+                        ma7 = minAssCharNoOptimalOrdering (I);
+
+
+            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma1, ma1e));");
+                        ASSUME(0, minAssDecompAreEquivalent(ma1, ma1e));
+
+            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma1, ma2));");
+                        ASSUME(0, minAssDecompAreEquivalent(ma1, ma2));
+
+//            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma2, ma2e));");
+//                        ASSUME(0, minAssDecompAreEquivalent(ma2, ma2e));
+
+//            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma2, ma3));");
+//                        ASSUME(0, minAssDecompAreEquivalent(ma2, ma3));
+
+//            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma3, ma3e));");
+//                        ASSUME(0, minAssDecompAreEquivalent(ma3, ma3e));
+
+//            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma3, ma4));");
+//                        ASSUME(0, minAssDecompAreEquivalent(ma3, ma4));
+
+            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma4, ma4e));");
+                        ASSUME(0, minAssDecompAreEquivalent(ma4, ma4e));
+
+//            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma4, ma5));");
+//                        ASSUME(0, minAssDecompAreEquivalent(ma4, ma5));
+
+//            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma5, ma5e));");
+//                        ASSUME(0, minAssDecompAreEquivalent(ma5, ma5e));
+
+//            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma5, ma6));");
+//                        ASSUME(0, minAssDecompAreEquivalent(ma5, ma6));
+
+            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma6, ma6e));");
+                        ASSUME(0, minAssDecompAreEquivalent(ma6, ma6e));
+
+            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma6, ma7));");
+                        ASSUME(0, minAssDecompAreEquivalent(ma6, ma7));
+
+            dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ma7, ma7e));");
+                        ASSUME(0, minAssDecompAreEquivalent(ma7, ma7e));
+
+
+         
+
+            dbprint(1, " minAss1e = minAssE(I);");
+                         minAss1e = minAssE(I);
+
+            dbprint(1, "minAss1  = minAss(I);");
+                        minAss1  = minAss(I);
+
+            dbprint(1, "map1 = minAssPrimesNew (I);");
+                        map1 = minAssPrimesNew (I);
+
+            dbprint(1, "map2 = minAssPrimesOldNew (I);");
+                        map2 = minAssPrimesOldNew (I);
+
+
+            dbprint(1, "map3 = minAssPrimCharsetsECurrentOrd (I);");                   
+                        map3 = minAssPrimCharsetsECurrentOrd (I);
+
+            dbprint(1, "map4 = minAssPrimCharsetsEOptimalOrd (I);");
+                        map4 = minAssPrimCharsetsEOptimalOrd (I);
+
+            dbprint(1, "map5 = minAssPrimCharsets0New (I);");
+                        map5 = minAssPrimCharsets0New (I);
+
+            dbprint(1, "map6 = minAssPrimCharsets1New (I);");
+                        map6 = minAssPrimCharsets1New (I);
+
+            dbprint(1, "map7 = minAssPrimesNew (I);");
+                        map7 = minAssPrimesNew (I);
+
+
+            trial++;
+       }
+      
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+
+/*
+
+LIB("bugs/test.primdec.many");
+
+init_randomIdeal();
+
+
+
+proc testPrimdecWrapper(rng)
+{
+      def genParams = defaultIdealGeneratorParams();
+      // adjust random ideal generator params:
+      genParams.maxGens = 3; 
+      genParams.absMaxCoeff = 14;
+      genParams.maxMonomialDegree = 3;
+      genParams.maxTermsPerGen = 3;
+
+      def idealG = idealGeneratorFromParams( genParams  );
+ 
+  	int trials = 300000;
+
+    //def rng = createRing(cchar,cord, numVars) ;
+
+	testPrimdec( rng, idealG, trials );
+
+}
+
+
+monitor("log/test.primdec.many.out.00","io");
+system("random");
+option("redSB");
+
+//echo = 0;
+printlevel = 0 ;
+TRACE=0;
+int numVars = 3;
+
+def rng = createRing("0","(dp(2),dp(1))", numVars) ;
+testPrimdecWrapper(rng);
+
+def rng = createRing("0","(lp(2),lp(1))", numVars) ;
+testPrimdecWrapper("0","dp");
+
+while true; do ./singular-spielwiese < input/test.primdecGTZ.only.primdec.02
+
+*/
+
+

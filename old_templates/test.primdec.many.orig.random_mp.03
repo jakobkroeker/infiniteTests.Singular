@@ -1,0 +1,93 @@
+
+
+LIB("bugs/test.primdec.many.orig.mp");
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//def genTable = getGenTable();
+
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 300;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 7;
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 2;
+genParams.bFractionsOn      = 0;
+
+def genTable = createRandomGeneratorsByParams( genParams  );
+
+
+
+
+
+proc getRandomMinpolyStr(mpVarStr , genTable)
+{
+
+   def R=basering;
+   
+   string rngstr= "ring rng = 7,"+mpVarStr+",dp;";
+   execute(rngstr);
+   setring rng;
+   poly p = genTable.polyG();
+   if (not (leadcoef(p)==0))      {        p = p-lead(p)+lead(p)/leadcoef(p);  }
+   //dbprint(1,"p=",p);
+   def l = factorize(p);
+  
+  poly mp;
+
+  while (mp==0)
+  {
+    while (size(l[1])<2)
+    {
+      p = genTable.polyG();
+      if (not (leadcoef(p)==0))      {        p = p-lead(p)+lead(p)/leadcoef(p);  }
+      //dbprint(1,"p=",p);
+      l = factorize(p);
+    }
+    if ( deg( l[1][2] )>1) 
+    {
+
+      mp = l[1][2];
+    }
+    else    {    mp=0;  l = list( list() );    }
+   }
+   string str_mp = "minpoly = "+string(mp ) +";";
+   setring R;
+   return (str_mp);
+}
+
+//proc getRing( genTable )
+proc getRandomRing(  )
+{
+
+ 
+   ring rng_mp = (7,vv),(xx,yy,zz,ww),dp;
+
+   setring rng_mp;
+
+   string str_mp = getRandomMinpolyStr("vv", genTable );
+   execute(str_mp);
+   option(redTail);
+
+   return (basering);
+}
+
+
+option(warn);
+option(redTail);
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+
+testPrimdec( getRandomRing , genTable, trials, logfile);
+
+

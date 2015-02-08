@@ -1,0 +1,27 @@
+ LIB("bugs/test.reslipman.isPrime");
+
+
+
+proc  testisPrimeWrapper( cchar, ordering )
+{
+    echo = 0;
+    option("redSB");
+
+    init_randomIdeal();
+    int numVars = 2;
+    def rng = createRing( cchar, ordering, numVars ) ;
+    // seems doable
+    def genParams = defaultIdealGeneratorParams();
+    // adjust random ideal generator params:
+    genParams.absMaxCoeff = 14;
+    genParams.maxMonomialDegree = 3;
+    genParams.maxTermsPerGen = 3;
+    genParams.maxGens = 4;
+    int trials = 1000000;
+    def idealG = idealGeneratorFromParams( genParams  );
+	testIsPrime( rng, idealG, trials );
+}
+
+
+ testisPrimeWrapper("3", "dp");
+

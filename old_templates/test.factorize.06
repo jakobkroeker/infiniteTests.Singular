@@ -1,0 +1,26 @@
+ LIB("bugs/test.factorize");
+
+
+
+proc  testFactorizeWrapper( cchar, ordering )
+{
+    echo = 0;
+    option("redSB");
+
+    init_randomIdeal();
+    int numVars = 2;
+    def rng = createRing( cchar, ordering, numVars ) ;
+    // seems doable
+    def genParams = defaultIdealGeneratorParams();
+    // adjust random ideal generator params:
+    genParams.absMaxCoeff = 14;
+    genParams.maxMonomialDegree = 5;
+    genParams.maxTermsPerGen = 7;
+    int trials = 1000000;
+    def polyG = polyGeneratorFromParams( genParams  );
+	testFactorize( rng, polyG, trials );
+}
+
+
+ testFactorizeWrapper("(9,a)", "dp");
+

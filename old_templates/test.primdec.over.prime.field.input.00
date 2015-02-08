@@ -1,0 +1,31 @@
+
+LIB("bugs/test.primdec.over.prime.field.lib");
+
+option("warn");
+option("redSB");
+
+echo = 0;
+
+
+
+proc primdecOverPrimeFieldWrapper(rng, repeats)
+{
+           
+      def genParams = defaultIdealGeneratorParams();
+      // adjust random ideal generator params:
+      genParams.maxGens=3; 
+      genParams.absMaxCoeff = 15;
+      genParams.maxMonomialDegree = 3;
+      genParams.maxTermsPerGen = 2;
+
+      def idealG = idealGeneratorFromParams( genParams  );
+
+      int trials = 3000000;
+     primdecOverPrimeField( rng, idealG, trials,repeats);
+}
+
+monitor("log/test.primdec.over.prime.field.lib.00","io");
+
+ring rng = 17,(x,y,z),( dp(2),dp(1) );
+
+primdecOverPrimeFieldWrapper(rng,10);

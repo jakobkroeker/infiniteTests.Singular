@@ -1,0 +1,63 @@
+ LIB("bugs/test.reslipman.isPrime");
+
+
+
+proc  testisPrimeWrapper( cchar, ordering )
+{
+    echo = 4;
+    option("redSB");
+
+    int numVars = 2;
+    def rng = createRing( cchar, ordering, numVars ) ;
+    // seems doable
+
+    def genParams = defaultRandomConstructionParams();
+
+
+    genParams.absMaxCoeff       = 14;
+    genParams.minVarFactorsPerMonomial = 0;
+    genParams.maxVarFactorsPerMonomial = 3;
+    genParams.maxTermsPerGen    = 3;
+    genParams.maxGens           = 4;
+    genParams.bFractionsOn = 0;
+
+    def gens = createRandomGeneratorsByParams( genParams  );
+
+    int trials = 1000000;
+	testIsPrime( rng, gens.idealG, trials );
+}
+
+
+ testisPrimeWrapper("integer", "dp");
+
+
+
+/*
+> ring rng = integer,(yh,sp),dp;
+> 
+. ideal I = 13*sp^2+977772, 977768*yh;
+> 
+. isPrime(I);
+  basering;
+LIB("reslipman.lib");
+
+  newstruct("TGenerator","proc fkt,list  params");
+  ring rng = integer,(x,y),dp;
+
+  ideal I = -2*x^3-3;
+  qring qr = std(I); 
+
+  ideal J = 6,-x^2*y,-4*x*y^2;
+  isPrime(J);  //fails
+
+
+
+LIB("reslipman.lib");
+
+  newstruct("TGenerator","proc fkt,list  params");
+  ring rng = integer,(x,y),dp;
+
+
+  ideal J = 6,-x^2*y,-4*x*y^2;
+  isPrime(J);  //fails
+*/

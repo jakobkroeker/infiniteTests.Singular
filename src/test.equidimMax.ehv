@@ -1,0 +1,80 @@
+/////////////////////
+version="version test.equidimMax.ehv";
+category="Commutative Algebra";
+info="
+";
+
+
+LIB "ringutils.lib";
+LIB "primdec.lib";
+LIB "ehv.lib";
+//LIB "wrappers.lib";
+LIB "randomIdeal.lib";
+ 
+
+proc testEquidimMax( rng, idealG, trials )
+{
+    print ("testEquidimMax");
+    if ( defined(basering) ) {   def BAS=basering; }
+
+    setring rng;
+    export(rng);
+    basering;
+    list ideals;
+
+    int trial;
+    def rI, rIehv,eIMEHV, eiMehv, eIM, IR, I;
+    for (trial = 1; trial<=trials; trial++)
+    {   
+       setring rng;
+       dbprint (1, "trial: ", trial );
+
+       I = idealG();
+       I;
+       IR = radical(I);
+       IR;
+       basering;
+       if ( not idealsAreEqual( IR, ideal(1) ) && not  isZero(IR) )
+       {
+           //if ( defined(eIMEHV) ) { kill eIMEHV; }
+           //if ( defined(eiMehv) ) { kill eiMehv; }
+           //if ( defined(eIM) ) { kill eIM; }
+           eIMEHV = equidimMaxEHV(IR);;    
+           eiMehv = equiMaxEHV(IR);
+           eIM    = equidimMax(IR);;
+           ASSUME(   0, idealsAreEqual( radical(eiMehv),  (eIMEHV) )   );
+           ASSUME(   0, idealsAreEqual( (eIM),     (eIMEHV) )   );            
+       }
+
+    }
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+proc testEquidimMaxWrapper(cchar, ordering)
+{
+    echo = 0;
+    def assumeLevel = 3;
+
+    init_randomIdeal();
+    int numVars = 2;
+    def rng = createRing(cchar,ordering, numVars) ;
+    setring rng;
+
+    def genParams = defaultIdealGeneratorParams();
+    // adjust random ideal generator params:
+    genParams.absMaxCoeff = 15;
+    genParams.maxMonomialDegree = 2;
+    genParams.maxTermsPerGen = 3;
+    genParams.maxGens = 2;
+    int trials = 1000000;
+    def idealG = idealGeneratorFromParams( genParams  );
+
+	testEquidimMax( rng, idealG, trials );
+}
+
+
+
+
+

@@ -1,0 +1,39 @@
+
+
+LIB("bugs/test.char_series");
+
+
+option("warn");
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+init_randomIdeal();
+TIdealGeneratingParameters genParams = defaultIdealGeneratorParams();
+
+genParams.absMaxCoeff       = 14;
+genParams.minMonomialDegree = 0;
+genParams.maxMonomialDegree = 3;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 2;
+
+proc idealG = idealGeneratorFromParams( genParams  );
+
+//////// adjust ring  
+string cchar    = "0";
+string ordering = "lp";
+int    numVars  = 3;
+
+def rng = createRing( cchar, ordering, numVars ) ;
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+
+testCharSeries( rng, idealG, trials);
+
+

@@ -1,0 +1,40 @@
+
+
+LIB("bugs/test.char_series");
+monitor("log/test.char_series.09","io");
+
+option("warn");
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultIdealGeneratorParams();
+
+genParams.absMaxCoeff       = 140;
+genParams.minMonomialDegree = 0;
+genParams.maxMonomialDegree = 3;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 4;
+
+proc idealG = idealGeneratorFromParams( genParams  );
+
+//////// adjust ring  
+string cchar    = "0";
+string ordering = "(lp(3),lp(2))";
+int    numVars  = 5;
+
+def rng = createRing( cchar, ordering, numVars ) ;
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+
+testCharSeries( rng, idealG, trials);
+
+// ./singular-spielwiese < input/test.char_series.09 2>&1 | tee -a log/test.char_series.09.log ;
+// ulimit -v 700000 ; ulimit -t 500
+// export cont=1; while [ $cont -eq 1 ] ; do nice -19 ./singular-spielwiese < input/test.char_series.09 2>&1 | tee -a log/test.char_series.09.log ; if [ $? -eq 123 ] ; then export cont=0; fi; done

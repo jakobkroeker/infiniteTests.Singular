@@ -1,0 +1,43 @@
+
+
+LIB("bugs/test.std.correct");
+// monitor("log/test.std.correct.03","io");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 15;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 4;
+genParams.maxTermsPerGen    = 4;
+genParams.maxGens           = 4;
+
+def gens = createRandomGeneratorsByParams( genParams  );
+
+
+//def rng = createRing( cchar, ordering, numVars ) ;
+// ring rng = 0,(x,y,z),(ls);
+
+ring rng = integer,(x,y,z),(ls);
+
+option("nowarn");
+option("redSB");
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+
+testGroebner( rng, gens.idealG, trials,logfile);
+
+// ulimit -v 1000000 ; ulimit -t 500
+//  set -o pipefail; ./singular-spielwiese < input/test.std.correct.02 2>&1 | tee -a log/test.std.correct.03.log ;
+// export cont=1; while [ $cont -eq 1 ] ; do set -o pipefail; nice -19 ./singular-spielwiese < input/test.std.correct.03 2>&1 | tee -a log/test.std.correct.03.log ; if [ $? -eq 123 ] ; then export cont=0; fi; done

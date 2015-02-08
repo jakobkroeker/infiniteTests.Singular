@@ -1,0 +1,67 @@
+/////////////////////
+version="version test.std";
+category="Commutative Algebra";
+info="
+";
+
+LIB "primdecint.lib";
+LIB "randomIdeal.lib";
+LIB "ringutils.lib";
+LIB "wrappers.lib";
+LIB "resolve.lib";
+
+
+proc testBlowUp( rng, idealG, trials )
+{
+    if (defined(basering) ) {   def BAS=basering; }
+    setring rng;
+
+    int trial;
+    ideal cs,  I, J,V,C;
+    while( trial<trials )
+    {   
+
+       if (defined(qrng)) {kill qrng; }
+       dbprint( 1, "basering: ", basering );
+       dbprint( 1, "trial: ", trial );
+
+       I = idealG( );
+       J = idealG( );
+
+       dbprint( 1, "I = ", I );
+       dbprint( 1, "J = ", J );
+
+       V = std(intersect(I,J));
+       C = std(I+J);
+
+       if ( idealsEqual(V, ideal(0))  )
+       {
+           continue; 
+       }
+
+       if ( idealsEqual(C, ideal(1))  )
+       {
+           continue; 
+       }
+
+       if ( not idealsEqual(slocus(C), ideal(1))  )
+       {
+          continue; 
+       }
+
+       dbprint( 1, "V = ", V );
+       dbprint( 1, "C = ", C );
+
+       blowUp(V,C);
+
+       trial = trial+1;
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+
+ 
+
+	
+

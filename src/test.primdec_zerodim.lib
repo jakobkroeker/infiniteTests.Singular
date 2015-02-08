@@ -1,0 +1,68 @@
+
+
+option("redSB");
+
+echo = 1;
+LIB("primdec.lib");
+LIB("ringutils.lib");
+LIB("wrappers.lib");
+LIB("ehv.lib");
+ 
+proc testPrimdecZeroDim( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials ,  cchar,cord)
+{
+    print ("testPrimdecZeroDim");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing( cchar,cord, numVars) ;
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+
+    // generating only zerodimensional ideals:
+    for (trial = 1; trial<=trials; trial=trial)
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(j) ) { kill j; }
+       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+     
+       if ( dimIdeal(j)==0 )
+       {
+          print(" dimIdeal(j)=0" );
+          trial=trial+1;
+		  zerodec(j); 
+       }
+    }
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+
+proc testPrimdecZerodimWrapper(cchar,cord)
+{
+	// seems doable
+	int numVars = 3;
+	int maxGens = 4;
+	int maxTermsPerGen = 4;
+	int maxMonomialDegree = 4;
+	int absMaxCoeff = 4;
+	int trials = 3000;
+	testPrimdecZeroDim( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials,cchar,cord);
+}
+
+testPrimdecZerodimWrapper("0","dp");
+testPrimdecZerodimWrapper("0","lp"); 
+testPrimdecZerodimWrapper("0","Dp");
+testPrimdecZerodimWrapper("5","dp");
+testPrimdecZerodimWrapper("5","lp");
+testPrimdecZerodimWrapper("5","Dp");
+
+
+
+
+

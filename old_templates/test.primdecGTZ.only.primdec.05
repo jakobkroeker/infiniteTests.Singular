@@ -1,0 +1,47 @@
+
+LIB("bugs/test.primdecGTZ.only.primdec");
+
+option("warn");
+option("redSB");
+
+echo = 0;
+
+
+
+proc testPrimdecWrapper(rng)
+{
+      def genParams = defaultIdealGeneratorParams();
+      // adjust random ideal generator params:
+      genParams.maxGens = 3; 
+      genParams.absMaxCoeff = 54;
+      genParams.maxMonomialDegree = 10;
+      genParams.maxTermsPerGen = 2;
+
+      def idealG = idealGeneratorFromParams( genParams  );
+ 
+  	int trials = 30000000;
+
+    //def rng = createRing(cchar,cord, numVars) ;
+
+	testPrimdec( rng,idealG, trials );
+
+}
+
+
+monitor("log/test.primdecGTZ.only.primdec.out.05","io");
+system("random");
+option("redSB");
+
+//echo = 0;
+printlevel = 0 ;
+TRACE=0;
+int numVars = 5;
+
+def rng = createRing("0","(dp(2),dp(3))", numVars) ;
+testPrimdecWrapper(rng);
+
+
+// ulimit -v 1000000 ; ulimit -t 500
+// ./singular-spielwiese < input/test.primdecGTZ.only.primdec.05 2>&1 | tee -a log/test.primdecGTZ.only.primdec.05.log ;
+// export cont=1; while [ $cont -eq 1 ] ; do ./singular-spielwiese < input/test.primdecGTZ.only.primdec.05 2>&1 | tee -a log/test.primdecGTZ.only.primdec.out.05.log ; if [ $? -eq 123 ] ; then export cont=0; fi; done
+

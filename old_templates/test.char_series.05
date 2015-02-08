@@ -1,0 +1,41 @@
+
+
+LIB("bugs/test.char_series");
+//monitor("log/test.char_series.05","io");
+
+option("warn");
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultIdealGeneratorParams();
+
+genParams.absMaxCoeff       = 140;
+genParams.minMonomialDegree = 0;
+genParams.maxMonomialDegree = 3;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 4;
+
+proc idealG = idealGeneratorFromParams( genParams  );
+
+//////// adjust ring  
+string cchar    = "0";
+string ordering = "lp";
+int    numVars  = 5;
+
+def rng = createRing( cchar, ordering, numVars ) ;
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+
+testCharSeries( rng, idealG, trials, filename);
+
+// export cont=1; export filename="log/test.char_series.05.in.$cont"; echo "string filename = \""$filename"\";" >log/input.test.char_series.05; cat input/test.char_series.05>> log/input.test.char_series.05;
+// ./singular-spielwiese < log/input.test.char_series.05 2>&1 | tee -a log/test.char_series.05.log.$cont ;
+// export cont=1; export filename="log/test.char_series.05.log.$cont"; while [ $cont -eq 1 ] ; do echo "filename = \""$filename"\";" >log/input.test.char_series.05; cat input/test.char_series.05>> log/input.test.char_series.05;
+./singular-spielwiese < log/input.test.char_series.05 2>&1 | tee -a log/test.char_series.05.log.$cont ; if [ $? -eq 123 ] ; then export cont=0; fi; done

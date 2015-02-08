@@ -1,0 +1,88 @@
+
+echo = 0;
+def assumeLevel = 3;
+
+
+LIB "primdec.lib";
+LIB "ehv.lib";
+// LIB "wrappers.lib";
+LIB "randomIdeal.lib";
+//LIB "ringutils.lib";
+
+ 
+
+proc testEquidimMax( rng, idealG, trials )
+{
+    print ("testEquidimMax");
+    if (defined(basering) ) {   def BAS=basering; }
+
+  
+    setring rng;
+    export(rng);
+    basering;
+    list ideals;
+
+    int trial;
+    def rI, rIehv,eIMEHV, eiMehv, eIM, IR;
+    ideal I;
+    while (1)
+    {   
+       setring rng;
+   
+       //if ( defined(I) ) { kill I; }
+       I = idealG();
+    
+       if ( not idealsAreEqual( I,ideal(1) ) && not  isZero(I) )
+       {
+           if ( isRadical(I) )
+           {
+              dbprint( 1, "testEquidimMax" );
+              dbprint( 1, "trial: ", trial );
+               I;
+
+               //if ( defined(eIMEHV) ) { kill eIMEHV; }
+               //if ( defined(eiMehv) ) { kill eiMehv; }
+               //if ( defined(eIM) ) { kill eIM; }
+               eIMEHV = equidimMaxEHV(I);;    
+               eiMehv = equiMaxEHV(I);
+               eIM =equidimMax(I);;
+               ASSUME(   0, idealsAreEqual( radical(eiMehv),  (eIMEHV) )   );
+               ASSUME(   0, idealsAreEqual( (eIM),     (eIMEHV) )   );       
+               trial = trial+1;
+           }     
+       }
+
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+proc testEquidimMaxWrapper(cchar, ordering)
+{
+    int numVars = 3;
+    def rng = createRing(cchar,ordering, numVars) ;
+    setring rng;
+    // seems doable
+    def genParams = defaultIdealGeneratorParams();
+    // adjust random ideal generator params:
+    genParams.absMaxCoeff = 15;
+    genParams.maxMonomialDegree = 3;
+    genParams.maxTermsPerGen = 3;
+    genParams.maxGens = 3;
+    int trials = 1000000;
+    def idealG = idealGeneratorFromParams( genParams  );
+
+	testEquidimMax( rng, idealG, trials );
+}
+
+	printlevel = 0 ;
+    TRACE = 0;
+
+testEquidimMaxWrapper("0","dp");
+testEquidimMaxWrapper("0", "lp");
+
+
+

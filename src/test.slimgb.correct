@@ -1,0 +1,46 @@
+/////////////////////
+version="version test.slimgb";
+category="Commutative Algebra";
+info="
+";
+
+LIB "primdecint.lib";
+LIB "randomIdeal.lib";
+LIB "ringutils.lib";
+LIB "wrappers.lib";
+ 
+proc testSlimgb( rng, idealG, trials )
+{
+    if (defined(basering) ) {   def BAS=basering; }
+    setring rng;
+
+    int trial;
+    ideal cs,  I, J, gI, gJ, ggI, ggJ;
+    while( trial<trials )
+    {   
+
+       if (defined(qrng)) {kill qrng; }
+       dbprint( 1, "basering: ", basering );
+       dbprint( 1, "trial: ", trial );
+
+       I = idealG( );
+
+       dbprint( 1, "I = ", I );
+       
+       sI = slimgb(I);
+       gI = groebner(I);
+
+
+       ASSUME(0, idealsAreEqual(sI,gI) );
+
+       trial = trial+1;
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+
+ 
+
+	
+

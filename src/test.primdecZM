@@ -1,0 +1,70 @@
+
+
+option("redSB");
+
+
+echo = 1;
+LIB("primdecint.lib");
+LIB("ringutils.lib");
+LIB("wrappers.lib");
+LIB("ehv.lib");
+ 
+
+proc testPrimdecZM( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, orderingStr,trials )
+{
+    print ("testPrimdecZ");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing("integer",orderingStr , numVars) ;
+    setring rng;
+    export(rng);
+    "bbasering";
+    basering;~;
+
+    list ideals;
+
+    int trial;
+    for (trial = 1; trial<=trials; )
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(I) ) { kill I; }
+       ideal I = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       print ("I:");
+       I;
+
+       if ( dimIdeal(I)>=0)
+       {
+           trial++;
+           if ( defined(L1) ) { kill L1; }
+           list L1 = primdecZM(module(I));
+       }
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+proc testPrimdecZMWrapper(orderingStr)
+{
+	// seems doable
+	int numVars = 2;
+	int maxGens = 3;
+	int maxTermsPerGen = 3;
+	int maxMonomialDegree = 3;
+	int absMaxCoeff = 14;
+	int trials = 3000;
+	testPrimdecZM( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, orderingStr,trials);
+}
+
+	printlevel = 0 ;
+    TRACE=1;
+
+testPrimdecZMWrapper("Dp");
+testPrimdecZMWrapper("dp");
+testPrimdecZMWrapper("lp");
+
+
+

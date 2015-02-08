@@ -1,0 +1,72 @@
+
+
+option("redSB");
+
+
+echo = 1;
+LIB("primdec.lib");
+LIB("ringutils.lib");
+LIB("wrappers.lib");
+LIB("gitfan.lib");
+ 
+
+
+proc testAfaces( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials ,cchar,cord)
+{
+    print ("testPrimdec");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing(cchar,cord, numVars) ;
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+    list L1,L2,L3;
+    //for (trial = 1; trial<=trials; trial++)
+    while(1)
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(j) ) { kill j; }
+       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       //system("random", random(0,5000000) ) ;
+       //system("random" ) ;
+       print ("j:");
+       j;
+
+       if (not isZero(j) && not idealsAreEqual(ideal(1),j) )
+       {
+            L1 = afaces(j);
+     
+       }
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+proc testAfacesWrapper(cchar,cord)
+{
+
+	// seems doable
+	int numVars = 3;
+	int maxGens = 4;
+	int maxTermsPerGen = 3;
+	int maxMonomialDegree = 3;
+	int absMaxCoeff = 14;
+	int trials = 300000;
+	testAfaces( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials,cchar,cord);
+}
+
+printlevel = 0 ;
+TRACE=1;
+testAfacesWrapper("0","lp");
+testAfacesWrapper("0","dp");
+
+
+testPrimdecWrapper("7","dp");
+
+

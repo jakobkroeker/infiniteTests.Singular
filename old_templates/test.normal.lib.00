@@ -1,0 +1,52 @@
+
+LIB("bugs/test.normal.lib");
+
+option("warn");
+option("redSB");
+
+echo = 0;
+
+
+proc testNormalWrapper(rng)
+{
+        def genParams = defaultRandomConstructionParams();
+      // adjust random ideal generator params:
+      genParams.absMaxCoeff = 54;
+      genParams.minVarFactorsPerMonomial = 0;
+      genParams.maxVarFactorsPerMonomial = 4;
+      genParams.maxTermsPerGen = 3;
+      genParams.maxGens = 3;
+
+      def gens = createRandomGeneratorsByParams( genParams  );
+
+      int trials = 3000000;
+      testNormal( rng, gens.idealG, trials );
+}
+
+
+option("nowarn");
+
+TRACE = 0;
+printlevel = 1;
+echo = 0;
+
+
+
+monitor("log/test.normal.lib.out.00","io");
+system("random");
+option("redSB");
+
+
+printlevel = 1 ;
+TRACE=0;
+int numVars = 3;
+
+// def rng = createRing("0", "( dp(2),dp(1) )", numVars) ;
+ring rng = 0,(x,y,z),( dp(2),dp(1) );
+testNormalWrapper(rng);
+
+
+// ulimit -v 500000 ; ulimit -t 500
+// ./singular-spielwiese -v < input/test.normal.lib.00 2>&1 | tee -a log/test.normal.lib.00.log ;
+// export cont=1; while [ $cont -eq 1 ] ; do ./singular-spielwiese < input/test.normal.lib.00 2>&1 | tee -a log/test.normal.lib.out.00.log ; if [ $? -eq 123 ] ; then export cont=0; fi; done
+

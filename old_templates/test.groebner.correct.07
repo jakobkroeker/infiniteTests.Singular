@@ -1,0 +1,47 @@
+
+
+LIB("bugs/test.groebner.correct");
+monitor("log/test.groebner.correct.07","io");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 50;
+genParams.bFractionsOn = 0;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3;
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 3;
+
+def gens = createRandomGeneratorsByParams( genParams  );
+
+//////// adjust ring  
+string cchar    = "integer";
+string ordering = "dp";
+int    numVars  = 5;
+
+//def rng = createRing( cchar, ordering, numVars ) ;
+ring rng = 0,(x,y,z,m,l),(lp(2),lp(3));
+short = 0;
+option("nowarn");
+option(redSB);
+option(redTail);
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+
+testGroebner( rng, gens.idealG, trials);
+
+// ulimit -v 1000000 ; ulimit -t 500
+//  set -o pipefail; ./singular-spielwiese < input/test.groebner.correct.07 2>&1 | tee -a log/test.groebner.correct.07.log ;
+// export cont=1; while [ $cont -eq 1 ] ; do set -o pipefail; nice -19 ./singular-spielwiese < input/test.groebner.correct.07 2>&1 | tee -a log/test.groebner.correct.07.log ; if [ $? -eq 123 ] ; then export cont=0; fi; done

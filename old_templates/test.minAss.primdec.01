@@ -1,0 +1,47 @@
+
+LIB("bugs/test.minAss.primdec");
+
+option("warn");
+option("redSB");
+
+echo = 0;
+
+
+
+proc testMinAssWrapper(rng)
+{
+      def genParams = defaultIdealGeneratorParams();
+      // adjust random ideal generator params:
+      genParams.maxGens           =  2; 
+      genParams.absMaxCoeff       = 54;
+      genParams.maxMonomialDegree =  3;
+      genParams.maxTermsPerGen    =  4;
+
+      def idealG = idealGeneratorFromParams( genParams  );
+ 
+  	int trials = 300000;
+
+    //def rng = createRing(cchar,cord, numVars) ;
+
+	testMinAss( rng,idealG, trials );
+
+}
+
+
+monitor("log/test.minAss.primdec.out.01","io");
+system("random");
+option("redSB");
+
+//echo = 0;
+printlevel = 0 ;
+TRACE=0;
+int numVars = 3;
+
+def rng = createRing("0","(lp(2),lp(1))", numVars) ;
+testMinAssWrapper(rng);
+
+
+// ulimit -v 1000000 ; ulimit -t 500
+// ./singular-spielwiese < input/test.minAss.primdec.01 2>&1 | tee -a log/test.minAss.primdec.01.log ;
+// export cont=1; while [ $cont -eq 1 ] ; do ./singular-spielwiese < input/test.minAss.primdec.01 2>&1 | tee -a log/test.minAss.primdec.out.01.log ; if [ $? -eq 123 ] ; then export cont=0; fi; done
+

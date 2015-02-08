@@ -1,0 +1,103 @@
+version="version test.minAss.primdec";
+category="Commutative Algebra";
+info="
+";
+
+LIB "randomIdeal.lib";
+LIB "primdec.lib";
+LIB "ringutils.lib";
+LIB "wrappers.lib";
+LIB "ehv.lib";
+
+
+ 
+
+
+proc testMinAss( rng, idealG, trials )
+{
+    print ("testMinAss");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+    list L1,L2,L3;
+    ideal I;
+    for (trial = 1; trial<=trials; trial++)
+    {   
+       setring rng;
+       print ("trial: "+string(trial));
+       if ( defined(j) ) { kill j; }
+       ideal I = idealG(  );
+       //system("random", random(0,5000000) ) ;
+       //system("random" ) ;
+       dbprint(1, "basering:",basering,"");
+       dbprint(1, "I:", I,"");
+
+       if (not isZero(I) && not idealsAreEqual( ideal(1), I ) )
+       {
+            L1 = minAssGTZ(I);
+            testMinAssEx(L1,I);
+            L2 = minAssChar(I);
+            testMinAssEx(L2,I);
+            L1 = convertMinAssToPrimdec(L1);
+            L2 = convertMinAssToPrimdec(L2);  
+            ASSUME(0, primDecsAreEquivalent( L1, L2) );
+
+            trial = trial+1;
+       }
+      
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+
+/*
+
+proc testMinAssWrapper(rng)
+{
+      def genParams = defaultIdealGeneratorParams();
+      // adjust random ideal generator params:
+      genParams.maxGens = 4; 
+      genParams.absMaxCoeff = 14;
+      genParams.maxMonomialDegree = 3;
+      genParams.maxTermsPerGen = 4;
+
+      def idealG = idealGeneratorFromParams( genParams  );
+ 
+  	int trials = 300000;
+
+    //def rng = createRing(cchar,cord, numVars) ;
+
+	testMinAss( rng, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials );
+
+}
+
+
+monitor("log/test.testMinAss.primdec.out.00","io");
+system("random");
+option("redSB");
+
+//echo = 0;
+printlevel = 0 ;
+TRACE=0;
+int numVars = 3;
+
+def rng = createRing("0","(dp(2),dp(1))", numVars) ;
+testMinAssWrapper(rng);
+
+def rng = createRing("0","(lp(2),lp(1))", numVars) ;
+testMinAssWrapper("0","dp");
+
+while true; do ./singular-spielwiese < input/test.primdecGTZ.only.primdec.02
+
+*/
+
+

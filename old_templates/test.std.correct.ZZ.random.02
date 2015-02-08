@@ -1,0 +1,58 @@
+
+
+LIB("bugs/test.std.correct");
+LIB("src/automatedTests.lib");
+
+//monitor("log/test.std.correct.06","io");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 20;
+genParams.bFractionsOn = 0;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 2;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 3;
+
+def gens = createRandomGeneratorsByParams( genParams  );
+
+
+
+option("nowarn");
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+def optionlist = list ("redSB", "redTail");
+
+proc getRandomRing(  )
+{
+
+   string str_rng = "ring rng = (integer),(x, y, z),";
+
+   string orderingString = randomBlockOrdering(randomOrdering, 3);
+
+   str_rng = str_rng + orderingString + ";";
+
+   execute(str_rng);
+
+   setring rng;
+
+   return (basering);
+}
+
+option("warn");
+
+testGroebner( getRandomRing, gens, optionlist, trials, logfile);
+
+

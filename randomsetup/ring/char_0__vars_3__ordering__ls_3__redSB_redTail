@@ -1,0 +1,13 @@
+version="ring";
+category="Commutative Algebra";
+info="";
+
+proc getRing()
+{
+
+  ring rng = 0,(x,y,z),ls;
+
+  option("redSB");
+  option("redTail");
+  return (rng);
+}

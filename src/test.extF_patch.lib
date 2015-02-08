@@ -1,0 +1,268 @@
+
+
+def rnd=random(0,20000);
+system("random",1397899680+rnd);
+
+option("redSB");
+
+echo = 0;
+LIB("primdec.lib");
+LIB("ehv.lib");
+LIB("randomIdeal.lib");
+ 
+proc extF_orig(list l,list #)
+{
+//zero_dimensional primary decomposition after finite field extension
+  def R=basering;
+  int p=char(R);
+
+  if((p==0)||(p>13)||(npars(R)>0)){return(l);}
+
+  int ex=3;
+  if(size(#)>0){ex=#[1];}
+
+  list peek,peek1;
+  while(size(l)>0)
+  {
+    if(size(l[2])==0)
+    {
+      peek[size(peek)+1]=l[1];
+    }
+    else
+    {
+      peek1[size(peek1)+1]=l[1];
+      peek1[size(peek1)+1]=l[2];
+    }
+    l=delete(l,1);
+    l=delete(l,1);
+  }
+  if(size(peek)==0){return(peek1);}
+
+  string gnir="ring RH=("+string(p)+"^"+string(ex)+",a),("+varstr(R)+"),lp;";
+  execute(gnir);
+  string mp="minpoly="+string(minpoly)+";";
+  gnir="ring RL=("+string(p)+",a),("+varstr(R)+"),lp;";
+  execute(gnir);
+  execute(mp);
+  list L=imap(R,peek);
+  list pr, keep;
+  int i;
+  for(i=1;i<=size(L);i++)
+  {
+    attrib(L[i],"isSB",1);
+    pr=zero_decomp(L[i],0,0);
+    keep=keep+pr;
+  }
+  for(i=1;i<=size(keep);i++)
+  {
+    keep[i]=simplify(keep[i],1);
+  }
+  mp="poly pp="+string(minpoly)+";";
+
+  string gnir1="ring RS="+string(p)+",("+varstr(R)+",a),lp;";
+  execute(gnir1);
+  execute(mp);
+  list L=imap(RL,keep);
+
+  for(i=1;i<=size(L);i++)
+  {
+    L[i]=eliminate(L[i]+ideal(pp),a);
+  }
+  i=0;
+  int j;
+  while(i<size(L) div 2-1)
+  {
+    i++;
+    j=i;
+    while(j<size(L) div 2)
+    {
+      j++;
+      if(idealsEqual(L[2*i-1],L[2*j-1]))
+      {
+        L=delete(L,2*j-1);
+        L=delete(L,2*j-1);
+        j--;
+      }
+    }
+  }
+  setring R;
+  list re=imap(RS,L);
+  re=re+peek1;
+
+  return(extF(re,ex+1));
+}
+
+
+
+
+
+proc extF_new(list l,list #)
+{
+//zero_dimensional primary decomposition after finite field extension
+  def R=basering;
+  int p=char(R);
+
+  if((p==0)||(p>13)||(npars(R)>0)){return(l);}
+  int ex=3;
+  if(size(#)>0){ex=#[1];}
+
+  list peek,peek1;
+  while(size(l)>0)
+  {
+    if(size(l[2])==0)
+    {
+      peek[size(peek)+1]=l[1];
+    }
+    else
+    {
+      peek1[size(peek1)+1]=l[1];
+      peek1[size(peek1)+1]=l[2];
+    }
+    l=delete(l,1);
+    l=delete(l,1);
+  }
+  if(size(peek)==0){return(peek1);}
+
+  // get the minpoly
+  string gnir="ring RH=("+string(p)+"^"+string(ex)+",a),("+varstr(R)+"),lp;";
+  execute(gnir);
+  string mp="minpoly="+string(minpoly)+";";
+  // construct the ring of interest:
+  gnir="ring RL=("+string(p)+",a),(X(1.."+string(nvars(R))+")),lp;";
+  execute(gnir);
+  execute(mp);
+  list L= fetch(R,peek);
+  list pr, keep;
+  int i;
+  for(i=1;i<=size(L);i++)
+  {
+    attrib(L[i],"isSB",1);
+    pr=zero_decomp(L[i],0,0);
+    keep=keep+pr;
+  }
+  for(i=1;i<=size(keep);i++)
+  {
+    keep[i]=simplify(keep[i],1);
+  }
+  mp="poly pp="+string(minpoly)+";";
+
+  string gnir1="ring RS="+string(p)+",(X(1.."+string(nvars(R))+"),a),lp;";
+  execute(gnir1);
+  execute(mp);
+  list L=imap(RL,keep);
+
+  for(i=1;i<=size(L);i++)
+  {
+    L[i]=eliminate(L[i]+ideal(pp),a);
+  }
+  i=0;
+  int j;
+  while(i<size(L) div 2-1)
+  {
+    i++;
+    j=i;
+    while(j<size(L) div 2)
+    {
+      j++;
+      if(idealsEqual(L[2*i-1],L[2*j-1]))
+      {
+        L=delete(L,2*j-1);
+        L=delete(L,2*j-1);
+        j--;
+      }
+    }
+  }
+  setring R;
+  list re=fetch(RS,L);
+  re=re+peek1;
+
+  return(extF(re,ex+1));
+}
+
+
+proc testExtF_patch(  pRng ,idealGen, trials, repeats)
+{
+    print ("testPatchedSplitCharp");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def extFStr=string(Primdec::extF);
+    kill Primdec::extF;
+    
+    setring pRng;
+
+    int trial;
+    list L1,L2;
+    ideal I;
+    int j;
+    for (trial = 1; trial<=trials; trial++)
+    {   
+       setring pRng;
+       print ("trial: "+string(trial));
+      
+       I = idealGen();
+       print ("I:");
+       I;
+       if (not idealsEqual(I,ideal(0)) && not idealsEqual(ideal(1),I ) )
+       {
+          for (j=1;j<repeats;j++)
+          { 
+            if ( defined(extF) ) { kill extF; }
+            proc extF(list l) 
+            {
+               return (extF_orig(l));
+            } 
+            export(extF);
+            L1 = primdecSY(I);
+            if (defined(extF)) { kill extF; }
+              proc extF(list l) 
+            {
+               return (extF_new(l));
+            } 
+            export(extF);
+            L2 = primdecSY(I);
+            ASSUME(0, primDecsAreEquivalent(L1, L2) );
+
+            ASSUME(0, testPrimary( L1, std(I) ));
+          }
+       }
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+proc testExtF_patchWrapper(cchar,cord)
+{
+      init_randomIdeal();
+      string cmd = "ring rng ="+cchar+" ,(x,y,z),"+cord+";";
+      execute(cmd);
+          
+      def genParams = defaultIdealGeneratorParams();
+      // adjust random ideal generator params:
+      genParams.absMaxCoeff = 15;
+      genParams.maxMonomialDegree = 3;
+      genParams.maxTermsPerGen = 4;
+      genParams.maxGens = 4;
+
+      proc idealG = idealGeneratorFromParams( genParams  );
+
+      int trials = 30000;
+      int repeats =5;
+       testExtF_patch( rng, idealG, trials,repeats);
+}
+
+testExtF_patchWrapper("7","dp");
+testExtF_patchWrapper("7","lp"); 
+testExtF_patchWrapper("7","Dp");
+testExtF_patchWrapper("5","dp");
+testExtF_patchWrapper("5","lp");
+testExtF_patchWrapper("5","Dp");
+
+testExtF_patchWrapper("19","dp");
+testExtF_patchWrapper("19","lp");
+testExtF_patchWrapper("19","Dp");
+
+testExtF_patchWrapper("0","dp");
+

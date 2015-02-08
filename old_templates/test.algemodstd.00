@@ -1,0 +1,46 @@
+
+
+LIB("bugs/test.algstdmod");
+LIB("wrappers.lib");
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 30;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3;
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 3;
+genParams.bFractionsOn      = 1;
+
+def genTable = createRandomGeneratorsByParams( genParams  );
+
+//////// adjust ring  
+string cchar    = "(0,vv)";
+string ordering = "dp";
+int    numVars  = 4;
+
+//def rng = createRing( cchar, ordering, numVars ) ;
+ring rng = (0,vv),(x,y,z,w),dp;
+setring rng ;
+minpoly = vv^2+vv+3;
+setring rng;
+
+
+// option(warn);
+option(redTail);
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+
+testAlgemodStd( rng, genTable.idealG, trials, logfile);
+
+

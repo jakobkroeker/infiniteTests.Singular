@@ -1,0 +1,59 @@
+/////////////////////
+version="version test.resultant";
+category="Commutative Algebra";
+info="
+";
+
+
+LIB "randomIdeal.lib";
+ 
+
+proc testResultant( rng, polyG, trials, filename )
+{
+ 
+    if (defined(basering) ) {   def BAS=basering; }
+    setring rng;
+
+
+    bigint trial;
+    poly  polyP, polyQ, variable, polyResultant;
+
+    while( trial<trials )
+    {   
+       dbprint( 1, "ring rng = "+string(basering)+";" );
+       write(":a "+filename,"LIB(\"randomIdeal.lib\");");
+       write(":a "+filename,"ring rng = "+string(basering)+";");
+       write(":a "+filename,"bigint trial = "+string(trial)+";");
+       dbprint( 1, "trial: ", trial );
+       polyP = polyG( );
+       polyQ = polyG( );
+       variable = randomVariable();
+       dbprint( 1, "I = ", I );
+       write(":a "+filename,"poly polyP= "+string(polyP)+";");
+       write(":a "+filename,"poly polyQ= "+string(polyQ)+";");
+       write(":a "+filename,"poly variable= "+string(variable)+";");
+       write(":a "+filename,"poly polyResultant = resultant(polyP,polyQ,variable);");
+       dbprint(1,"poly polyP= "+string(polyP)+";");
+       dbprint(1,"poly polyQ= "+string(polyQ)+";");
+       dbprint(1,"poly variable= "+string(variable)+";");
+       dbprint(1,"poly polyResultant = resultant(polyP,polyQ,variable);");
+       polyResultant =resultant(polyP,polyQ,variable);
+       trial = trial+1;
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+
+/*
+proc  testResultantWrapper( cchar, ordering, numVars, genParams, trials )
+{
+    def rng = createRing( cchar,ordering, numVars ) ;
+
+    def polyG = polyGeneratorFromParams( genParams  );
+
+	testResultant( rng, polyG, trials);
+}
+*/
+	
+

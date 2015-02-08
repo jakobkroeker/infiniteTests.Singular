@@ -1,0 +1,66 @@
+/////////////////////
+version="version test.algemodstd";
+category="Commutative Algebra";
+info="
+";
+
+
+LIB "randomIdeal.lib";
+LIB "algemodstd.lib";
+ 
+
+proc testAlgemodStd( rng, idealG, trials, filename )
+{
+ 
+    if (defined(basering) ) {   def BAS=basering; }
+    setring rng;
+    "filename";filename;
+
+    bigint trial;
+    ideal I,result,result2,resultStd;
+
+    while( trial<trials )
+    {  
+       write(":w "+logfile,emptystring);
+       write(":a "+filename,"LIB(\"algemodstd.lib\");");
+       dbprint( 1, "ring rng = "+string(basering)+";" );
+       write(":a "+filename,"ring rng = "+string(basering)+";");
+       write(":a "+filename,"bigint trial = "+string(trial)+";");
+       dbprint( 1, "trial: ", trial );
+       I = idealG( );
+
+       dbprint( 1, "I = ", I );
+       write(":a "+filename,"ideal I= "+string(I)+";");
+
+       dbprint(1,"ideal result =algemodStd(I);");
+       write(":a "+filename,"ideal result =algemodStd(I);");
+       result =algemodStd(I);
+
+       dbprint(1,"       ASSUME(0, idealsAreEqual(result,I) );");
+       write(":a "+filename,"       ASSUME(0, idealsAreEqual(result,I) );");
+       ASSUME(0, idealsAreEqual(result,I) );
+
+       dbprint(1,"ideal result2 =algemodStd(I);");
+       write(":a "+filename,"ideal result2 =algemodStd(I);");
+       result2 =algemodStd(I);
+
+       dbprint(1," ASSUME(0, size(result2)==size(result) );");
+       write(":a "+filename," ASSUME(0, size(result2)==size(result) );");
+       ASSUME(0, size(result2)==size(result) );
+
+       dbprint(1,"ideal resultStd =groebner(I);");
+       write(":a "+filename,"ideal resultStd =groebner(I);");
+       resultStd =groebner(I);
+
+       dbprint(1,"       ASSUME(0, idealsAreEqual(result,I) );");
+       write(":a "+filename,"       ASSUME(0, idealsAreEqual(result,I) );");
+       ASSUME(0, idealsAreEqual(result,resultStd) );
+     
+       trial = trial+1;
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+	
+

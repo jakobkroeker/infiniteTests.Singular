@@ -1,0 +1,4 @@
+#!/bin/bash
+value=${*:-`cat`}
+#echo $value
+echo $value |xargs -n 1 echo -e "\n"; echo -e ""

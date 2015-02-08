@@ -1,0 +1,47 @@
+
+
+LIB("bugs/test.syz");
+monitor("log/test.syz.08","io");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+//genParams.absMaxCoeff       = 150;
+genParams.absMaxCoeff       = 25;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 5;
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 3;
+genParams.bFractionsOn = 0;
+
+def gens = createRandomGeneratorsByParams( genParams  );
+
+//////// adjust ring  
+string cchar    = "0";
+string ordering = "lp";
+int    numVars  = 3;
+
+//def rng = createRing( cchar, ordering, numVars ) ;
+ring rng = 0,(x,y,z),(lp);
+
+option("nowarn");
+option("redSB");
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+
+testSyz( rng, gens.idealG, trials);
+
+// ulimit -v 1000000 ; ulimit -t 500
+// ./singular-spielwiese < input/test.syz.08 2>&1 | tee -a log/test.syz.08.log ;
+// export cont=1; while [ $cont -eq 1 ] ; do nice -19 ./singular-spielwiese < input/test.syz.08 2>&1 | tee -a log/test.syz.08.log ; if [ $? -eq 123 ] ; then export cont=0; fi; done

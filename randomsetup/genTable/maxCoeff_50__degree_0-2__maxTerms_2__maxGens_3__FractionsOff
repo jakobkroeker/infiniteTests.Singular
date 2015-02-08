@@ -1,0 +1,22 @@
+version="ring";
+category="Commutative Algebra";
+info="";
+
+LIB "randomIdeal.lib";
+
+proc getGenTable()
+{
+  def genParams = defaultRandomConstructionParams();
+
+  genParams.absMaxCoeff       = 50;
+  genParams.bFractionsOn = 0;
+  genParams.minVarFactorsPerMonomial = 0;
+  genParams.maxVarFactorsPerMonomial = 2;
+  genParams.maxTermsPerGen    = 2;
+  genParams.maxGens           = 3;
+
+  def gens = createRandomGeneratorsByParams( genParams  );
+  return (gens);
+}
+
+// maxCoeff_50__degree_0-2__maxTerms_2__maxGens_3__FractionsOff_.sing

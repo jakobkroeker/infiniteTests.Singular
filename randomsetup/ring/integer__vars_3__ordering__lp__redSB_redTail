@@ -1,0 +1,15 @@
+version="ring";
+category="Commutative Algebra";
+info="";
+
+proc getRing()
+{
+  ring rng = integer,(x,y,z),lp;
+
+  option("redSB");
+  option("redTail");
+  return (rng);
+}
+
+
+// integer.vars_3.ordering_lp.redSB.redTail

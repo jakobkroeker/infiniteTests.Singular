@@ -1,0 +1,106 @@
+
+
+
+LIB("primdec.lib");
+LIB("ringutils.lib");
+LIB("wrappers.lib");
+LIB("reslipman.lib");
+
+LIB("randomIdeal.lib");
+
+
+
+
+
+proc testNormalZ( numVars, idealG, maxTrials, cchar, cord )
+{
+
+    int printlevelOffset=3;
+    dbprint(printlevel-voice+3, "testNormalZ");
+    if (defined(basering) )
+    { 
+        def BAS=basering;
+    }
+
+    def rng = createRing(cchar,cord, numVars) ;
+    setring rng;
+    export(rng);
+
+    int trial;
+    def L ;
+
+    trial = 0;
+    while( trial < maxTrials )
+    {   
+       setring rng;
+   
+       if ( defined(I) ) { kill I; }
+
+       //ideal I = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       ideal I = idealG();
+
+       dbprint(printlevel-voice+printlevelOffset, "trial =", trial);
+       dbprint(printlevel-voice+printlevelOffset, "I =", I, "");       
+
+       if ( defined(rI) ) { kill rI; }
+       def rI = Radical(I);
+
+       dbprint(printlevel-voice+printlevelOffset, "trial =", trial);
+       dbprint(printlevel-voice+printlevelOffset, "rI =", rI, "");       
+
+       if  (isZero(rI) ||  idealsAreEqual(ideal(1),rI)   )
+       //if  (   idealsAreEqual( ideal(1) , rI )   )    
+       {
+          continue;
+       }
+
+       dbprint(printlevel-voice+printlevelOffset, "trial =", trial);
+       dbprint(printlevel-voice+printlevelOffset, "rI =", rI, "");       
+     
+       if ( defined(L) ) { kill L; }
+       def L = normalZ(rI);
+       trial = trial + 1;
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+proc testNormalZWrapper(string cchar,string cord)
+{
+    int numVars = 3;
+
+    init_randomIdeal();
+             
+    def genParams= defaultIdealGeneratorParams();
+    genParams.absMaxCoeff = 10;
+    genParams.maxMonomialDegree = 3;
+    genParams.maxTermsPerGen = 3;
+    genParams.maxGens = 3;
+    def idealG = idealGeneratorFromParams( genParams  );
+	
+	int maxGens = 3;
+	int maxTermsPerGen = 3;
+	int maxMonomialDegree = 3;
+	int absMaxCoeff = 10;
+	int trials = 3000;
+	testNormalZ( numVars, idealG, trials, cchar, cord);
+}
+
+
+//option("nowarn");
+
+TRACE=0;
+printlevel = 2;
+echo = 0;
+
+testNormalZWrapper("integer","dp");
+testNormalZWrapper("integer","lp");
+testNormalZWrapper("integer","Dp");
+ 
+
+
+
+
+

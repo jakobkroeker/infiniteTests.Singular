@@ -1,0 +1,115 @@
+
+
+
+LIB("primdec.lib");
+LIB("ringutils.lib");
+LIB("wrappers.lib");
+LIB("reslipman.lib");
+
+
+
+
+
+proc testNormalZ_primeideal( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials, cchar, cord )
+{
+    dbprint(printlevel-voice+3, "testNormalZ_primeideal");
+    if (defined(basering) )
+    { 
+        def BAS=basering;
+    }
+
+    def rng = createRing(cchar,cord, numVars) ;
+    setring rng;
+    export(rng);
+
+    list ideals;
+
+    int trial;
+    int npos;
+    def primes;
+    def L, L1, L2 ;
+
+    intvec v=1,1,1;
+    def testResult;
+    int printlevelOffset = 3 ; // required, since otherwise normal() prints dbinfo because it increases printlevel
+
+    trial = 0;
+    while(trial<trials)
+    {   
+       setring rng;
+   
+       if ( defined(j) ) { kill j; }
+       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+
+       dbprint(printlevel-voice+printlevelOffset, "j ", j);
+
+       //j = radical(j);
+       //if  (isZero(j) ||  idealsAreEqual(ideal(1),j)   )
+       if  (   idealsAreEqual(ideal(1),j)   )    
+       {
+          continue;
+       }
+       
+       L = primdecZ(j);
+       dbprint(printlevel-voice+printlevelOffset, "L ", L);
+      
+
+       for (npos=1; npos<=size(L); npos++)
+       {
+
+           j = L[npos][2];
+           ASSUME(0, isPrime(j) );
+           //ASSUME(0, not isZero(j) );
+           //ASSUME(0, (not idealsAreEqual(ideal(1),j ))  );
+ 
+           if (isPrime(j) && (not idealContainsConstants(j))  && (not isZero(j)) && (not idealsAreEqual( ideal(1), j ) )   )
+           //if (isPrime(j)   )  
+           {
+               if (not idealsAreEqual( ideal(1),testideal(j) ))
+                {
+                   dbprint(printlevel-voice+printlevelOffset, "j ", j);
+
+                   dbprint(printlevel-voice+printlevelOffset, "trial ", trial);
+             
+                   if (defined(L1)) {kill L1;}
+                   def L1 = normalZ_primeideal(j);
+
+                   dbprint(printlevel-voice+printlevelOffset, "trial ", trial);
+                   trial = trial+1;
+              }
+           }
+       }
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+proc testNormalZ_primeidealWrapper(string cchar,string cord)
+{
+	int numVars = 2;
+	int maxGens = 3;
+	int maxTermsPerGen = 2;
+	int maxMonomialDegree = 3;
+	int absMaxCoeff = 10;
+	int trials = 3000;
+	testNormalZ_primeideal( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials, cchar, cord);
+}
+
+
+//option("nowarn");
+
+TRACE=0;
+printlevel = 5;
+echo = 0;
+
+testNormalZ_primeidealWrapper("integer","dp");
+testNormalZ_primeidealWrapper("integer","lp");
+testNormalZ_primeidealWrapper("integer","Dp");
+ 
+
+
+
+
+

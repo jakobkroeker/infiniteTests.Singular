@@ -1,0 +1,41 @@
+
+
+LIB("bugs/test.primdec.many.orig");
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 30;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 2;
+genParams.maxTermsPerGen    = 5;
+genParams.maxGens           = 16;
+genParams.bFractionsOn      = 0;
+
+def genTable = createRandomGeneratorsByParams( genParams  );
+
+//////// adjust ring  
+string cchar    = "0";
+string ordering = "(ls(2),ls(7))";
+int    numVars  = 10;
+
+def rng = createRing( cchar, ordering, numVars ) ;
+
+option(warn);
+option(redSB);
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+
+testPrimdec( rng, genTable.idealG, trials, logfile);
+
+

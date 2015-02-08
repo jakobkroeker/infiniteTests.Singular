@@ -1,0 +1,42 @@
+
+
+LIB("bugs/test.heightZ");
+monitor("log/test.heightZ.01","io");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultIdealGeneratorParams();
+
+genParams.absMaxCoeff       = 15;
+genParams.minMonomialDegree = 0;
+genParams.maxMonomialDegree = 5;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 2;
+
+proc idealG = idealGeneratorFromParams( genParams  );
+
+//////// adjust ring  
+string cchar    = "integer";
+string ordering = "(dp(2),dp(1))";
+int    numVars  = 3;
+
+def rng = createRing( cchar, ordering, numVars ) ;
+
+option("warn");
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+
+testHeightZ( rng, idealG, trials);
+
+// ./singular-spielwiese < input/test.heightZ.01 2>&1 | tee -a log/test.heightZ.01.log ;
+// ulimit -v 1000000 ; ulimit -t 5000
+// export cont=1; while [ $cont -eq 1 ] ; do nice -19 ./singular-spielwiese < input/test.heightZ.01 2>&1 | tee -a log/test.heightZ.01.log ; if [ $? -eq 123 ] ; then export cont=0; fi; done

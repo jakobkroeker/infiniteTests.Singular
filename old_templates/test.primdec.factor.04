@@ -1,0 +1,25 @@
+
+LIB("bugs/test.primdec.factor");
+
+
+proc  testFactorWrapper( cchar, ordering )
+{
+    echo = 0;
+    option("redSB");
+
+    init_randomIdeal();
+    int numVars = 3;
+    def rng = createRing( cchar, ordering, numVars ) ;
+    // seems doable
+    def genParams = defaultIdealGeneratorParams();
+    // adjust random ideal generator params:
+    genParams.absMaxCoeff = 14;
+    genParams.maxMonomialDegree = 5;
+    genParams.maxTermsPerGen = 7;
+    int trials = 1000000;
+    def polyG = polyGeneratorFromParams( genParams  );
+	testPrimdecFactor( rng, polyG, trials );
+}
+
+
+ testFactorWrapper("integer", "dp");

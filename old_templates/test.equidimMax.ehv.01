@@ -1,0 +1,5 @@
+
+ LIB("bugs/test.equidimMax.ehv");
+ testEquidimMaxWrapper( "0", "dp" );
+
+ 

@@ -1,0 +1,74 @@
+
+
+
+option("redSB");
+
+
+echo = 0;
+LIB("ringutils.lib");
+LIB("primdec.lib");
+LIB("ehv.lib");
+LIB("wrappers.lib");
+
+ 
+
+proc testZerodec( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials , pordstr)
+{
+    print ("testResolve");
+    if (defined(basering) ) {   def BAS=basering; }
+
+    def rng = createRing("0",pordstr, numVars) ;
+    setring rng;
+    export(rng);
+    basering;
+    list ideals;
+
+    int trial;
+    def rI, rIehv;
+    for (trial = 1; trial<=trials; trial++)
+    {   
+       setring rng;
+       //print ("trial: "+string(trial));
+
+       if ( defined(I) ) { kill I; }
+       ideal I = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
+       //print ("I:");
+       I = radical(I);
+       I;
+       if ( not idealsAreEqual(I,ideal(1)) && not  isZero(I) && 0==dimIdeal(I) )
+       {
+           def zerodec_primdec = zerodec(I);;    
+           def zerodec_ehv = decompEHV(I); 
+           ASSUME(0, primDecsAreEquivalent(zerodec_primdec,  zerodec_ehv));
+         
+       }
+
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+proc testZerodecWrapper(ordering)
+{
+
+	// seems doable
+	int numVars = 3;
+	int maxGens = 5;
+	int maxTermsPerGen = 4;
+	int maxMonomialDegree = 3;
+	int absMaxCoeff = 15 ;
+	int trials = 1000;
+	testZerodec( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials, ordering);
+}
+
+	printlevel = 0 ;
+    TRACE = 0;
+
+testZerodecWrapper("dp");
+testZerodecWrapper("lp");
+
+
+

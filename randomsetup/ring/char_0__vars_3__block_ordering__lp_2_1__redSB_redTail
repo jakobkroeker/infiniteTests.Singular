@@ -1,0 +1,20 @@
+version="ring";
+category="Commutative Algebra";
+info="";
+
+proc getRing()
+{
+  //////// adjust ring  
+  string cchar    = "0";
+  string ordering = "(lp(2),lp(1))";
+  int    numVars  = 3;
+
+  ring rng = 0,(x,y,z),(lp(2),lp(1));
+
+  option("redSB");
+  option("redTail");
+  return (rng);
+}
+
+
+// char_0.vars_3.ordering_lp(2)_lp(1).redSB.redTail
