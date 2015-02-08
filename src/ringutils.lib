@@ -1,0 +1,1100 @@
+version="$Id: ringutils.lib  2013-12-6 12:16:26Z jakob $";
+category="   ";
+info=" 
+LIBRARY:  ringutils.lib    utils for ring usage 
+AUTHORS:  Jakob Kroeker,  kroeker@math.uni-hannover.de,
+
+OVERVIEW:
+
+  A helper library for usage of rings.
+
+PROCEDURES:
+
+getNewVariableName(); get a variable name which is not in conflict with given ones
+
+getNewRingVariableName(); get a  variable name which is not in conflict with variables of a given ring
+
+optionIsSet(); check if an option is set.
+";
+
+
+LIB "stringutils.lib"; 
+LIB "listutils.lib";
+LIB "ring.lib";
+
+
+// newstruct("TGenerator","proc fkt,list  params");
+
+/*
+proc testAssume()
+{
+   // def assumeLevel = 4;
+   ASSUME(2,1==2);
+   return(1);
+}
+*/
+
+
+// weights only for orderings wp,ws,Wp,Ws,a,M 
+// global: wp, Wp
+// dp: parameter is num of vars
+// wp, Wp (parameters are the weights of vars?)
+
+proc baseringHasGlobalOrdering()
+{
+    return ( ord_test(basering)==1 );
+}
+
+/*
+proc hasGlobalOrdering( rng )
+{
+    return ( ord_test(rng)==1 );
+}
+*/
+
+
+proc indexedVariables(string varName, int varcount)
+{
+   if (varcount<0) { ERROR("negative number of variables"); }
+   list varlist;
+   int pos;
+   if (varcount>0)
+   {
+      for (pos=varcount; pos>0; pos--)
+      {
+        varlist[pos] = varName+"("+string(pos)+")";
+      }
+   }
+   return(varlist);
+}
+
+
+// set ordering to dp and all weights to 1.
+
+proc changeRingListVarOrderTo_dp(list rnglst)
+{  
+   list varOrder;
+   int varnum = size( rnglst[2] );
+
+   intvec weights = 1: varnum;
+
+   varOrder[1] = "dp";
+   varOrder[2] = weights;
+
+   rnglst[3] =  list(varOrder);
+   return (rnglst);
+}
+
+proc ringlistChangeVarNum(list rnglst, int newVarNum)
+{
+     rnglst[2] = indexedVariables("x", newVarNum);
+     return(rnglst);
+}
+
+
+/*
+proc optionIsSet(string optionName)
+"
+USAGE:    @code{optionIsSet( optionName );}
+
+PARAMETERS:
+
+@code{optionName}: a name(string) of an option of interest
+
+RETURN:
+
+     true, if the by  @code{optionName} given option is active,
+@*   false otherwise.
+
+
+EXAMPLE:  example optionIsSet;
+"
+{
+   def optionList = splitString(option()," ");
+   int pos=1;
+   for (pos=1;pos<=size(optionList);pos++)
+   {
+     if (optionList[pos]==optionName) { return(1);}
+   }
+   return(0);
+}
+example
+{ 
+    // check if the option "warn" is set.
+    optionIsSet("warn");
+    option("warn");
+    // now the option is set
+    optionIsSet("warn");
+
+    option("nowarn");
+    // now the option is unset
+    optionIsSet("warn");
+}
+*/
+
+
+proc toggleOption(string op) 
+{
+    if ( optionIsSet(op) )  
+    {
+       option("no"+op); 
+    }
+    else
+    {
+      option(op); 
+    }
+    optionIsSet(op);
+}
+
+
+
+static proc hasNamePrefixConflict( string newVariableName, existingVariableNameList  )
+"
+USAGE:    @code{getNewVariableName( newVariableName, existingVariableNameList );}
+ 
+PARAMETERS:
+
+@code{varList}: a list of variable names which should not be in conflict with the new name
+
+RETURN:
+
+     true, if the @code{newVariableName} is in conflict with one of the names in the given @code{existingVariableNameList}
+@*   false otherwise.
+
+
+EXAMPLE:  example hasNamePrefixConflict;
+"
+{
+
+  int    idx;
+  string variableName;
+
+  for (idx=1; idx<= size(existingVariableNameList); idx++)
+  {
+       variableName = existingVariableNameList[ idx ]; 
+
+     if ( size( variableName )==0 )     {   ERROR("variable name is emply");          }
+
+     if ( variableName[1] ==" " )           {    ERROR("variable has  leading white space");    }
+     if ( 1 == find( variableName, newVariableName) )
+     {
+        return (1); // there is a prefix conflict.
+     }
+  }
+  return(0);
+}
+example
+{
+    ring rng = 0,(x,y,z(1) ),dp;    
+    def  variableStringArray = varstr(rng);
+    def  parameterStringArray = varstr(rng);
+    def variableNameList = splitString( variableStringArray, "," );
+    def parameterNameList = splitString( parameterStringArray, "," );
+    def nameList = extendList(variableNameList, parameterNameList);
+   
+    string newVariableName = "x";
+    // check for conflict of "x" with rng variables:
+    int hasConflict = hasNamePrefixConflict( newVariableName, nameList  );
+    hasConflict;
+}
+
+//  test for 'hasNamePrefixConflict' procedure. 
+// 'testHasNamePrefixConflict' is not part of the user interface
+// 'testHasNamePrefixConflict' has to be public, since 1. otherwise it cannot be accessed in a test file.
+// 2. Also for that setup it is possible to quickly rerun a selected test inside of Singular.
+// 3. the test is not too far away from the code and changes are higher that the test gets updated 
+proc testHasNamePrefixConflict()
+"
+USAGE:    @code{testHasNamePrefixConflict(  );} // throws an error in case the test fails 
+"{
+    ring rng = 0,(x,y,z(1) ),dp;
+    def  varListString = varstr(rng);
+    def varList = splitString( varListString,"," );
+ 
+    string newVariableName="x";
+    int hasConflict = hasNamePrefixConflict( newVariableName, varList  );
+    if (not hasConflict) {  ERROR("testStringVariablePrefixConflict : expected conflict with x !");  }
+    
+    newVariableName="z";
+    hasConflict = hasNamePrefixConflict( newVariableName, varList  );
+    if (not hasConflict) {  ERROR("testStringVariablePrefixConflict : expected conflict with z !");  }
+
+    newVariableName="a";
+    hasConflict = hasNamePrefixConflict(  newVariableName,varList );
+    if (hasConflict) 
+    {  ERROR("testStringVariablePrefixConflict :  conflict with a not expected !");  }
+}
+
+
+proc getNewVariableName( varList )
+"
+USAGE:    @code{getNewVariableName( varList );}
+ 
+PARAMETERS:
+
+@code{varList}: a list of variable names which should not be in conflict with the new name
+
+RETURN:
+
+   a variable name which is not in conflict with given variable names.
+
+
+EXAMPLE:  example getNewVariableName;
+"
+{
+
+   string alphabet="abcdefghijklmnopqrstuvwxyz";
+   
+   proc rndPos(alphabet)
+   {
+       int rndPos = random( 1, size(alphabet) );  
+       return (rndPos);
+   }
+   
+  string newVarName = "" ;
+
+  int maxTrials = 1000;
+  int trial  = 1;
+
+  while (trial <= maxTrials)
+  {
+     //newVarName = "x" + alphabet[ rndPos(alphabet) ];
+
+     newVarName = alphabet[ rndPos(alphabet) ] + alphabet[ rndPos(alphabet) ];
+
+     if ( 0 == hasNamePrefixConflict(newVarName, varList) )
+     {
+       return (newVarName); 
+     }
+    
+     trial = trial+1;
+  }
+  ERROR("getNewVariableName: failed to create a new variable prefix");
+
+}
+example
+{
+    ring rng = 0,(x,y,z(1) ),dp;
+    def  variableStringArray = varstr(rng);
+    def  parameterStringArray = parstr(rng);
+    //
+    variableStringArray;
+    //
+    parameterStringArray;
+    //
+    def variableNameList = splitString( variableStringArray, "," );
+    def parameterNameList = splitString( parameterStringArray, "," );
+    //
+    variableNameList;
+    //
+    parameterNameList;
+    //
+    def nameList = extendList(variableNameList, parameterNameList);
+    //
+    nameList;
+    //
+    // get a variable name which is not in conflict with ring variables and parameters:
+    string newVariableName = getNewVariableName( nameList );
+    newVariableName;
+}
+
+
+
+proc getVariableNames(int num)
+{
+    list nameList;
+    int pos;
+    for (pos=1;pos<=num; pos++)
+    {
+       nameList[ size(nameList)+1 ] = getNewVariableName(nameList);
+    }
+    return(nameList);
+}
+
+
+// does not handle all cases for charStr.
+proc createRing(string charStr, string monomialOrderStr, int numOfVariables )
+{
+   list varNames=getVariableNames(numOfVariables);
+   string varStr = "(" + assembleStringArray( varNames, "," ) + ")" ;
+   string cmd = "ring rng = " + charStr + "," + varStr + "," + monomialOrderStr + ";";
+   execute (cmd);
+   return (rng);
+}
+
+
+proc removeVarFromList(list varlst, string elem)
+{
+   int pos;
+   for ( pos=1; pos<=size(varlst); pos++)
+   { 
+      if ( elem == varlst[pos] )
+      {
+         return (delete(varlst,pos));
+      }
+   }
+   return (varlst);
+}
+
+proc removeVarFromRingList(list rnglst, string elem)
+{
+  rnglst[2] = removeVarFromList(rnglst[2],elem);
+  return (rnglst);
+}
+
+
+proc getNewVariableName2(list rnglst)
+{
+   list varlist = rnglst[2][1];
+   if ( typeof(rnglst[1])=="list" )
+   {
+      varlist = varlist + rnglst[1][2];
+   }
+
+   return ( getNewVariableName( varlist ) );
+}
+
+
+proc getNewRingVariableName( rng )
+"
+USAGE:    @code{getNewRingVariableName( rng );}
+ 
+PARAMETERS:
+
+@code{rng}: a ring 
+
+RETURN:
+
+   a variable name which is not in conflict with existing variables and parameters of given ring.
+
+
+EXAMPLE:  example getNewRingVariableName;
+"
+{
+
+  /* def varList = Stringutils::splitString( varstr(rng),"," );
+   def parList = Stringutils::splitString( parstr(rng),"," );
+
+   varList=Listutils::extendList(varList, parList );
+
+   return (getNewVariableName(varList)); */
+
+   return(  getNewVariableName2( ringlist(rng) )  );
+
+}
+example
+{
+    ring rng = 0,(x,y,z(1) ),dp;
+    string newVariableName = getNewVariableName(rng);
+    newVariableName;
+}
+
+
+
+//  test for 'getNewVariableName' procedure. 
+// 'testGetNewVariableName' is not part of the user interface
+// 'testGetNewVariableName' has to be public, since 1. otherwise it cannot be accessed in a test file.
+// 2. Also for that setup it is possible to quickly rerun a selected test inside of Singular.
+// 3. the test is not too far away from the code and changes are higher that the test gets updated 
+proc testGetNewVariableName()
+"
+USAGE:    @code{testGetNewVariableName(  );} // throws an error in case the test fails 
+"
+{
+    system("reference");
+    ring rng = 0,(x,y,z(1) ),dp;
+    def  varListString = varstr(rng);
+    def varList = splitString( varListString, "," );
+ 
+    string newVarPrefix = getNewVariableName(rng);
+    if ( size(newVarPrefix)<2 ) {  ERROR("testGetNewVariablePrefix: new variable too short ") ; }
+    if ( hasNamePrefixConflict( newVarPrefix,varList) ) 
+    {  ERROR("testGetNewVariablePrefix: there is a potential name conflict ") ; }
+}
+
+//  test for 'getNewRingVariableName' procedure. 
+// 'testGetNewRingVariableName' is not part of the user interface
+// 'testGetNewRingVariableName' has to be public, since 1. otherwise it cannot be accessed in a test file.
+// 2. Also for that setup it is possible to quickly rerun a selected test inside of Singular.
+// 3. the test is not too far away from the code and changes are higher that the test gets updated 
+proc testGetNewRingVariableName()
+"
+USAGE:    @code{testGetNewRingVariableName(  );} // throws an error in case the test fails 
+"
+{
+    system("reference");
+    ring rng = 0,(x,y,z(1) ),dp;
+ 
+    string newVarPrefix = getNewRingVariableName(rng);
+    if ( size(newVarPrefix)<2 ) {  ERROR("testGetNewVariablePrefix: new variable too short ") ; }
+
+    def  varListString = varstr(rng);
+    def varList = splitString( varListString, "," );
+
+    if ( hasNamePrefixConflict( newVarPrefix,varList) ) 
+    {  ERROR("testGetNewVariablePrefix: there is a potential name conflict ") ; }
+}
+
+
+proc getRingParameterList( rngRef)
+{
+    string  characterString = charstr(rngRef);
+    list ringParameters = splitString( characterString, "," );
+    if (size(ringParameters)==0) { ERROR("unexpected size=0 of ringParameters");}
+   return (ringParameters );
+}
+
+
+proc testGetRingParameterList()
+{
+   ring rng = integer,x,dp;
+   def paramList=getRingParameterList(rng);
+
+   if ( not  getRingParameterList( rng ) ) { ERROR ("testHasIntegerCoefficientRing failed") }
+   kill rng;
+   ring rng = (integer,a),x,dp;
+   if ( not hasIntegerCoefficientRing( rng )  ) { ERROR ("testHasIntegerCoefficientRing failed") }
+   kill rng;
+   ring rng = 0,x,dp;
+   if (   hasIntegerCoefficientRing( rng )  ) { ERROR ("testHasIntegerCoefficientRing failed") }
+}
+
+
+proc isExtensionField( rngRef)
+{
+    return( npars(rngRef)>0);
+
+    list ringParameters = getRingParameterList(rngRef );
+    if (size(ringParameters)==0) 
+    {
+        ERROR("unexpected size=0 of ringParameters");
+    }
+    if (size(ringParameters)>1) 
+    { 
+      return(1);
+    }
+    return(0);
+}
+
+
+proc baseringIsExtensionField()
+{
+  def BAS=basering;
+  //system("reference"); 
+  //reference baseringRef= BAS;
+  //return ( isExtensionField(baseringRef)  );
+  return ( isExtensionField(BAS)  );
+}
+
+
+proc testIsExtensionField()
+{
+   ring rng = (0,a),x,dp;
+   list ringParameters = getRingParameterList(rng );
+   if ( not  baseringIsExtensionField() ) { ERROR ("coefficient ring of "+string(rng)+" was not recognized as extension field   ") }
+   ring rng2 = 0,x,dp;
+   if ( not  isExtensionField( rng )  ) { ERROR ("coefficient ring of "+string(rng)+" was not recognized as extension field   ") }
+   kill rng;
+   ring rng = integer,x,dp;
+   if (  baseringIsExtensionField(  ) )  { ERROR ("coefficient ring of"+string(rng)+" is not an extension ring  ") }
+   if (  isExtensionField( rng ) )  { ERROR ("coefficient ring of"+string(rng)+" is not an extension ring  ") }
+   kill rng;
+   ring rng = 0,x,dp;
+   if (  baseringIsExtensionField(  )  ) { ERROR ("coefficient ring of"+string(rng)+" is not an extension ring   ") }
+   if (  isExtensionField( rng ) ) { ERROR ("coefficient ring of"+string(rng)+" is not an extension ring   ") }
+}
+
+
+
+proc hasIntegerCoefficientRing( rng )
+{
+   list rl = ringlist(rng);
+
+   if ( not (typeof(rl[1][1])=="string")    ) { return (0); }
+
+   return ( (rl[1][1]=="integer") and ( npars(rng)==0 ) and (char(basering)==0) );
+
+}
+
+
+
+
+
+
+proc testHasIntegerCoefficientRing()
+{
+   ring rng1 = integer,x,dp;
+   ASSUME(0, hasIntegerCoefficientRing( rng1 ) );
+
+   qring q = ideal(x);
+   ASSUME(0, hasIntegerCoefficientRing( q ) );
+
+   ring rng2 = (integer,7),x,dp;
+   ASSUME(0, not hasIntegerCoefficientRing( rng2 ) );
+
+   ring rng3 = (integer,49),x,dp;
+   ASSUME(0, not hasIntegerCoefficientRing( rng3 ) );
+
+   ring rng4 = (integer,7,a),x,dp;
+   ASSUME(0, not hasIntegerCoefficientRing( rng4 ) );
+
+   ring rng5 = 7,x,dp;
+   ASSUME(0, not hasIntegerCoefficientRing( rng5 ) );
+
+
+
+   ring rng6 = 0,x,dp;
+   ASSUME(0, 0==hasIntegerCoefficientRing( rng6 ) );
+
+   ring rng7 = (0,a),x,dp;
+   ASSUME(0, 0==hasIntegerCoefficientRing( rng7 ) );
+
+   ring rng8 = (real,a),x,dp;
+   ASSUME(0, 0==hasIntegerCoefficientRing( rng8 ) );
+
+   ring rng9 = (real),x,dp;
+   ASSUME(0, 0==hasIntegerCoefficientRing( rng9 ) );
+}
+
+
+
+proc baseringHasIntegerCoefficientRing()
+{
+   def BAS = basering;
+
+   // system("reference"); 
+   // reference ringPar = BAS;
+   // return ( hasIntegerCoefficientRing(baseringRef)  );
+
+  return ( hasIntegerCoefficientRing(BAS)  );
+}
+
+proc hasRationalCoefficientField( rngRef)
+{
+    list ringParameters = getRingParameterList(rngRef );
+    //if (size(ringParameters)==1 )    { 
+       if (ringParameters[1]=="0") 
+       {
+          return(1); 
+       }
+    //}
+    return (0);
+}
+
+
+
+proc baseringHasRationalCoefficientField()
+{
+   def BAS=basering;
+  //system("reference"); 
+  //reference baseringRef= BAS;
+  //return ( hasRationalCoefficientField(baseringRef)  );
+  return ( hasRationalCoefficientField(BAS)  );
+}
+
+
+proc testHasRationalCoefficientField()
+{
+   ring rng = 0,x,dp;
+   // hasIntegerCoefficientRing( rng );
+
+   if ( not  baseringHasRationalCoefficientField() ) { ERROR ("coefficient ring of "+string(rng)+" was not recognized as rational  ") }
+   ring rng2 = integer,x,dp; 
+   if ( not  hasRationalCoefficientField( rng ) ) { ERROR ("coefficient ring of "+string(rng)+" was not recognized as rational  ") }
+   kill rng;
+   ring rng = (0,a),x,dp;
+   if ( not  baseringHasRationalCoefficientField() ) { ERROR ("coefficient ring of "+string(rng)+" was not recognized as rational  ") }
+   if ( not  hasRationalCoefficientField( rng ) )    { ERROR ("coefficient ring of "+string(rng)+" was not recognized as rational  ") }
+   kill rng;
+   ring rng = integer,x,dp;
+   if (  baseringHasRationalCoefficientField() )  { ERROR ("coefficient ring of"+string(rng)+" is not rational numbers  ") }
+   if (  hasRationalCoefficientField( rng ) )     { ERROR ("coefficient ring of"+string(rng)+" is not rational numbers  ") }
+   kill rng;
+   ring rng = complex,x,dp;
+   if (   baseringHasRationalCoefficientField() )  { ERROR ("coefficient ring of"+string(rng)+" is not rational numbers ") }
+   if (   hasRationalCoefficientField( rng ) )     { ERROR ("coefficient ring of"+string(rng)+" is not rational numbers ") }
+}
+
+proc hasIntegerNonPrimeCoefficientField( rngRef)
+{
+   list ringParameters = getRingParameterList(rngRef );
+    if (size(ringParameters)==2 )     { 
+          
+       if ( not (typeof(ringParameters[1])=="string")    ) { return (0); }
+       if ( not ( ringParameters[1]=="integer")    ) { return (0); }
+
+       if ( char(rngRef)>0 and ( prime( char(rngRef)) != char(rngRef))  )
+       {
+          return(1); 
+       }
+    }
+    return (0);
+}
+
+proc baseringHasIntegerNonPrimeCoefficientField()
+{
+  def BAS=basering;
+  //system("reference"); 
+  //reference baseringRef= BAS;
+  //return ( hasPrimeCoefficientField(baseringRef)  );
+  return ( hasIntegerNonPrimeCoefficientField(BAS)  );
+}
+
+
+proc hasPrimeCoefficientField( rngRef)
+{
+   list ringParameters = getRingParameterList(rngRef );
+    if (size(ringParameters)==1 )     { 
+       if (char(rngRef)>0  and ( prime( char(rngRef))== char(rngRef)) )
+       {
+          return(1); 
+       }
+    }
+    if (size(ringParameters)==2 )     { 
+          
+       if ( not (typeof(ringParameters[1])=="string")    ) { return (0); }
+       if ( not ( ringParameters[1]=="integer")    ) { return (0); }
+
+       if ( char(rngRef)>0 and ( prime( char(rngRef))== char(rngRef))  )
+       {
+          return(1); 
+       }
+    }
+    return (0);
+}
+
+proc baseringHasPrimeCoefficientField()
+{
+  def BAS=basering;
+  //system("reference"); 
+  //reference baseringRef= BAS;
+  //return ( hasPrimeCoefficientField(baseringRef)  );
+  return ( hasPrimeCoefficientField(BAS)  );
+}
+
+
+proc testHasPrimeCoefficientField()
+{
+   ring rng = 7,x,dp;
+   // hasIntegerCoefficientRing( rng );
+
+   if ( not  baseringHasPrimeCoefficientField() )      { ERROR ("coefficient ring of"+string(rng)+" was not recognized as prime field  ") }
+   ring rng2 = 0,x,dp;
+   if ( not  hasPrimeCoefficientField( rng  ) )        { ERROR ("coefficient ring of"+string(rng)+" was not recognized as prime field  ") }
+   kill rng;
+   ring rng = (7,a),x,dp;
+    if (   baseringHasPrimeCoefficientField() )      { ERROR ("coefficient ring of"+string(rng)+" is not a prime field  ") }
+    if (   hasPrimeCoefficientField( rng ) )         { ERROR ("coefficient ring of"+string(rng)+" is not a prime field  ") }
+   kill rng;
+   ring rng = integer,x,dp;
+   if (   baseringHasPrimeCoefficientField() )        { ERROR ("coefficient ring of"+string(rng)+" is not a prime field  ") }
+   if (  hasPrimeCoefficientField( rng )  )            { ERROR ("coefficient ring of"+string(rng)+" is not a prime field  ") }
+   kill rng;
+   ring rng = 0,x,dp;
+   if (  baseringHasPrimeCoefficientField() )      { ERROR ("coefficient ring of"+string(rng)+" is not a prime field  ") }
+   if (  hasPrimeCoefficientField( rng ) )          { ERROR ("coefficient ring of"+string(rng)+" is not a prime field  ") }
+   kill rng;
+   ring rng = complex,x,dp;
+   if (   baseringHasPrimeCoefficientField() )        { ERROR ("coefficient ring of"+string(rng)+" is not a prime field  ") }
+   if (   hasPrimeCoefficientField( rng ) )          { ERROR ("coefficient ring of"+string(rng)+" is not a prime field  ") }
+}
+
+
+proc hasFiniteCoefficientField( rngRef)
+{
+   list ringParameters = getRingParameterList(rngRef );
+   if (char(rngRef)>0)
+   {
+        return(1);   
+   }
+   return (0);
+}
+
+
+proc baseringHasFiniteCoefficientField()
+{
+    def BAS=basering;
+  //system("reference"); 
+  //reference baseringRef= BAS;
+  //return ( hasFiniteCoefficientField(baseringRef)  );
+  return ( hasFiniteCoefficientField(BAS)  );
+}
+
+
+proc testHasFiniteCoefficientField()
+{
+   ring rng = 7,x,dp;
+   // hasIntegerCoefficientRing( rng );
+
+   if ( not  baseringHasFiniteCoefficientField() )  { ERROR ("coefficient ring of"+string(rng)+" was not recognized as finite field  ") }
+  if ( not  hasFiniteCoefficientField( rng ) )  { ERROR ("coefficient ring of"+string(rng)+" was not recognized as finite field  ") }
+   kill rng;
+   ring rng = (7,a),x,dp;
+   if ( not  baseringHasFiniteCoefficientField() ) { ERROR ("coefficient ring of"+string(rng)+" was not recognized as finite field  ") }
+   if ( not  hasFiniteCoefficientField( rng ) ) { ERROR ("coefficient ring of"+string(rng)+" was not recognized as finite field  ") }
+   kill rng;
+   ring rng = integer,x,dp;
+   if (   baseringHasFiniteCoefficientField() )  { ERROR ("coefficient ring of"+string(rng)+" is not a finite field  ") }
+   if (  hasFiniteCoefficientField( rng ) )    { ERROR ("coefficient ring of"+string(rng)+" is not a finite field  ") }
+   kill rng;
+   ring rng = 0,x,dp;
+   if (  baseringHasFiniteCoefficientField() )  { ERROR ("coefficient ring of"+string(rng)+" is not a finite field  ") }
+   if (   hasFiniteCoefficientField( rng ) )  { ERROR ("coefficient ring of"+string(rng)+" is not a finite field  ") }
+
+}
+
+
+proc hasComplexCoefficientField( rngRef)
+{
+    list ringParameters = getRingParameterList(rngRef );
+    //if (size(ringParameters)==1 )    { 
+       if (ringParameters[1]=="complex")
+       {
+          return(1); 
+       }
+    //}
+    return (0);
+}
+
+proc baseringHasComplexCoefficientField()
+{
+    def BAS=basering;
+  //system("reference"); 
+  //reference baseringRef= BAS;
+  //return ( hasComplexCoefficientField(baseringRef)  );
+  return ( hasComplexCoefficientField(BAS)  );
+}
+ 
+
+proc testHasComplexCoefficientField()
+{
+   ring rng = complex,x,dp;
+   // hasIntegerCoefficientRing( rng );
+
+   if ( not  baseringHasComplexCoefficientField() )  { ERROR ("coefficient ring of"+string(rng)+" was not recognized as compext field  ") }
+   ring rng2 = integer,x,dp;
+   if ( not  hasComplexCoefficientField( rng ) )  { ERROR ("coefficient ring of"+string(rng)+" was not recognized as compext field  ") }
+   kill rng;
+   ring rng = (complex,a),x,dp;
+   if ( not  baseringHasComplexCoefficientField() ) { ERROR ("coefficient ring of"+string(rng)+" was not recognized as compext field  ") }
+   if ( not  hasComplexCoefficientField( rng ) ) { ERROR ("coefficient ring of"+string(rng)+" was not recognized as compext field  ") }
+   kill rng;
+   ring rng = integer,x,dp;
+   if (   baseringHasComplexCoefficientField() )  { ERROR ("coefficient ring of"+string(rng)+" is not a complex field  ") }
+   if (   hasComplexCoefficientField( rng ) )  { ERROR ("coefficient ring of"+string(rng)+" is not a complex field  ") }
+   kill rng;
+   ring rng = 0,x,dp;
+   if (   baseringHasComplexCoefficientField() )  { ERROR ("coefficient ring of"+string(rng)+" is not a complex field  ") }
+   if (   hasComplexCoefficientField( rng ) )  { ERROR ("coefficient ring of"+string(rng)+" is not a complex field  ") }
+}
+
+
+proc hasRealCoefficientField( rngRef )
+{
+    list ringParameters = getRingParameterList(rngRef );
+    if (size(ringParameters)==1 ) 
+    { 
+       if (ringParameters[1]=="real")
+       {
+          return(1); 
+       }
+    }
+    return (0);
+}
+
+proc baseringHasRealCoefficientField()
+{
+    def BAS=basering;
+  //system("reference"); 
+  //reference baseringRef= BAS;
+  //return ( hasRealCoefficientField(baseringRef)  );
+  return ( hasRealCoefficientField(BAS)  );
+}
+
+
+
+
+proc testHasRealCoefficientField()
+{
+   ring rng = real,x,dp;
+   // hasIntegerCoefficientRing( rng );
+
+   if ( not  baseringHasRealCoefficientField() )  { ERROR ("coefficient ring of"+string(rng)+" was not recognized as real field  ") }
+   ring rng2 = integer,x,dp;
+   if ( not  hasRealCoefficientField( rng ) )  { ERROR ("coefficient ring of"+string(rng)+" was not recognized as real field  ") }
+   kill rng;
+   ring rng = (real,a),x,dp;
+   if (   baseringHasRealCoefficientField() )  { ERROR ("coefficient ring of"+string(rng)+" is not a real field  ") }
+   if (  hasRealCoefficientField( rng ) )  { ERROR ("coefficient ring of"+string(rng)+" is not a real field  ") }
+   kill rng;
+   ring rng = integer,x,dp;
+   if (   baseringHasRealCoefficientField() )  { ERROR ("coefficient ring of"+string(rng)+" is not a real field  ") }
+   if (   hasRealCoefficientField( rng ) )  { ERROR ("coefficient ring of"+string(rng)+" is not a real field  ") }
+   kill rng;
+   ring rng = 0,x,dp;
+   if (   baseringHasComplexCoefficientField() )  { ERROR ("coefficient ring of"+string(rng)+" is not a real field  ") }
+   if (   hasRealCoefficientField( rng ) )  { ERROR ("coefficient ring of"+string(rng)+" is not a real field  ") }
+}
+
+/*
+proc isQuotientRing( rngRef )
+{
+    if(typeof(rngRef)=="qring") { return(1); }
+    return (0);
+}
+*/
+
+proc baseringIsQuotientRing()
+{
+    def BAS=basering;
+  //system("reference"); 
+  //reference baseringRef= BAS;
+  //return ( hasRealCoefficientField(baseringRef)  );
+  return ( isQuotientRing(BAS)  );
+}
+
+
+/*
+proc testIsQuotientRing()
+{
+   ring rng = real,x,dp;
+   // hasIntegerCoefficientRing( rng );
+
+   if (   baseringIsQuotientRing() )  { ERROR (" ring "+string(rng)+" is not a quotient ring  ") }
+
+   qring qrng=1;
+
+   if ( not  baseringIsQuotientRing() )  { ERROR ("  ring "+string(qrng)+" was not recognized as quotient ring ") }
+   ring rng2 = integer,x,dp;
+
+   if (   baseringIsQuotientRing() )  { ERROR (" ring "+string(rng2)+" is not a quotient ring  ") }
+
+   qring qrng2=0;
+  
+   if ( not  baseringIsQuotientRing(qrng2) )  { ERROR ("  ring "+string(qrng2)+" was not recognized as quotient ring ") }
+
+   kill rng;
+   kill qrng; 
+   ring rng = 0,x,dp;
+   if (   baseringIsQuotientRing() )  { ERROR (" ring "+string(rng)+" is not a quotient ring  ") }
+   qring qrng=1;
+
+   if ( not  baseringIsQuotientRing() )  { ERROR ("  ring "+string(qrng)+" was not recognized as quotient ring ") }
+
+}
+*/
+
+
+
+proc findInStringList(list varlst, string elem)
+{
+   int pos;
+   for ( pos=1; pos<=size(varlst); pos++)
+   { 
+      ASSUME( 0, typeof( varlst[pos] )=="string" );
+      if ( elem == varlst[pos] )
+      {
+         return( pos);
+      }
+   }
+   return (0);
+}
+
+
+/*
+proc randomVariable()
+{
+    return ( var( random(1, nvars(basering) ) ) );
+}
+*/
+
+
+proc randomMonomial( absMaxCoeff, maxMonomialDegree )
+{
+    poly tmpMonomial = random(-absMaxCoeff, absMaxCoeff ); 
+   
+    def monomialDegree = random( 0, maxMonomialDegree) ;
+
+    int factorNr;
+    for ( factorNr = 1; factorNr <= monomialDegree ; factorNr++)
+    {
+         tmpMonomial = tmpMonomial* randomVariable() ;
+    }
+    return(tmpMonomial);
+}
+
+
+
+
+
+proc randomGen( absMaxCoeff, maxMonomialDegree, maxTermsPerGen )
+{
+    poly term;    
+           
+    int termMonomials = random( 1 , maxTermsPerGen );
+
+    int monomialId;
+    for (monomialId = 1; monomialId <= termMonomials ; monomialId++)
+    {
+        term = term + randomMonomial(absMaxCoeff, maxMonomialDegree);;
+    }
+    return(term);
+}
+
+
+
+proc randomIdeal(  maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen )
+{
+    int numGens= random(1,maxGens);
+  
+    ideal rndIdeal;
+    int generatorId;
+    
+    for (generatorId = numGens; generatorId >= 1; generatorId--)
+    {
+       rndIdeal[generatorId] = randomGen( absMaxCoeff, maxMonomialDegree, maxTermsPerGen ) ;
+    }  
+    return (rndIdeal);
+}
+
+
+
+
+
+
+proc randomCoeffFactory(pAbsMaxCoeff)
+{
+     proc rCoeff( pWrapper  )
+     {
+        def absMaxCoeff =  pWrapper[1];
+        number c = random( -absMaxCoeff, absMaxCoeff ); 
+        return(c);
+     }
+    
+    TGenerator g;
+    g.fkt  = rCoeff;
+    g.params = list( pAbsMaxCoeff );
+    return (g);
+}
+
+
+
+proc randomMonomialFactory(  pMaxMonomialDegree )
+{
+   
+     proc rMon( pWrapper  )
+     {
+        def maxMonomialDegree   = pWrapper[1];
+        poly tmpMonomial = 1; 
+       
+        def monomialDegree = random( 0, maxMonomialDegree) ;
+
+        int factorNr;
+        for ( factorNr = 1; factorNr <= monomialDegree ; factorNr++)
+        {
+             tmpMonomial = tmpMonomial* randomVariable() ;
+        }
+        return(tmpMonomial);
+    }
+    
+    TGenerator g;
+    g.fkt  = rMon;
+    g.params = list(pMaxMonomialDegree);
+    return (g);
+}
+
+
+
+
+proc randomTermFactory(  coeffGen, monomialGen )
+{
+     proc randomTerm( pWrapper  )
+     {
+        TGenerator coeffGen    = pWrapper[1];
+        TGenerator monomialGen = pWrapper[2];
+        poly tmpMonomial = coeffGen.fkt( coeffGen.params )*monomialGen.fkt( monomialGen.params );
+        return(tmpMonomial);
+    }
+    
+    TGenerator g;
+    g.fkt  = randomTerm;
+    g.params = list(  coeffGen, monomialGen );
+    return (g);
+}
+ 
+
+
+
+proc randomPolyFactory( randomTermGenerator, pMaxTermsPerGen )
+{
+    proc randomPolyGenerator( pWrapper ) 
+    {
+        TGenerator termG    = pWrapper[1];
+        def maxTermsPerGen = pWrapper[2];
+        poly term;    
+               
+        int termMonomials = random( 1 , maxTermsPerGen );
+
+        int monomialId;
+        for (monomialId = 1; monomialId <= termMonomials ; monomialId++)
+        {
+            term = term + termG.fkt( termG.params );
+        }
+        return(term);
+    }
+
+    TGenerator g;
+    g.fkt  = randomPolyGenerator;
+    g.params = list( randomTermGenerator, pMaxTermsPerGen );
+    return(g);
+}
+
+
+proc randomIdealFactory(  polyGen, maxGens )
+{
+     proc randomIdealGenerator( pWrapper ) 
+     {
+         TGenerator polyGen = pWrapper[1];
+         def maxGens      =  pWrapper[2];
+
+         int numGens= random(1, maxGens);
+       
+         ideal rndIdeal;
+         int generatorId;
+         
+         for (generatorId = numGens; generatorId >= 1; generatorId--)
+         {
+            rndIdeal[generatorId] = polyGen.fkt( polyGen.params ); ;
+         }  
+         return (rndIdeal);
+     }
+ 
+     TGenerator g;
+     g.fkt  = randomIdealGenerator;
+     g.params = list( polyGen, maxGens );
+     return(g);
+}
+
+
+proc testRandomGen()
+{
+    // LIB("ringutils.lib");
+    newstruct("TGenerator","proc fkt,list  params");
+    // ring rng = integer,(x,y),dp;
+    def coeffG = randomCoeffFactory(3);
+    coeffG.fkt( coeffG.params );
+    def monomialG = randomMonomialFactory(3);
+    monomialG.fkt( monomialG.params );
+    def termG = randomTermFactory(coeffG,monomialG);
+    termG.fkt( termG.params );
+     
+    def polyG = randomPolyFactory(termG,2);
+
+    polyG.fkt( polyG.params );
+    def idealG = randomIdealFactory(polyG,2);
+
+   ideal i = idealG.fkt( idealG.params );
+   return(i);
+}
+
+

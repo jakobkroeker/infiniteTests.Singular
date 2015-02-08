@@ -1,0 +1,1694 @@
+version="$Id: wrappers.lib  2013-29-10 12:16:26Z jakob $";
+category="   ";
+info=" 
+LIBRARY:  wrappers.lib    wrappers for ideal computation
+AUTHORS:  Jakob Kroeker,  kroeker@math.uni-hannover.de,
+
+OVERVIEW:
+
+  A helper library for ideal computations.
+
+PROCEDURES:
+
+
+idealsAreEqual(); 
+isSubset();  
+isElement();
+isZeroByName();
+dimIdeal();
+quotientZWrapper();
+";
+
+LIB "ringutils.lib";
+// LIB "ideal.lib";
+
+proc intersectPrimdec(list L)
+{
+    int i;
+    if (size(L)==0) { return ( ideal(1) ); }
+
+    ideal J = L[1][1];
+    for (i = 2; i<=size(L); i++)
+    {
+         J = intersect( L[i][1] );
+    }
+    return(J);
+}
+
+proc primdecToSB(list L)
+{
+    int i;
+    for (i = 1; i<=size(L); i++)
+    {
+         L[i][1] = std(L[i][1]);
+         L[i][2] = std(L[i][2]);
+    }
+    return(L);
+}
+
+
+// a wrapper for height computation over integer,
+// to make it interchangeable in one strike
+
+proc heightZWrapper(ideal I)
+{
+    // myheight handles only special cases, so it is not generic!
+    //return ( myheight(I) );
+
+    return ( heightZ( I ) );
+}
+
+// intersect two ideals I and J; 
+// protects against a (fixed) bug in intersect,
+// which sets errneously the isSB property.
+proc intersectWrapper(ideal I, ideal J)
+{
+    /*
+    if (baseringHasIntegerCoefficientRing())
+    {
+        return( myintersect(I,J ) );
+    } 
+    */
+    ideal result =  intersect( I, J );
+    if ( baseringHasIntegerCoefficientRing() )
+    {
+       ASSUME(1, idealsAreEqual(result,intersectZ(delZeroGens(I),delZeroGens(J) )  )  );
+    }
+    attrib(result,"isSB",0);  // overwrite isSB property to protect against a bug in intersect.
+    return( result );
+}
+
+proc testIntersect()
+{
+    ring rng = integer,(x,y),dp;
+    ideal I=x,y;
+    ideal J=x;
+    ASSUME(0, isZero( intersectWrapper(I,ideal(0) )));
+    ASSUME(0, isZero( intersectWrapper(ideal(0) ,J)));
+    ASSUME(0, idealsAreEqual( intersectWrapper(I,J), ideal(x) ) );
+    qring q = std(ideal(4*x^3));
+    def QJ=fetch(rng,J);
+    def QI=fetch(rng,I);
+    ASSUME(0, isZero( intersectWrapper(QI,ideal(0) )));
+    ASSUME(0, isZero( intersectWrapper(ideal(0) ,QJ)));
+    ASSUME(0, idealsAreEqual( intersectWrapper(QI,QJ), ideal(x) )) ;
+}
+
+/*
+proc assumeLevelHE(int n)
+{
+  if (not defined(assumeLevel))
+}
+*/
+
+proc quotientWrapper(ideal I, ideal J)
+{
+
+    if (baseringHasIntegerCoefficientRing())
+    {
+        return(Primdecint::quotientZ(I,J));
+    } 
+    return( quotient(I,J));
+}
+
+
+
+
+// call std() instead interred over integers, 
+//since interred over integers is disabled
+proc interredWrapper(ideal I)
+{
+
+    if (baseringHasIntegerCoefficientRing())
+    {
+        return(stdWrapper(I));
+    } 
+    return( interred(I));
+}
+
+// a wrapper for syz with additional consistency check
+//
+// was used to workaround a (meanwhile fixed) bug in syz over integers in quotient ring
+proc syzQringFix(ideal sfawesdfwff)
+{
+ if ( baseringIsExtensionField()    )
+  { 
+      ERROR("syzQringFix does not support  extension rings");
+  }
+
+   def BAS = basering;
+
+   module result = syz(sfawesdfwff);
+
+   /*
+   if ( baseringIsQuotientRing() )
+   {
+       
+       def strrng = string(basering);
+       def strcmd = "ring rng = "+strrng+ ";";
+       execute( strcmd);
+       ideal s=fetch(BAS,sfawesdfwff),ideal(BAS);
+       int nQuotientIdealGens =  ncols(ideal(BAS));
+
+       def result = syz(s); 
+       // gen( ncols(sfawesdfwff))+1),...gen( ncols(sfawesdfwff))+ nQuotientIdealGens ) do not play a role in qring rng/ideal(BAS).
+       //  get rid of them:
+       matrix tmpmatrix = matrix(result);
+       matrix resultmatrix[nrows(tmpmatrix)-nQuotientIdealGens][ncols(tmpmatrix)] = tmpmatrix[1..nrows(tmpmatrix)-nQuotientIdealGens , 1..ncols(tmpmatrix)];;
+       result = module(resultmatrix);
+       setring(BAS);
+       def result=fetch( rng, result );
+       // now the open issue is, that we may have redundant columns; (see example at github). How to fix that?
+   }  
+   else 
+   {
+     module result= syz(sfawesdfwff);
+   } 
+   */
+
+   ideal zero;
+   if (not idealsAreEqual(zero, transpose(result)*  transpose(sfawesdfwff) )  ) {  ERROR("syz returned wrong result"); } 
+   return(result);
+}
+
+
+// returns a proc for primary decomposition, 
+// depending on current ring and a subjective hardwired selection inside primaryDecomposition_setup()
+// in case several alternatives do exist.
+// 
+// todo: a user should be able to modify the setup.
+proc primaryDecomposition_setup(  )
+{
+   
+   proc primaryDecomposition_notImplemented(ideal I)
+   { 
+      ERROR("primary decomposition is not implemented for current ring.");
+   }
+   if (not defined(basering))
+   {
+      ERROR("error: no basering active");
+   }
+   if (baseringIsQuotientRing()  )
+   {
+      return (primaryDecomposition_notImplemented);
+   }
+
+   if (not defined(baseringIsExtensionField)) 
+   {
+      LIB("wrappers.lib"); 
+   }
+   if (not defined(primdecZ)) 
+   {
+      LIB("primdecint.lib"); 
+   }
+
+   if ((not baseringIsExtensionField()) && (char(basering) > 0) )
+   { 
+       dbprint(printlevel-voice, "(not baseringIsExtensionField()) && (char(basering) > 0)");
+       return ( primdecGTZ ) ;
+   } 
+   if  ( charstr(basering) == "integer" )
+   {
+         if  (char(basering) == 0) 
+         {  
+             dbprint(printlevel-voice,"(char(basering) == 0) ");
+             return ( primdecZ ) ;
+         }
+   }
+   if  (charstr(basering) == "0")
+   {
+       dbprint(printlevel-voice,"(char(basering) == 0) ");
+       return ( primdecGTZ ) ;
+   }
+   return (primaryDecomposition_notImplemented);
+}
+
+// returns a proc for computation of minimal associated primes
+// depending on current ring and a subjective hardwired selection inside minAssPrimes_setup2()
+// in case several alternatives do exist.
+// 
+proc minAssPrimes_setup2(  )
+{
+   
+   proc primaryDecomposition_notImplemented(ideal I)
+   { 
+      ERROR("primary decomposition is not implemented for current ring.");
+   }
+   if (not defined(basering))
+   {
+      ERROR("error: no basering active");
+   }
+   if (baseringIsQuotientRing()  )
+   {
+      return (primaryDecomposition_notImplemented);
+   }
+
+   if (not defined(baseringIsExtensionField)) 
+   {
+      LIB("wrappers.lib"); 
+   }
+   if (not defined(minAssZ)) 
+   {
+      LIB("primdecint.lib"); 
+   }
+
+   if ((not baseringIsExtensionField()) && (char(basering) > 0) )
+   { 
+       return ( minAssChar ) ;
+   } 
+   if  ( charstr(basering) == "integer" )
+   {
+         if  (char(basering) == 0) 
+         {  
+             return ( minAssZ ) ;
+         }
+   }
+   if  (charstr(basering) == "0")
+   {
+       return ( minAssChar ) ;
+   }
+   return (primaryDecomposition_notImplemented);
+}
+
+
+// check if the coefficient ring of the basering is a field.
+proc baseringCoefficientRingIsField()
+{
+   //possible:
+   //ring uu = (0,integer),x,dp;
+  if ( find( charstr(basering), "complex") || find( charstr(basering), "real") )
+  {
+     // these are only pseudofields
+     return(0);
+  }
+
+   if (1==find( charstr(basering), "integer") )
+   {
+       if ( char(basering)>0 ) 
+       {
+           def pf = primefactors(char(basering));
+           ASSUME(0, size( pf[1] ) > 0 );
+           if ( size( pf[1] )>1 ) 
+           {    
+                return(0);     
+           }
+           else
+           { 
+                
+                if (npars(basering)>0)
+                {
+                     // isField or not depends on minpoly.
+                     ERROR("baseringCoefficientRingIsField check not implemented for extension rings/fields");
+                }
+                else
+                {
+                      if ( prime(char(basering)) == char(basering) )
+                      {
+                         return(1); 
+                      }
+                      return(0);  // 
+                }
+           }
+           
+           
+            ERROR("baseringCoefficientRingIsField: unexpected case, inform developers");
+       }
+       if (char(basering)==0) 
+       {
+           return(0);
+       }
+   }
+   if (0==find(charstr(basering),"integer"))
+   {
+       if (char(basering)==0) 
+       {
+           return(1);
+       }
+       def pf = primefactors(char(basering));
+       ASSUME(0, size( pf[1] ) > 0 );
+       if ( size( pf[1] )>1 ) 
+       {    
+            return(0);     
+       }
+       else
+       { 
+            if (npars(basering)>0)
+            {
+                 // isField or not depends on minpoly.
+                 ERROR("baseringCoefficientRingIsField check not implemented for extension rings/fields");
+            }  
+            else
+            {
+                 if ( prime(char(basering)) == char(basering) )
+                 {
+                     return(1); 
+                 }
+                 ERROR("baseringCoefficientRingIsField: unexpected case, inform developers");
+                 return(0);  // 
+            }
+       }
+       return(1);
+   }
+   return(0);
+}
+
+
+proc testBaseringCoefficientRingIsField()
+{
+    ring rng = 0,x,dp;
+    ASSUME(0, baseringCoefficientRingIsField());
+    ring rng2 = integer,x,dp;
+    ASSUME(0, not baseringCoefficientRingIsField());
+    ring rng3 = (integer,5),x,dp;
+    ASSUME(0, baseringCoefficientRingIsField());
+    ring rng3a = (integer,6),x,dp;
+    ASSUME(0, not baseringCoefficientRingIsField());
+
+    ring rng4 = (5),x,dp;
+    ASSUME(0, baseringCoefficientRingIsField());
+    //ring rng5 = (5,a),x,dp;
+    //ASSUME(0, baseringCoefficientRingIsField());
+
+    ring rng6 = (complex),x,dp;
+    ASSUME(0, not baseringCoefficientRingIsField());
+
+    ring rng7 = (real),x,dp;
+    ASSUME(0, not baseringCoefficientRingIsField());
+
+}
+
+// returns a proc for radical computation
+// depending on current ring and a subjective hardwired selection inside radical_setup()
+// in case several alternatives do exist.
+// 
+proc radical_setup(  )
+{
+   
+   proc radical_notImplemented(ideal I)
+   { 
+      ERROR("radical is not implemented for current ring.");
+   }
+   if (not defined(basering))
+   {
+      ERROR("error: no basering active");
+   }
+   if (baseringIsQuotientRing()  )
+   {
+      return (radical_notImplemented);
+   }
+
+   if (not defined(baseringIsExtensionField)) 
+   {
+      LIB("wrappers.lib"); 
+   }
+   if (not defined(radicalZ)) 
+   {
+      LIB("primdecint.lib"); 
+   }
+
+   if ((not baseringIsExtensionField()) && (char(basering) > 0) )
+   { 
+       return ( radical ) ;
+   } 
+   if  ( charstr(basering) == "integer" )
+   {
+         if  (char(basering) == 0) 
+         {  
+             return ( radicalZ ) ;
+         }
+   }
+   if  (charstr(basering) == "0")
+   {
+       return ( radical ) ;
+   }
+   return (radical_notImplemented);
+}
+
+
+proc stdWrapper(ideal I)
+{
+    int i;
+    ideal result;
+
+          if ( baseringHasIntegerCoefficientRing() ) 
+          {
+             result = Primdecint::stdZ(I);
+           
+             result = Primdecint::normalizeZ(result); 
+             for(i=1; i<=ncols(result); i++)  
+             {
+                ASSUME(1 , leadcoef(result[i]) >= 0 ); 
+             }
+
+             attrib( result, "isSB",1);
+          }
+          else  { result = std(I); }
+          return (result);
+}
+
+
+// is a wrapper around mstd and returns mstd directly
+// instead of a list with 1t entry std and second entry mstd
+//  
+// this was also a workaround for a bug in mstd over integers which is now fixed
+// which called then std instead of mstd.
+proc mstdWrapper(ideal I)
+{
+    int i;
+    ideal result;
+      // should check if coefficient ring is a field or not.
+      if ( not baseringCoefficientRingIsField()  ) 
+      { 
+          if ( baseringHasIntegerCoefficientRing() ) 
+          {
+             list mstdI = mstd(I);
+             if ( size( mstdI[2] ) < size( mstdI[1] ) )
+             {
+                 result =  mstdI[2] ;
+             }
+             else { result = mstdI[1]; }
+                for(i=1; i<=ncols(result); i++)  //no difference
+                   {
+                       if(leadcoef(result[i])<0) { result[i]=-result[i]; }
+                       //ASSUME(1 , leadcoef(result[i]) >= 0 ); 
+                   }
+                   result = Primdecint::normalizeZ(result); 
+          }
+          else  { result = std(I); }
+          return (result);
+      }
+      else 
+      {
+         list mstdI = mstd(I);
+         if ( size( mstdI[2] ) < size( mstdI[1] ) )
+         {
+             return( mstdI[2] );
+         }
+         return( mstdI[1] );
+      }
+}
+
+// test if an ideal I is indeed radical, using singulars primary decomposition pdec of I 
+// by testing that pdec[pos][1] is equal to pdec[pos][2] for all entries of pdec.
+//
+// Note: cannot pass references currently, since they do not work across libraries.
+proc testIsRadical(ideal I)
+{
+   dbprint(printlevel-voice,"testIsRadical");
+
+   def primaryDecomposition = primaryDecomposition_setup();
+
+   dbprint(printlevel-voice,"primaryDecomposition",primaryDecomposition);
+   dbprint(printlevel-voice,"I",I);
+   def pdec = primaryDecomposition(I);
+   //def pdec = primdecGTZ(I);
+   //dbprint(printlevel-voice,"ready");
+
+   // "basering"; basering; "I"; I;
+   // dbprint(printlevel-voice,"basering=",basering);
+   // dbprint(printlevel-voice,"I=",I);
+   // def pdec = primaryDecomposition(link(I));
+   // dbprint(printlevel-voice,"pdec=",pdec);
+   // "pdec";
+   //  pdec;
+
+   int primePos,primaryPos,pos;
+   int sizepdec=size(pdec);
+   if (sizepdec==0) 
+   { 
+        ASSUME(0, idealsAreEqual( ideal(1), I) );
+        return(1);
+   }
+   for (pos=1; pos<=sizepdec; pos++)
+   {
+      if (not (idealsAreEqual( pdec[pos][1],  pdec[pos][2]) ) )
+      {
+          dbprint(printlevel-voice,"testIsRadical::pdec =",pdec);
+          kill pdec;
+          return(0);
+      }
+   }
+   kill pdec;
+   return(1);
+}
+
+
+
+proc convertMinAssToPrimdec(list mA)
+{
+   list pd;
+   int i;
+   for ( i=1; i<=size(mA); i++ )
+   {
+       pd[i] = list(mA[i], mA[i] );
+   }
+   return (pd);
+}
+example
+{
+   LIB("primdec.lib");
+   ring rng = 0,(x,y),dp;
+
+   ideal I = x+23y^ 2,y-5;
+   list L = minAssChar(I);
+   convertMinAssToPrimdec(L);
+}
+
+proc minAssDecompAreEquivalent(L1,L2)
+{
+   list L1C = convertMinAssToPrimdec(L1);
+   list L2C = convertMinAssToPrimdec(L2);
+   return (primDecsAreEquivalent(L1C,L2C));
+}
+
+proc testMinAssEx(list L, ideal I )
+{
+   // check that the intersection of the primary ideals equals the original ideal
+  
+   if (idealsAreEqual( I, ideal(1)) )
+   {
+      ASSUME(0, size(L)==0 ); //list expected to be empty.
+      return(1);  
+   }
+
+   ideal J = L[1];
+  
+   int i;
+
+   for (i=2; i<=size(L); i++)
+   {
+       J = intersect(J, L[i] );
+   }
+   proc pRadical = radical_setup();
+
+
+   ASSUME(0, idealsAreEqual(J,pRadical(I)) );
+
+
+
+   // check irreducibility of the returned components 
+   for ( i=1; i<=size(L); i++)
+   {
+       ASSUME(0, size( minAssChar( L[i] )) == 1 );
+       ASSUME(0, size(  minAssGTZ( L[i] )) == 1 );
+   }
+   return(1);  
+}
+
+
+
+
+// extended primary decomposition test
+// parameter: primary decomposition L of ideal I
+// 
+// tests:
+//    1. check that the intersection of the primary ideals equals the original ideal
+//    2. check that the radicals of the given primary ideals are indeed the returned prime ideals in the respective entry of the list
+//    3. check irreducibility of the returned components using minAssChar and minAssGTZ
+//
+proc testPrimdecEx(list L, ideal I )
+{
+   // check that the intersection of the primary ideals equals the original ideal
+
+   def pr = Primdec::reconvList(L);
+ 
+   if (idealsAreEqual( I, ideal(1)) )
+   {
+      ASSUME(0,  size(pr)==0 ); //list expected to be empty.
+      return(1);
+   }
+   
+   int i;
+
+   ideal J = pr[1];
+  
+   for (i=2; i<=size(pr) div 2; i++)
+   {
+       J = intersect(J,pr[2*i-1]);
+   }
+   //dbprint(1, "ideal J = "+string(J)+";");
+   ASSUME(0, idealsAreEqual(J,I) ) ;
+   ASSUME(0, idealsAreEqual(I,J) ) ;
+
+   // ASSUME(0, testPrimary( L, stdWrapper(I) )  );
+
+   proc pRadical = radical_setup();
+
+   //  check that the radicals of the given primary ideals are indeed the returned prime ideals in the respective entry of the list
+   for (i=1; i<=size(L); i++)
+   {
+       ASSUME(0, idealsAreEqual( pRadical( L[i][1] ), L[i][2] )  );
+       ASSUME(0, isSubset(  L[i][1] , std(L[i][2]) )   );
+   }
+   // check irreducibility of the returned components 
+   for (i=1; i<=size(L); i++)
+   {   
+       dbprint(1, L[i][1], "");
+       ASSUME(0, size( minAssChar( L[i][1] )) == 1 );
+       ASSUME(0, size(  minAssGTZ( L[i][1] )) == 1 );
+   }
+   return(1);  
+}
+
+
+// test if an ideal I is indeed radical, using minimal associated primes mp of I 
+// by testing that mp[pos]  is equal to Radical(mp[pos]) for all entries of mp
+//
+proc testIsRadical2(ideal I)
+{
+   def minAssPrimesDec =  minAssPrimes_setup2();
+
+   def minAssPrimesList = minAssPrimesDec(I);
+
+   // "basering"; basering; "I"; I;
+   // dbprint(printlevel-voice,"basering=",basering);
+   // dbprint(printlevel-voice,"I=",I);
+   // def pdec = minAssPrimesDec(link(I));
+   // dbprint(printlevel-voice,"mapdec=",minAssPrimesList);
+   // "minAssPrimesList";
+   //  minAssPrimesList;
+
+   int primePos, primaryPos, pos;
+   for (pos=1; pos<=size(minAssPrimesList); pos++)
+   {
+      if (not (idealsAreEqual( minAssPrimesList[pos],  Radical( minAssPrimesList[pos])) ) )
+      {
+          kill minAssPrimesList;
+          return(0);
+      }
+   }
+   kill minAssPrimesList;
+   return(1);
+}
+
+
+
+proc isZNormalized(ideal I)
+{
+   if ( deg( I[1] )>0 ) { return(1); }
+   int i,j;
+   number n;
+   poly p,refP;
+   for(i=2;i<=size(I);i++)
+   {
+      j=1;
+      refP = I[i];
+      while(j<=size(I[i]))
+      {
+         n = leadcoef( I[i][j] ) mod leadcoef( I[1] );
+         p = n*leadmonom( I[i][j] );
+         refP = refP - refP[j] + p;
+         if ( p!=0 )  { j++; }
+      }
+      if ( I[i] != refP )
+      {
+          return(0);
+      }
+   }
+   return(1);
+}
+
+
+proc hasRadicalAttrib(ideal I)
+{
+  def attribIsRadical = attrib(I,"isRadical"); 
+
+  if ( typeof(attribIsRadical)=="string" ) 
+  {
+     if (attribIsRadical=="")
+     {
+        return(0);
+     }
+  }
+  if ( typeof(attribIsRadical)=="int" )
+  {
+      if (attribIsRadical==0 || attribIsRadical==1 )
+      {
+         return(1);
+      }
+  } 
+  ERROR("unexpected type or value of isRadical attrib");
+}
+
+// check if an ideal is radical or not 
+
+proc isRadical(ideal I )
+{
+
+  ASSUME(2,  testIsRadical(I)== testIsRadical2(I) );
+
+  if ( hasRadicalAttrib(I) )
+  {
+     ASSUME(2, testIsRadical(I) == attrib(I,"isRadical") );
+     return ( attrib(I,"isRadical") );
+  }
+
+  return ( testIsRadical(I) );
+  //return ( idealsAreEqual( I, Radical(I) ) );
+}
+
+proc TESTIsRadical()
+{
+   ring rng = 0,x,dp;
+   ideal I=x^2;
+   ASSUME(0, not isRadical(I));
+   I=x;
+   ASSUME(0, isRadical(I) );
+
+   ring rngZ = integer,x,dp;
+
+   ideal I=x^2;
+   ASSUME(0, not isRadical(I));
+   I=x;
+   ASSUME(0, isRadical(I) );
+
+   ring rngZ = 5,x,dp;
+
+   ideal I=x^2;
+   ASSUME(0, not isRadical(I));
+   I=x;
+   ASSUME(0, isRadical(I) );
+
+   ring rngZ2 = (integer,5),x,dp;
+
+   ideal I=x^2;
+   ASSUME(0, not isRadical(I));
+   I=x;
+   ASSUME(0, isRadical(I) );
+}
+
+// some consistency check for reduced groebner basis.
+//
+// see http://de.wikipedia.org/wiki/Gr%C3%B6bnerbasis
+proc isReducedSB(ideal I)
+{
+    return(1); //hack
+
+    attrib(I,"isSB",0);
+    int i,j, monomialPos;
+    int ngens  = nGens(I);
+    ideal LT;
+    poly g;
+    for (i=1; i<=ngens; i++ )
+    {
+        g = I[i];
+
+        if ( i< ngens )
+        {
+            if (not ( I[i] < I[i+1] ) )
+            {
+                return(int(0));
+            } 
+        }
+  
+        LT = 0;
+        for ( j=1; j<=nGens(I); j++ )
+        {
+           if ( i != j ) 
+           {
+              LT = LT + lead (I[j]);
+           }
+        }
+        LT = stdWrapper(LT);
+        //dbprint(printlevel-voice,"LT=",LT);
+        for (monomialPos=2;monomialPos<=size(g);monomialPos++)
+        {
+             //dbprint(printlevel-voice," reduceWrapper( g[monomialPos], LT ) =", reduceWrapper( ideal(g[monomialPos]), LT ) );
+             if (   isZero(  reduceWrapper( ideal(g[monomialPos]), LT )  )   )
+             {
+                return(int(0));
+             }
+        }      
+    }
+   //attrib(I,"isSB",1);
+   return(int(1));
+}
+
+
+/*
+static proc attrib(list #)
+{
+   #;
+   if ( size(#)==3 || size(#)==2 ) 
+   {
+       if ( #[2] == "isSB"  )
+       {
+          if ( attrib(#[1], #[2] ) )
+          {
+              if (typeof( #[1])=="poly" || typeof( #[1])=="ideal" )
+              {
+                  def bla =  attrib(#[1], #[2] );
+                  ASSUME(   3, isReducedSB( #[1] )  );
+                  ASSUME(0, bla== attrib(#[1], #[2] ) );
+              }
+          }
+       }
+   }
+   if (size(#)==3)    {   3;     attrib(#[1], #[2], #[3] ) ;  return();  }
+   if (size(#)==2)    {   2;     return(attrib(#[1], #[2] )) ;   }
+   if (size(#)==1)    {   1;     return(attrib(#[1])) ;    }
+
+   ERROR(" case not handled by attrib");
+}*/
+
+
+proc testIsReducedSB()
+{
+    ring rng = integer,x,dp;
+    ideal I = x^2-3*x^3, 2*x;
+    ASSUME(0, not isReducedSB(I) );
+    I = intersect(I,I);
+    ASSUME(0,  isReducedSB(I) );
+
+    ring rng2 = integer,xq,xa;
+    ideal I = 2*xq, 3*xa^2, xa^2*xq;
+    I = stdWrapper(I);
+    ASSUME(0,  isReducedSB(I) );
+}
+
+// removes zero generators from I (I ideal or Module)
+// bad: proc delZeroGens(ideal I), since then it will work incorrectly for modules.
+proc delZeroGens( I)
+{
+   return (simplify(I,2) );
+}
+
+// reduce wrapper to work around a bug 
+// for integer coefficient rings:
+proc reduceWrapper( I,  J)
+{
+
+
+   //return (reduce( groebner(i), groebner(j) ));
+   ASSUME(2, idealsAreEqual( reduce( I,           groebner(J) ), 
+                             reduce( groebner(I), groebner(J) )
+                        ) );
+
+   return (reduce( I, groebner(J) ) );
+}
+
+
+proc dimLead(ideal I)
+{
+   if ( baseringIsExtensionField()   ||
+         not (  baseringHasIntegerCoefficientRing()  ||
+                baseringHasRationalCoefficientField() || 
+                baseringHasPrimeCoefficientField()
+           ) 
+      )
+  { 
+      ERROR("dimLead does not support given ring type");
+  }
+ 
+  return ( dim( I ) );
+   
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+proc dimIdeal_foxy(ideal I)
+{
+   if ( baseringIsExtensionField()   ||
+         not (  baseringHasIntegerCoefficientRing()  ||
+                baseringHasRationalCoefficientField() || 
+                baseringHasPrimeCoefficientField()
+           ) 
+      )
+  { 
+      ERROR("dimIdeal does not support given ring type");
+  }
+
+   if ( attrib(I, "isSB") == 0 )
+   {
+        return ( dim( groebner(I) ) );
+   }
+   // ASSUME(3, isSB(I) );
+   return ( dim( I ) );
+}
+
+
+
+
+
+proc dimIdeal(ideal I)
+{
+   if ( baseringIsExtensionField()   ||
+         not (  baseringHasIntegerCoefficientRing()  ||
+                baseringHasRationalCoefficientField() || 
+                baseringHasPrimeCoefficientField()
+           ) 
+      )
+  { 
+      ERROR("dimIdeal does not support given ring type");
+  }
+ 
+  return ( dim( groebner(I) ) );
+   
+}
+
+
+
+// check if two ideals are equal using groebner basis computation and reduce
+// do not modify code, since it shows an assume(?) bug and also incorporates a simple test for 'reduce()'.
+//
+// todo: do not compute std if it is not necessary?
+proc idealsAreEqual( ideal I, ideal J)
+"USAGE:   idealsAreEqual(I,J); I, J ideals
+RETURN:  integer, 1 if I and J are equal, 0 otherwise
+"
+{
+    //dbprint( printlevel-voice,"idealsAreEqual(I,J)" );
+    //dbprint( printlevel-voice,"idealsAreEqual, I = ",I, "");
+    //dbprint( printlevel-voice,"idealsAreEqual, J = ",J, "");
+    //dbprint( printlevel-voice,"basering, J = ",basering);
+    //"J";J;
+    // "I";I;
+
+    ideal gJ =  groebner( J );
+    ideal gI =  groebner( I );
+    // "gJ";gJ;
+    // "gJisSB";
+    // attrib(gJ,"isSB");
+    // "gI";gI;
+    // "gIisSB";
+    // attrib(gI,"isSB");
+    //if (  nNonzeroGens ( reduce (I, gJ ) ) == 0  &&  
+    //      nNonzeroGens ( reduce (J, gI ) ) == 0      )
+    
+    // wenn man die assume-Zeilen einkommentiert, geht ebenfalls gewaltig was schief... 
+    // ASSUME(4,  nNonzeroGens ( reduce (I, gJ ) )==  nNonzeroGens ( reduce (gI, gJ ) ) );
+    // ASSUME(4,  nNonzeroGens ( reduce (J, gI ) )==  nNonzeroGens ( reduce (gJ, gI ) ) );
+
+    // workaround a bug in reduce: 
+    if (  nNonzeroGens ( reduce ( gI, gJ ) ) == 0  &&  
+          nNonzeroGens ( reduce ( gJ, gI ) ) == 0      )
+    {
+        return (1);
+    }
+    return (0);
+}
+
+// check if two ideals are equal using groebner basis computation and reduce
+// this should became idealsAreEqual later.
+//
+proc idealsAreEqual_foxy(ideal I, ideal J)
+"USAGE:   idealsAreEqual_foxy(I,J); I, J ideals
+RETURN:  integer, 1 if I and J are equal, 0 otherwise
+"
+{
+    
+   if ( attrib(I, "isSB") == 0 )
+   {
+      I = groebner(I);
+   }
+   if ( attrib(J, "isSB") == 0 )
+   {
+      J = groebner(J);
+   }
+   // ASSUME(3, isSB(I) ); // check, if standard basis properties are satisfied.
+   // ASSUME(3, isSB(J) );
+
+    if (  nNonzeroGens ( reduce (I, J) ) == 0  &&  
+          nNonzeroGens ( reduce (J, I) ) == 0 
+       )
+    {
+        ASSUME( 3, idealsAreEqual(I,J));
+        return (1);
+    }
+    return (0);
+}
+
+static proc testIdealsAreEqual()
+{
+    ring  r = 0,(x,y),dp;
+    ideal j = x;
+    ideal i = x, 0 , y;
+    ASSUME( 0, not idealsAreEqual(i, j) );
+    ASSUME( 0, not idealsAreEqual_foxy(i, j) );
+  
+    ring rng = 0,(x,y),dp;
+    ideal J = x,y;
+    ideal I = x+y,x;
+    ASSUME( 0, idealsAreEqual(I, J) );
+    ASSUME( 0, idealsAreEqual_foxy(I, J) ) ;
+
+    ring s = integer,(x,y),dp;
+    ideal mq = x^2 + y^2;
+    qring q  = std(mq);
+    ideal qi = y;
+    ideal qj = y-x^2-y^ 2,0, x^2+y^2 ;
+    ASSUME(0, idealsAreEqual( qj, qi ) );
+    ASSUME(0, idealsAreEqual_foxy( qj, qi ) );
+}
+
+
+// count nonzero ideal generators
+// maybe needs rework to be usable for modules, too.
+proc nNonzeroGens(ideal I)
+{
+    int nnonzerogens = size(I);
+    return( nnonzerogens );
+}
+
+
+
+
+
+// is more recent, but also contained in also defined in ehv.lib (branch fix.ehv.isSubset)
+// see also isSubModule in ring.lib
+
+/*
+
+proc isSubset(ideal I, ideal J)
+"USAGE:   isSubset(I,J); I, J ideals
+RETURN:  integer, 1 if I is a subset of J and 0 otherwise
+"
+{
+   // check at assumeLevel>=3
+   int testLevel = 3; 
+   //if (assumeLevelLE( testLevel ))
+   //{
+       ideal tmpJ=J;
+       attrib(tmpJ, "isSB",0);
+       ASSUME( testLevel, idealsAreEqual( reduce (I, std(J) ), reduce (std(I), std(tmpJ) )) );
+   //}
+
+   int s = ncols(I);
+   ideal stdJ = std(J);
+   for( int i=1; i<=s; i++)
+   {
+      // comparison with 0-polynomial.  
+      if(  reduce( I[i], stdJ ) != 0  ) 
+      {
+          return(0);
+      }
+   }
+   return(1);
+}
+example
+{
+    ring rng = 0,(x,y),dp;
+    ideal I = x, y;
+    ideal J = x;
+    isSubset(J, I);    //=1 
+    ideal J2 = 5;
+    isSubset(J2, I);   //=0 
+}
+
+*/
+
+
+
+
+// a test routine for IsSubset
+static proc testIsSubset()
+{
+    ring  r = 0,(x,y),dp;
+    ideal j = x;
+    ideal i = x, 0 , y;
+    ASSUME( 0, isSubset( i, std(j) ) == isSubset( std(i), std(j) ) );
+  
+    ring rng = 0,(x,y),dp;
+    ideal J=x,y;
+    ideal I=x;
+    ASSUME(0, 1 == isSubset(I, J) );
+
+    ring s = integer,(x,y),dp;
+    ideal mq=x^2 + y^2;
+    qring q = std(mq);
+    ideal qi = y;
+    ideal qj = y-x^2-y^ 2,0, x^2+y^2 ;
+    ASSUME(0, 0==size( reduce(qj,std(qi)) ) );
+}
+
+// checkh if a poly is an element of an ideal. 
+// Returns 1 if yes, otherwise returns 0.
+proc isElement(poly p, ideal Set)
+{
+   return  ( size ( reduce (p, stdWrapper( Set ) ) )== 0);
+}
+example
+{
+    ideal I=x,y;
+    poly  p=x;
+    isElement(p,I);
+    //1 
+}
+
+// returns the number of ideal generators. 
+// probably needs rework  - what is about modules??
+proc nGens(ideal I)
+{
+   int ngens = ncols(I);
+    return( ngens);
+}
+
+
+proc idealRepresentationReduced( ideal I )
+{
+   int i, j, k;
+   poly p;
+   for (i = 1; i <= nGens(I); i++)
+   {
+        for( k = 1; k<= nGens(I);k++)
+        {
+            if (i != k)
+            {
+                //if ( 0== size(   reduce(   lead( I[i] ),    std(lead( I[k] ))  )   )   )
+                if (    idealsAreEqual(  lead(I[i]),    lead(I[k]) )    )
+                {
+                    dbprint(1, "// idealRepresentationReducedTail: I[" +string(i)+ " ] is not reduced with I[" +string(k)+"]" );
+                    return(0);
+                }
+            }
+        }
+   }
+   return (int(1));
+}
+
+
+proc idealRepresentationReducedTail( ideal I )
+{
+   int i,j,k;
+   poly p;
+   for (i = 1; i <= nGens(I); i++)
+   {
+       p = I[i];
+ 
+       for (j =1; j<= size(p); j++)
+       {
+                for( k = 1; k<= nGens(I);k++)
+                {
+                    if (i != k)
+                    {
+                        //if ( 0== size(reduce( p[j], std( lead(I[k]) ) ) ) )
+                        if ( idealsAreEqual(   p[j],    lead(I[k]) )    )
+                        {
+                            dbprint(1, "// idealRepresentationReducedTail :  I[" + string(i) + "]" +string(p) );
+                            dbprint(1, "//  idealRepresentationReducedTail: lead(I[" + string(k) + "])"+string( lead(I[k]) ) );
+                            return(0);
+                        }
+                    }
+                }
+
+       }
+   }
+   return (int(1));
+}
+
+
+proc idealRepresentationsSimilar( ideal I, ideal J )
+{
+   if (not (nGens(I)==nGens(J) )) 
+   {
+       dbprint(1, "nGens(I)<>nGens(J)");
+       return ( int(0) );
+   }
+   int i;
+   for (i = 1; i <= nGens(I); i++)
+   {
+       if (not (size(I[i])==size(J[i]) ) )
+       {
+           dbprint(1, "// I[" +string(i)+ " ]<>J[" +string(i)+"]" );
+           return( int(0) );
+       }
+   }
+   return (int(1));
+}
+
+
+
+// check if two ideal representations are exactly equal
+// probably obsolete; drop this one  since it is used nowhere.
+//
+proc idealRepresentationsEqual( ideal I, ideal J )
+{
+   if (not (nGens(I)==nGens(J) )) 
+   {
+       dbprint(1, "nGens(I)<>nGens(J)");
+       return ( int(0) );
+   }
+   int i;
+   for (i = 1; i <= nGens(I); i++)
+   {
+       if (not (I[i]==J[i]) )
+       {
+           dbprint(1, "// I[" +string(i)+ " ]<>J[" +string(i)+"]" );
+           return( int(0) );
+       }
+   }
+   return (int(1));
+}
+
+// check if an ideal is zero
+// Needs work: how this function will behave for modules??
+proc isZero(ideal I)
+{
+    if (size(I)==0) { return (1); }
+    def redI = reduceWrapper( I, std(ideal(0)) );
+    //redI;
+    return( 0==size(redI) );
+}
+
+
+// check if an ideal is zero
+// 
+// call memory overhead should be minimal (check!), since the 
+proc isZeroByName(string idealName)
+{
+ print("isZeroByName");
+ // memory(0);
+ // memory(2);
+ execute("def redI = reduceWrapper("+idealName+",std(0)); def result=(size(redI)==0);");
+ return(result);
+}
+
+
+// convert a ringlist from a (integer,prime),... ring to (prime),... ring type,
+// since both rings are equivalent and fields, but in the first one some computations are not possible.
+//
+
+proc patchRL(rl)
+{
+  if ( typeof(rl[1])=="list"  and size(rl[1])>1 )
+  {
+     if ( typeof(rl[1][1])=="string")
+     {
+        if (rl[1][1]=="integer" and size(rl[1][2])==2 )
+        {
+            if ( typeof(rl[1][2][1])=="bigint" and  typeof(rl[1][2][2])=="int")
+            {
+                  int rchar = int(rl[1][2][1]);
+                  if ( rchar == rl[1][2][1] and 
+                       rl[1][2][2]==int(1)  and
+                       rchar == prime( int(rl[1][2][1]) )  
+                     )
+                  {
+                       rl[1] = rchar;
+                       return (rl);
+                  }
+            }
+        }
+     }
+  }
+  return (rl);
+}
+
+proc testPatchRL(rl)
+{
+
+   ring rng = 0,x,dp;
+   def rl = ringlist(rng);
+   def patchedRl = patchRL(rl);
+   ASSUME(0, size(patchedRl)==size(patchedRl));
+   ASSUME(0, size(patchedRl[1])==size(patchedRl[1]));
+
+
+   ring rng2 = 3,x,dp;
+   def rl2 = ringlist(rng2);
+   def patchedRl2= patchRL(rl2);
+   ASSUME(0, size(patchedRl2)==size(patchedRl2));
+   ASSUME(0, size(patchedRl2[1])==size(patchedRl2[1]));
+
+   ring rng3 = (integer,3),x,dp;
+   def rl3= ringlist(rng3);
+   def patchedRl3= patchRL(rl3);
+   ASSUME(0, size(patchedRl3)==size(patchedRl3));
+   ASSUME(0, size(patchedRl3[1])==1 );
+}
+
+
+// computes radical of ideal I in a quotient ring or a usual ring,
+// using a provided method which does not work in quotient rings
+//
+proc RadicalX(proc method, ideal  I )
+{
+   dbprint( printlevel-voice, "RadicalX" );
+   dbprint( printlevel-voice, " method = ", method );
+   dbprint( printlevel-voice, " I = ", I );
+
+    ASSUME( 0 , isCommutative( ) );
+    ASSUME( 0 , hasGlobalOrdering( basering ) );
+    if ( baseringIsExtensionField()  ||
+         not (  baseringHasIntegerCoefficientRing()  ||
+                baseringHasRationalCoefficientField() ||
+                baseringHasPrimeCoefficientField()
+             ) 
+        )
+    { 
+      ERROR("RadicalX does not support given ring");
+    }
+      if (not baseringIsQuotientRing() )
+      {  
+            def result = method(I);
+            return (result);
+      }
+      else
+      {    
+            def BAS = basering;
+            def rl = ringlist(basering);
+            def Q = rl[4];
+            rl[4]  = ideal(0); 
+            rl = patchRL(rl); 
+            def newr = ring(rl);
+            setring newr;
+            def Q = fetch(BAS, Q);
+            def I = fetch(BAS, I);
+            I = I + Q;
+            def result = method(I);       
+            setring BAS;
+            ideal result = fetch( newr, result);            
+            result  = reduce( result , std(0) );
+            return (result); 
+      }
+}
+
+// computes minimal associated primes of ideal I in a quotient ring or a usual ring,
+// using a provided method which does not necessarily work in quotient rings
+//
+proc minAssX( proc method, ideal  I )
+{
+   dbprint( printlevel-voice, "minAssX" );
+   dbprint( printlevel-voice, " method = ", method );
+   dbprint( printlevel-voice, " I = ", I );
+
+    ASSUME( 0 , isCommutative( ) );
+    ASSUME( 0 , hasGlobalOrdering( basering ) );
+    if ( baseringIsExtensionField()  ||
+         not (  baseringHasIntegerCoefficientRing()  ||
+                baseringHasRationalCoefficientField() ||
+                baseringHasPrimeCoefficientField()
+             ) 
+        )
+    { 
+      ERROR("minAssX does not support given ring");
+    }
+      if (not baseringIsQuotientRing() )
+      {  
+            def result = method(I);
+            return (result);
+      }
+      else
+      {
+            //export (I); 
+            def BAS = basering;
+            def rl = ringlist(basering);
+            def Q = rl[4];
+            rl[4]  = ideal(0); 
+            rl = patchRL(rl);
+            def newr = ring(rl);
+            setring newr;
+            def Q = fetch(BAS, Q);
+            def I = fetch(BAS, I);
+            I = I + Q;
+
+            def result = method(I);
+            int sizeMinAss = size(result); 
+            int pos_i, pos_j;
+        
+            setring BAS;
+
+            if (sizeMinAss>0)
+            {
+                list result = fetch( newr, result);          
+            }
+            // else: result will be still defined and empty.i
+            list newRes;
+           
+            int drop_current = 0;
+            pos_i = 1; 
+
+            while ( pos_i <= size(result) ) 
+            {
+                 result[ pos_i ] = stdWrapper(reduce( result[ pos_i ], std(0) ));
+                 if ( idealsAreEqual( result[ pos_i ], ideal(1) )  )
+                 { 
+                        result = delete(result, pos_i);
+                        continue;
+                 }
+                 for ( pos_j=pos_i+1; pos_j <= size(result); pos_j++)
+                 {
+                    // if result[i] \in result[ pos_j ] then result[ pos_j ] is not minimal associated prime 
+                    if (idealsAreEqual( result[ pos_i ], result[ pos_j ]) )
+                    {
+                          dbprint ( printlevel-voice, "minAssX: equal ideals in result" );
+                          result = delete(r esult, pos_j );
+                    }
+
+                    if (isSubset( result[ pos_i ], result[ pos_j ]) )
+                    {
+                          result = delete( result, pos_j );
+                          dbprint ( printlevel-voice, "minAssX: subset ideals in result" );
+                    }
+                 }
+                 drop_current = 0;
+                 for ( pos_j=pos_i+1; pos_j<= size(result) ; pos_j++)
+                 {
+                    // if result[ pos_j ] \in result[ pos_i ] then result[pos_i] is not minimal associated prime 
+                    if (  isSubset( result[ pos_j ], result[ pos_i ] )  )
+                    {
+                          result = delete( result, pos_i );
+                          drop_current = 1;
+                          dbprint ( printlevel-voice, "minAssX: drop current" );
+                    }
+                
+                 }
+                 if ( drop_current == 1 ) { continue; }
+
+                 newRes[ size(newRes) + 1 ] = result[ pos_i ];
+                 pos_i = pos_i + 1;      
+            }
+            return (result); 
+      }
+}
+
+
+proc minAssZX( I ) 
+{
+    return(  minAssX( minAssZ, I )  );
+}
+
+proc testMinAssZX()
+{
+    ring rng = integer,(x,y),dp;
+    // ideal i = 
+}
+
+proc minAssGTZX(ideal I ) 
+{
+    return(   minAssX( minAssGTZ, I )   );
+}
+proc testMinAssGTZX()
+{
+}
+
+proc radicalZX(ideal I ) 
+{
+    return(   RadicalX( radicalZ, I )   );
+}
+
+proc radicalX(ideal I ) 
+{
+    return(   RadicalX( radical, I )   );
+}
+
+proc radicalKLX(ideal I ) 
+{
+    return(   RadicalX( radicalKL, I )   );
+}
+
+proc radicalSLX(ideal I ) 
+{
+    return(   RadicalX( radicalSL, I )   );
+}
+
+
+proc radicalEHVX(ideal I ) 
+{
+    return(   RadicalX( radicalEHV, I )   );
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////
+
+// check if an ideal is radical. 
+// Delegate the call to radicalZX if ring is integer ring (needs rework?), otherwise to radicalX
+
+ proc Radical(ideal I)
+{ 
+  ASSUME( 0 , isCommutative( ) );
+
+  //dbprint(printlevel-voice,"called Radical with basering",basering);
+  //dbprint(printlevel-voice,"called Radical with ideal I = ", I ); 
+  def BAS = basering;
+  ideal result;
+  if(charstr(BAS) == "integer")
+  { 
+     //dbprint(printlevel-voice,"callinng radicalZ"); 
+     result = radicalZX(I);
+  }
+  else
+  { result = radicalX(I);}
+  return(result);
+}
+
+
+// check if an ideal is prime
+// using minimal associated primes decomposition.
+//
+proc isPrime(ideal I)
+{
+  dbprint( printlevel-voice, "isPrime()" );
+  dbprint( 1, "  basering;",  basering );
+  dbprint( 1, "  ringlist;",  ringlist(basering) );
+  dbprint( printlevel-voice, " I = ", I );
+  ASSUME( 0 , isCommutative( ) );
+  ASSUME( 0 , hasGlobalOrdering( basering ) );
+
+  if ( hasIntegerNonPrimeCoefficientField(basering) && isQuotientRing(basering) )
+  {
+     return(0);
+  }
+  if ( baseringIsExtensionField()   ||
+         not (  baseringHasIntegerCoefficientRing()  ||
+                baseringHasRationalCoefficientField() ||
+                baseringHasPrimeCoefficientField()
+           ) 
+      )
+  { 
+      ERROR("isPrime does not support given ring");
+  }
+   list j;
+   if ( baseringHasIntegerCoefficientRing() ) 
+   { 
+      j = minAssZX(I);
+   }
+  else
+  {
+     j = minAssGTZX(I);
+  }
+
+  if ( size(j) != 1) 
+  {
+     dbprint(printlevel, "isPrime::( size(j) != 1) ");
+     //  i is not prime
+     return(0); 
+  }
+  // patch need for minAssGTZ and minAssZ, since they do not handle the 1-ideal correctly.
+  if ( idealsAreEqual( ideal(1), j[1] ) )
+  {
+     //  I is not prime
+     return(0);  
+  } 
+
+   if  (not  idealsAreEqual ( Radical( j[1]), I ) ) // if not, i is not prime
+   {
+     dbprint( printlevel, "isPrime:: Radical( j[1])",  Radical( j[1]));
+     dbprint( printlevel, "isPrime::  I", I);
+      //  I is not prime
+      return(0); 
+   }
+   return(1);
+}
+
+// split an ideal into two ideals, first with only constant generators
+// and second with only nonconstant generators.
+
+proc splitConstantGens(ideal I)
+{
+   if (not attrib(I,"isSB"))  { I = groebner(I); }
+   int numGens = nGens(I);
+   ideal constI, nonconstI;
+   for (int k = 1; k<=numGens; k++)
+   {
+      if ( deg(I[k])==0 ) 
+      {
+           constI=constI+I[k];
+      }
+      else
+      {
+          nonconstI=nonconstI+I[k];
+      }
+   }
+   return(list(constI, nonconstI));
+}
+
+// check if ideal contains constant generators
+proc idealContainsConstants(ideal I)
+{
+   if (not attrib(I,"isSB"))  { I = groebner(I); }
+   //I = std(I);
+   int numGens = ncols(I);
+   for (int k = 1; k<=numGens; k++)
+   {
+      if ( deg(I[k])==0 ) 
+      {
+          return (int(1));
+      }
+   }
+   return(int(0));
+}
+
+static 
+proc testIdealContainsConstants()
+{
+   ring rng = 0,(x,y),dp;
+   ideal i=x;
+   ASSUME(0, 0 == idealContainsConstants(i) );
+   i = x^2,0 ;
+   ASSUME(0, 0 ==idealContainsConstants(i) );
+   i = 0 ;
+   ASSUME(0, 0 == idealContainsConstants(i) );
+   i = 1 ;
+   ASSUME(0, idealContainsConstants(i) );
+   i = x,7 ;
+   ASSUME(0, idealContainsConstants(i) );
+   i = 7,y ;
+   ASSUME(0, idealContainsConstants(i) );
+
+}
+
+/* sandbox:
+
+proc passByCopy(ideal i) 
+{   return(std(i)); }
+
+proc passByName(string idealName)
+{
+ // almost no data is copied in comparison to passByCopy!
+  execute("return(std("+idealName+"));");
+}
+
+proc passByName(string idealName)
+{
+ // almost no data is copied in comparison to passByCopy!
+  execute("def result=std("+idealName+");");
+  return(result);
+}
+
+proc passByName(string idealName)
+{
+ // almost no data is copied in comparison to passByCopy!
+  execute("return(std("+idealName+"));");
+}
+
+*/
+
+// intersect all primary components  of a primary decomposition
+proc intersectPrimaryDecomposition(list pdecomp)
+{
+  
+    ASSUME(0, size(pdecomp)>0);
+    ideal I = pdecomp[1][1];
+    int pos ;
+    for (pos=1; pos<=size(pdecomp); pos++)
+    {
+         I = intersectWrapper(I, pdecomp[i][1] );
+    }
+    return(I);
+}
+
+
+
+
