@@ -43,9 +43,10 @@ proc testGroebner( getRng, gens.idealG, optionlist, trials, logfile )
        dbprint(1, "LIB \"primdec.lib\";");
        dbprint(1, "LIB \"wrappers.lib\";");
        dbprint( 1, "ring rng = "  + string( basering)+";" );
-       dbprint( 1, "intvec op = "+string( option(get) )+";");
-       dbprint( 1, " option() ;");
+       dbprint( 1, "intvec op = "+string( option(get) )+";");    
        dbprint( 1, " option(set, op) ;");
+       dbprint( 1, " option() ;");
+       dbprint( 1, " // option() ;" + option() );
        dbprint( 1, "int trial = " + string( trial) + ";" );
        short = 0;
        I = gens.idealG( );

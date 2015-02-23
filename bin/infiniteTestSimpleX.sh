@@ -19,31 +19,35 @@ echo "idx : "$idx" "
 read -p "Press [Enter] key to start testing with parameters as above"
 ulimit -v $4
 export cont=0;
-mkdir -p /tmp/testingular/input/$2/
-mkdir -p log/$2/bugs
 
-echo "started with " >> log/$2/id_$idx.log
-echo $0" "$@  >> log/$2/id_$idx.log
+filename="${2##*/}"
+echo $filename
+
+mkdir -p /tmp/testingular/input/$filename/
+mkdir -p log/$filename/bugs
+
+echo "started with " >> log/$filename/id_$idx.log
+echo $0" "$@  >> log/$filename/id_$idx.log
 
 while [ $cont -lt $maxBugs ] ; 
 do 
-    rm -f log/$2/$2.id_$idx.$cont
+    rm -f log/$filename/$filename.id_$idx.$cont
     sleep 5
     echo "cont: "$cont;
     #echo 'def contstr="'$cont'";' >input/$2.cont; 
-    echo 'string logfile = "log/'$2'/id_'$idx'.'$cont'";'  >/tmp/testingular/input/$2/$2.in; 
+    echo 'string logfile = "log/'$filename'/id_'$idx'.'$cont'";'  >/tmp/testingular/input/$filename/$filename.in; 
 
-    cat input/$2 >> /tmp/testingular/input/$2/$2.in; 
+    cat $2 >> /tmp/testingular/input/$filename/$filename.in; 
 
-    set -o pipefail; timeout -s SIGKILL $3 $1 -v < /tmp/testingular/input/$2/$2.in 2>&1 | tee -a log/$2/id_$idx.log;
-    status=$?; echo "status="$status;echo "status"$status >> log/$2/id_$idx.log;
+    set -o pipefail; timeout -s SIGKILL $3 $1 -v < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee -a log/$filename/id_$idx.log;
+    status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
     if [ $status -eq 14 ] || [ $status -eq 137 ] || [ $status -eq 124 ] || [ $status -eq 0 ] 
     then
         # export cont=$(($cont )); 
-        echo "doNothing ";echo "doNothing ">> log/$2/id_$idx.log;
+        echo "doNothing ";echo "doNothing ">> log/$filename/id_$idx.log;
     else 
-        echo "raiseCount ";echo "raiseCount ">> log/$2/id_$idx.log;
-        mv log/$2/id_$idx.$cont log/$2/bugs/id_$idx.$cont.bug;
+        echo "raiseCount ";echo "raiseCount ">> log/$filename/id_$idx.log;
+        mv log/$filename/id_$idx.$cont log/$filename/bugs/id_$idx.$cont.bug;
         export cont=$(($cont + 1)); 
     fi; 
 done
