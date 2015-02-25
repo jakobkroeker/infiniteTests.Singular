@@ -1,0 +1,151 @@
+/////////////////////
+version="version test.factorize.lib";
+category="Commutative Algebra";
+info="
+";
+
+LIB "src/wrappers.lib";
+LIB "src/automatedTests.lib";
+
+proc createRingX(string charStr, string modulus, string monomialOrderStr, int numOfVariables )
+{
+   def varNames=getVariableNames(numOfVariables);
+   def varStr = "(" + assembleStringArray( varNames, "," ) + ")" ;
+   string cmd = "ring rng = " + charStr + "," + varStr + "," + monomialOrderStr + ";";
+   execute (cmd);
+   string cmd = "minpoly = " + modulus  + ";";
+   execute (cmd);
+   return (rng);
+}
+
+
+proc reconstruct(fp)
+{
+
+  ASSUME(0, size(fp)==2 );
+  int fpsize = size(fp[1]);
+ 
+  poly result=1;
+  int pos;
+  for (pos=1;pos<=fpsize;pos++)
+  {
+     result = result*(fp[1][pos])^(fp[2][pos]);
+  }
+  return (result);
+}
+
+
+proc testFactorsIrreducible(list fp)
+{
+  int i = 0;
+  def result, rfp, quot,pfp;
+  dbprint(1, "def pfp, result;");
+  for (i=2; i <= size( fp[1] ); i++)
+  {
+     pfp = fp[1][i];
+     dbprint( 1, "pfp = " +string(pfp)+ ";");
+     dbprint( 1, "result = factor( pfp );");          
+     result = factorize( pfp );
+     dbprint( 1, "ASSUME(0, 2==size(result[1]) );");          
+     ASSUME(0, size(result[1])==2); 
+     dbprint( 1, "rfp  = reconstruct(result);");          
+     rfp  = reconstruct(result);
+     //dbprint( 1, " quot = p/rfp;");          
+     //quot = p/rfp;
+
+       if ( (not (pfp == rfp)) 
+//       ||       (not (idealsAreEqual( ideal(pfp), ideal(rfp) )))
+          )
+       {
+         dbprint( 1, "// pfp = " + string( pfp) + ";");    
+         dbprint( 1, "// rfp = " + string(rfp) +";");
+         //dbprint( 1, " ASSUME(0, idealsAreEqual( ideal(pfp), ideal(rfp) ));");
+         dbprint( 1, " ASSUME(0, pfp == rfp) ;");                  
+         //ASSUME(0, idealsAreEqual( ideal(pfp), ideal(rfp) ));
+         ASSUME(0, pfp == rfp);
+       }      
+  }
+  return ();
+}
+
+
+
+proc testFactorize( getRng, gens,  logfile);
+{
+    dbprint(printlevel-voice, "//testFactorize");
+    int warnIsSet = optionIsSet("warn");
+    option(nowarn);
+    if (defined(basering) ) {   def BAS=basering; }
+    def rng = getRng(gens);
+    setring rng;
+    option(warn);
+      
+    short = 0;
+    int trial;
+
+    while( 1 )
+    {   
+       option(nowarn);  
+       kill rng;      
+       def rng = getRng(gens);
+       setring rng;
+   
+       write(":w "+logfile,emptystring);
+       monitor(logfile,"io");
+       write(":w "+logfile,emptystring);
+       dbprint(1, "LIB(\"primdec.lib\");");
+       dbprint(1, "LIB(\"src/wrappers.lib\");");
+       dbprint(1, "LIB(\"src/automatedTests.lib\");");
+       dbprint( 1, "ring rng = "  + string( basering )+";" );
+       dbprint( 1, "short = 0 ;" );
+       dbprint( 1, "minpoly = " + string(minpoly) + ";");
+       dbprint( 1, "intvec op = "+string( option(get) )+";");    
+       dbprint( 1, " option(set, op) ;");
+       dbprint( 1, " option() ;");
+       dbprint( 1, " // option() :" + option() );
+       dbprint( 1, "int trial = " + string( trial) + ";" );
+       
+       dbprint( 1, " poly p; list fp; poly quot; poly rfp;" );
+       short = 0;
+       
+       if ( defined(p) ) { kill p; }
+       poly p = gens.polyG();
+       dbprint( 1, " poly p = "+string(p)+";" );
+       if ( idealsAreEqual( ideal(p), ideal(0) ) ) {continue;}
+       dbprint( 1, "trial =", trial );
+       dbprint( 1, " def fp = factorize(p);" );       
+       def fp = factorize(p);
+
+       dbprint( 1, "rfp =reconstruct(fp);");     
+       def rfp  = reconstruct(fp);
+
+       //dbprint( 1, "quot= p/rfp;");     
+       //def quot = p/rfp;
+
+       
+       if ( (not (p == rfp)) 
+//        ||          (not (idealsAreEqual( ideal(p), ideal(rfp) )))
+          )
+       {
+         dbprint( 1, "// fp ="+string( fp)+ ";");    
+         dbprint( 1, "// quot ="+string( quot)+ ";");     
+         dbprint( 1, "// rfp="+ string(rfp)+";");
+         //dbprint( 1, " ASSUME(0, idealsAreEqual( ideal(p), ideal(rfp) ));");
+         dbprint( 1, " ASSUME(0,p == rfp) ;");                  
+  //       ASSUME(0, idealsAreEqual( ideal(p), ideal(rfp) ));
+         ASSUME(0, p == rfp);
+       }        
+       
+       testFactorsIrreducible(fp);
+       
+           
+       trial = trial + 1;
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+
