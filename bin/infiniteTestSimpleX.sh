@@ -37,7 +37,7 @@ do
     #echo 'def contstr="'$cont'";' >input/$2.cont; 
     echo 'string logfile = "log/'$filename'/id_'$idx'.'$cont'";'  >/tmp/testingular/input/$filename/$filename.in; 
 
-    cat $2 >> /tmp/testingular/input/$filename/$filename.in; 
+    cat input/$filename >> /tmp/testingular/input/$filename/$filename.in; 
 
     set -o pipefail; timeout -s SIGKILL $3 $1 -v < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee -a log/$filename/id_$idx.log;
     status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;

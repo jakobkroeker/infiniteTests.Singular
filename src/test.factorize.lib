@@ -5,7 +5,7 @@ info="
 ";
 
 LIB "src/wrappers.lib";
-LIB "src/automatedTests.lib";
+//LIB "src/automatedTests.lib";
 
 proc createRingX(string charStr, string modulus, string monomialOrderStr, int numOfVariables )
 {
