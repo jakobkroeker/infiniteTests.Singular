@@ -4,7 +4,17 @@ info="";
 
 LIB "ellipticcovers.lib" ;
 
-
+static proc mod_init()
+{
+ 
+    if (not defined(TWeighttedOpts_def) )
+    {
+        int TWeighttedOpts_def = 0;
+        newstruct("TWeightedOpts",   "proc randomOrdProc, int wmin,   int wmax");         
+    }
+}
+  
+  
 proc chooseRandomOptionsFromList(list optionList)
 {
    int i;
@@ -176,6 +186,13 @@ proc randomGlobalOrdering()
 }
 
 
+proc straightBlockString(sord,blocksize)
+{
+  return(sord + "("+ string(blocksize) + ")");
+}
+
+
+
 proc randomBlockOrdering(randomOrdProc, numvars)
 {
     string boType = randomOrdProc();
@@ -188,7 +205,7 @@ proc randomBlockOrdering(randomOrdProc, numvars)
     string result = "(";
     for ( pos=1; pos <=size(block); pos++ )
     {
-         result = result + boType + "("+ string(block[pos]) + ")";
+         result = result + straightBlockString(boType, block[pos]);
          if  (pos< size(block) )
          {
             result = result + ", ";
@@ -198,6 +215,10 @@ proc randomBlockOrdering(randomOrdProc, numvars)
     return (result);
 }
 
+
+
+
+
 proc randomLocalOrdering()
 {
     list l = "ls","rs","ds","Ds";
@@ -205,20 +226,276 @@ proc randomLocalOrdering()
 }
 
 
+proc randomLocalWeights(wlen, wmin, wmax)
+{
+    ASSUME(0, wlen>0);
+
+    ASSUME(0, wmax>=wmin );
+    if (wmin==wmax)
+    {
+      ASSUME(0, wmin<>0);
+    }
+    int i;
+    int www;
+    
+    while (www==0)   {   www =  random(wmin, wmax);  }
+      
+    intvec vv = www;
+    for (i = 2; i<=wlen; i++)
+    {
+       www =  random(wmin,wmax);
+       while (www==0)   {   www =  random(wmin, wmax);  }
+       vv = vv,www;
+    }
+    return(vv);
+}
+
+proc randomLocalWeightsStr(wlen, wmin, wmax )
+{
+  return ( string(randomLocalWeights(wlen, wmin, wmax )) );
+}
+
+proc randomGlobalWeights(wlen, wmin, wmax )
+{
+    ASSUME(0, wmin>0 );
+    ASSUME(0, wmax>0 );
+    ASSUME(0, wmax>=wmin );
+    ASSUME(0, wlen>0);
+    
+    intvec vv = random(wmin,wmax);
+    int i;
+    for (i = 2; i<=wlen;i++)
+    {
+       vv = vv, random(wmin,wmax);
+    }
+    return(vv);
+}
+
+proc randomGlobalWeightsStr(wlen, wmin, wmax )
+{
+  return ( string(randomGlobalWeights(wlen, wmin, wmax )) );
+}
+
+proc chooseWeightedGlobalOrdering()
+{
+    list l = "wp","Wp";
+    return( l[random(1, size(l) ) ]);
+}
+
+
+proc chooseWeightedLocalOrdering()
+{
+    list l = "ws","Ws";
+    return( l[random(1, size(l) ) ]);
+}
+
+
+proc chooseWeightedOrdering()
+{
+    list l = "ws","Ws","wp","Wp";
+    return( l[random(1, size(l) ) ]);
+}
+
+proc  randomWeightedGlobalOrdering(numvars, wmin, wmax)
+{
+   string oo = chooseWeightedGlobalOrdering();
+   string wstr = string(randomGlobalWeights(numvars, wmin, wmax));
+   oo = oo+"("+wstr+")";
+   return (oo);
+}
+
+proc isStraightOrderingStr(word)
+{
+  return( word=="ls" || word=="rs" || word=="ds" || word=="Ds" || word=="lp" || word=="rp" || word=="dp" || word=="Dp");
+}
+
+proc isWeightedOrderingStr(word)
+{
+  return( word=="ws" || word=="Ws" || word=="wp" || word=="Wp" );
+}
+
+
+proc isStraightLocalOrderingStr(word)
+{
+  return( word=="ls" || word=="rs" || word=="ds" || word=="Ds" );
+}
+
+
+proc isLocalOrderingStr(word)
+{
+  return( word=="ls" || word=="rs" || word=="ds" || word=="Ds" || word=="Ws" || word=="ws" );
+}
+
+proc isStraightGlobalOrderingStr(word)
+{
+  return( word=="lp" || word=="rp" || word=="dp" || word=="Dp" );
+}
+
+
+proc isGlobalOrderingStr(word)
+{
+  return(  word=="lp" || word=="rp" || word=="dp" || word=="Dp" || word=="Wp" || word=="wp" );
+}
+
+
+proc isLocalWeightedOrderingStr(word)
+{
+  return(word=="ws" ||word=="Ws");
+}
+
+
+proc isGlobalWeightedOrderingStr(word)
+{
+  return(word=="wp" || word=="Wp");
+}
+
+
+proc randomWeights(word, wlen, wmin, wmax)
+{
+  if ( isLocalWeightedOrderingStr(word) )
+  {
+      return ( randomLocalWeightsStr (wlen, wmin, wmax) );
+  }
+  
+  if ( isGlobalWeightedOrderingStr(word) )
+  {
+      return ( randomGlobalWeightsStr (wlen, max(wmin,1), max(wmax,1)) );
+  }
+  ERROR("Unhandled weighted ordering");
+}
+
+proc  randomWeightedOrderingBlock(word, blocksize, wopts)
+{
+   string wstr = randomWeights(word, blocksize, wopts.wmin, wopts.wmax);
+   wstr = word+"("+wstr+")";
+   return (wstr);
+}
+
+proc randomGLWBlock(word, blocksize, wopts)
+{
+   if (isWeightedOrderingStr(word))
+   {
+      return( randomWeightedOrderingBlock(word, blocksize, wopts) );
+   }
+   if (isStraightOrderingStr(word))
+   {
+      return( straightBlockString(word,blocksize) );
+   }
+   ERROR("Unhandled word");
+}
+
+
+
+proc randomWeightedLocalOrdering(numvars, wmin, wmax)
+{
+   string oo = chooseWeightedLocalOrdering();
+   string wstr = randomLocalWeightsStr(numvars, wmin, wmax);
+   oo = oo+"("+wstr+")";
+   return (oo);
+}
+
+
+
+
+
+proc randomOrderingList()
+{
+  list l = "ls","rs","ds","Ds","lp","rp","dp","Dp";
+  return(l);
+}
+
+
 proc randomOrdering()
 {
-    list l = "ls","rs","ds","Ds","lp","rp","dp","Dp";
+    list l = randomOrderingList();
     return(l[random(1, size(l) ) ]);
 }
+
+
+proc randomGLWOrderingList()
+{
+  list l = "ls","rs","ds","Ds","lp","rp","dp","Dp","ws","Ws","Wp","wp";
+  return(l);
+}
+
+proc chooseGLWOrdering()
+{
+    list l = randomGLWOrderingList();
+    return(l[random(1, size(l) ) ]);
+}
+
+
+
+
+
+
+
+
+static proc randomGLWBlockOrdering_i(wopts, numvars , mixed )
+{
+    string boType = wopts.randomOrdProc();
+    intvec block = randomBlock(numvars);
+
+    int pos;
+    string result = "(";
+    for ( pos=1; pos <=size(block); pos++ )
+    {
+         if (mixed) {    boType = wopts.randomOrdProc(); }
+         result = result + randomGLWBlock(boType, block[pos], wopts);
+         if  (pos< size(block) )
+         {
+            result = result + ", ";
+         }
+    }
+    result = result + ")";
+    return (result);
+}
+
+
+proc randomGLWMixedOrdering(wopts, numvars )
+{
+   return(randomGLWBlockOrdering_i(wopts, numvars , 1 ));
+}
+
+proc randomGLWBlockOrdering(wopts, numvars)
+{
+   return(randomGLWBlockOrdering_i(wopts, numvars , 0 ));
+}
+
+
+proc testRandomWeightedBlockOrdering()
+{
+   // LIB("src/automatedTests.lib");
+   TWeightedOpts wopts;  
+   wopts.randomOrdProc = chooseWeightedLocalOrdering;
+   wopts.wmin = -10;
+   wopts.wmax = 5;
+   int numvars = 5;
+   def result = randomGLWBlockOrdering(wopts,numvars);
+   
+   wopts.randomOrdProc = chooseGLWOrdering;
+   wopts.wmin = -10;
+   wopts.wmax = 5;
+   int numvars = 5;
+   def result = randomGLWBlockOrdering(wopts,numvars);
+   
+   
+   wopts.randomOrdProc = chooseGLWOrdering;
+   wopts.wmin = -10;
+   wopts.wmax = 5;
+   int numvars = 5;
+   def result = randomGLWMixedOrdering(wopts,numvars);
+   
+   
+}
+
+
+
 
 /*
 
 // 0 in 50 % cases
 
-proc randomWeight(min,max,len)
-{
-    
-}
 
 
 
