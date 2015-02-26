@@ -1,27 +1,35 @@
 #!/bin/bash
 # $1 = binary
 # $2 = input file
-# $3 = tmelimit
-# $4 = memory limit
-# $5 = max num bugs
-# $6 = idx 
+# $3 = keep log
+# $4 = tmelimit
+# $5 = memory limit
+# $6 = max num bugs
+# $7 = idx 
 # set memlimit e.g.:  ulimit -v 1000000 ; 
 echo "binary:   "$1
 echo "testing   "$2
-echo "timeout:  "$3" sec"
-echo "memlimit: "$4" kb"
-echo "maxBugs : "$5" "
-maxBugs=$(($5 + 0));
+keepLog=$3
+#echo "keepLog:"$keepLog
+if [ $keepLog -eq 1 ] ; then  echo "keep log " ; fi;
+if [ $keepLog -eq 0 ] ; then  echo " do not keep log " ; fi;
+echo "timeout:  "$4" sec"
+echo "memlimit: "$5" kb"
+echo "maxBugs : "$6" "
+maxBugs=$(($6 + 0));
 export rnd=$RANDOM
-export idx=$6
+export idx=$7
 echo "idx : "$idx" "
+
 #exit
 read -p "Press [Enter] key to start testing with parameters as above"
-ulimit -v $4
+ulimit -v $5
 export cont=0;
 
 filename="${2##*/}"
 echo $filename
+
+
 
 mkdir -p /tmp/testingular/input/$filename/
 mkdir -p log/$filename/bugs
@@ -39,8 +47,15 @@ do
 
     cat input/$filename >> /tmp/testingular/input/$filename/$filename.in; 
 
-    set -o pipefail; timeout -s SIGKILL $3 $1 -v < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee -a log/$filename/id_$idx.log;
-    status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
+    if [ $keepLog -eq 1 ] 
+    then
+        set -o pipefail; timeout -s SIGKILL $4 $1 -v < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee -a log/$filename/id_$idx.log;
+        status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
+    else
+        set -o pipefail; timeout -s SIGKILL $4 $1 -v < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee log/$filename/id_$idx.log;
+        status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
+    fi;
+
     if [ $status -eq 14 ] || [ $status -eq 137 ] || [ $status -eq 124 ] || [ $status -eq 0 ] 
     then
         # export cont=$(($cont )); 
@@ -51,7 +66,7 @@ do
         export cont=$(($cont + 1)); 
     fi; 
 done
-echo $1" "$2"  "$3" "$4" "$5" "$6
+echo $1" "$2" "$3" "$4" "$5" "$6" "$7
 #timeout:     124
 #out of mem:  14
 
