@@ -2,7 +2,7 @@ version=" ";
 category = "Automated tests";
 info="";
 
-LIB "ellipticcovers.lib" ;
+// LIB "ellipticcovers.lib";  // get a redefining problem...
 
 static proc mod_init()
 {
@@ -498,9 +498,9 @@ proc testRandomWeightedBlockOrdering()
 
 
 
+// LIB("general.lib");
+// LIB("infiniteTests/src/automatedTests.lib");
 
-LIB("infiniteTests/src/automatedTests.lib");
-LIB("general.lib");
 
 randomBlockOrdering(randomGlobalOrdering, 4);
 

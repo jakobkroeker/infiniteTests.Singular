@@ -4,7 +4,7 @@ category="Commutative Algebra";
 info="
 ";
 
-//LIB "src/wrappers.lib";
+// LIB "src/wrappers.lib";
 //LIB "src/automatedTests.lib";
 
 proc createRingX(string charStr, string modulus, string monomialOrderStr, int numOfVariables )
@@ -69,6 +69,38 @@ proc testFactorsIrreducible(list fp)
 }
 
 
+proc testFactorsUniq(list fp)
+{
+  int i = 0;
+  int j = 0;
+  def result, pfp, fpf;
+  dbprint(1, "def pfp,fpf, result;");
+  for (i=2; i <= size( fp[1] ); i++)
+  {
+     pfp = fp[1][i];
+     
+     for (j=2; j <= size( fp[1] ); j++)
+     {
+   
+         if (j != i)
+         {
+             fpf = fp[1][j];
+             if (  deg(gcd(pfp,fpf))>0)
+             {
+               dbprint( 1, "pfp = " +string(pfp)+ ";");
+               dbprint( 1, "fpf = " +string(fpf)+ ";");
+               dbprint( 1, "// ERROR: 0 < deg gcd ( fp[1]["+string(i)+"], fp[1]["+string(j)+"] ) !");
+               dbprint( 1, "ASSUME(0, deg(gcd(pfp,fpf))<=0 );");
+               ASSUME( 0, deg( gcd(pfp,fpf) ) <= 0 );
+             }
+         }
+     }
+  }
+  return ();
+}
+
+
+
 
 proc testFactorize( getRng, gens,  logfile);
 {
@@ -115,7 +147,10 @@ proc testFactorize( getRng, gens,  logfile);
        dbprint( 1, "trial =", trial );
        dbprint( 1, " def fp = factorize(p);" );       
        def fp = factorize(p);
-
+       dbprint (1, "");
+       dbprint (1, " //  num factors  = "+string(size(fp[1])));
+       dbprint (1, "");
+       // if (string(minpoly) != "0" )      {      ASSUME(0, 2 >= size(fp[1]));       }
        dbprint( 1, "rfp =reconstruct(fp);");     
        def rfp  = reconstruct(fp);
 
@@ -137,7 +172,7 @@ proc testFactorize( getRng, gens,  logfile);
        }        
        
        testFactorsIrreducible(fp);
-       
+       testFactorsUniq(fp);
            
        trial = trial + 1;
     }
