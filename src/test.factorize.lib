@@ -4,7 +4,7 @@ category="Commutative Algebra";
 info="
 ";
 
-LIB "src/wrappers.lib";
+//LIB "src/wrappers.lib";
 //LIB "src/automatedTests.lib";
 
 proc createRingX(string charStr, string modulus, string monomialOrderStr, int numOfVariables )
@@ -89,7 +89,7 @@ proc testFactorize( getRng, gens,  logfile);
        kill rng;      
        def rng = getRng(gens);
        setring rng;
-   
+       dbprint(1, "//logfile = "+logfile);
        write(":w "+logfile,emptystring);
        monitor(logfile,"io");
        write(":w "+logfile,emptystring);
