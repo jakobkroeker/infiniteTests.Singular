@@ -9,6 +9,8 @@ LIB("randomIdeal.lib");
 
 LIB("src/test.factorize.lib");
 
+LIB("src/wrappers.lib");
+
 //////////////////////////////////////////////////////////
 //////// adjust verbosity
 printlevel = 2 ;
