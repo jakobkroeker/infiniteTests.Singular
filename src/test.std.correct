@@ -9,7 +9,7 @@ LIB "randomIdeal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
  
-proc testGroebner( getRng, gens.idealG, optionlist, trials, logfile )
+proc testGroebner( getRng, gens, optionlist, trials, logfile )
 {
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
