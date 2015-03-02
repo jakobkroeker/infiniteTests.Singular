@@ -9,12 +9,12 @@ LIB "randomIdeal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
  
-proc testGroebner( getRng, gens, optionlist, trials, logfile )
+proc testGroebner( getRng, gens, optionlist, trials, basic, logfile )
 {
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
-      def rng = getRng();
+      def rng = getRandomRing(gens);
       setring rng;
       option(warn);
       
@@ -25,11 +25,14 @@ proc testGroebner( getRng, gens, optionlist, trials, logfile )
     {   
       option(nowarn);  
       kill rng;      
-      def rng = getRng();
+      def rng = getRandomRing(gens);
       setring rng;
       ideal cs,  I, J, gI, gJ, ggI, ggJ;
 
-      chooseRandomOptionsFromList(optionlist);
+      if ( hasGlobalOrdering(basering))
+      {
+         chooseRandomOptionsFromList(optionlist);
+      }
       if (warnIsSet)
       {
         option(warn);
@@ -42,8 +45,11 @@ proc testGroebner( getRng, gens, optionlist, trials, logfile )
        write(":w "+logfile,emptystring);
        dbprint(1, "LIB \"primdec.lib\";");
        dbprint(1, "LIB \"wrappers.lib\";");
+       dbprint(1, "LIB \"src/automatedTests.lib\" ;");
        dbprint( 1, "ring rng = "  + string( basering)+";" );
-       dbprint( 1, "intvec op = "+string( option(get) )+";");    
+       dbprint( 1, "short = 0 ;" );
+       dbprint( 1, "minpoly = " + string(minpoly) + ";");
+       dbprint( 1, "intvec op = "+string( option(get) )+";");           
        dbprint( 1, " option(set, op) ;");
        dbprint( 1, " option() ;");
        dbprint( 1, " // option() ;" + option() );
@@ -98,7 +104,10 @@ proc testGroebner( getRng, gens, optionlist, trials, logfile )
        dbprint(1,"ASSUME(0, idealsEqual(gJ,ggJ ));");
        ASSUME(0, idealsEqual(gJ,ggJ ));
 
- 
+      if (basic)
+      {
+         continue;
+      }
       if ( hasGlobalOrdering(basering))
       {
           if ( optionIsSet("redTail") )
