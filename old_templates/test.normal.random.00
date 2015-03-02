@@ -20,11 +20,11 @@ echo  = 0;
 
 //////// adjust random ideal generator params: 
 def genParams = defaultRandomConstructionParams();
+     
 
-//genParams.absMaxCoeff       = 150;
-genParams.absMaxCoeff       = 105;
+genParams.absMaxCoeff       = 54;
 genParams.minVarFactorsPerMonomial = 0;
-genParams.maxVarFactorsPerMonomial = 5;
+genParams.maxVarFactorsPerMonomial = 4;
 genParams.maxTermsPerGen    = 3;
 genParams.maxGens           = 3;
 
@@ -40,7 +40,7 @@ int trials = 100000000;
  
  
   TWeightedOpts wopts;  
-  wopts.randomOrdProc = chooseGLWOrdering;
+  wopts.randomOrdProc = chooseGLWOrderingNoWs;
   wopts.wmin = -10;
   wopts.wmax = 5;
   int numvars = 5;
