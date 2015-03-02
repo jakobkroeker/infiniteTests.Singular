@@ -643,7 +643,7 @@ proc testPrimdecEx(list L, ideal I )
    // check irreducibility of the returned components 
    for (i=1; i<=size(L); i++)
    {   
-       dbprint(1, L[i][1], "");
+       dbprint(printlevel-voice, L[i][1], "");
        ASSUME(0, size( minAssChar( L[i][1] )) == 1 );
        ASSUME(0, size(  minAssGTZ( L[i][1] )) == 1 );
    }
@@ -1540,14 +1540,26 @@ proc radicalEHVX(ideal I )
 proc isPrime(ideal I)
 {
   dbprint( printlevel-voice, "isPrime()" );
-  dbprint( 1, "  basering;",  basering );
-  dbprint( 1, "  ringlist;",  ringlist(basering) );
+  dbprint( printlevel-voice, "  basering;",  basering );
+  dbprint( printlevel-voice, "  ringlist;",  ringlist(basering) );
   dbprint( printlevel-voice, " I = ", I );
   ASSUME( 0 , isCommutative( ) );
-  ASSUME( 0 , hasGlobalOrdering( basering ) );
+  
+  //ASSUME( 0 , hasGlobalOrdering( basering ) );
+  def BAS=basering;
+  
+  
+  
+  if (not ( hasGlobalOrdering( basering )))
+  {
+    def rr = changeordTo(basering,"dp");
+    setring rr ;
+    ideal I = fetch(BAS,I);  
+  }
 
   if ( hasIntegerNonPrimeCoefficientField(basering) && isQuotientRing(basering) )
   {
+     setring BAS;
      return(0);
   }
   if ( baseringIsExtensionField()   ||
@@ -1573,12 +1585,14 @@ proc isPrime(ideal I)
   {
      dbprint(printlevel, "isPrime::( size(j) != 1) ");
      //  i is not prime
+     setring BAS;
      return(0); 
   }
   // patch need for minAssGTZ and minAssZ, since they do not handle the 1-ideal correctly.
   if ( idealsAreEqual( ideal(1), j[1] ) )
   {
      //  I is not prime
+     setring BAS;
      return(0);  
   } 
 
@@ -1587,8 +1601,10 @@ proc isPrime(ideal I)
      dbprint( printlevel, "isPrime:: Radical( j[1])",  Radical( j[1]));
      dbprint( printlevel, "isPrime::  I", I);
       //  I is not prime
+      setring BAS;
       return(0); 
    }
+   setring BAS;  
    return(1);
 }
 
