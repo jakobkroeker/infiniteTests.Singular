@@ -44,7 +44,7 @@ proc getRandomMinpolyStr(characteristic, mpVarStr , genTable)
    execute(rngstr);
    setring rng;
    poly p = genTable.polyG();
-   if (not (leadcoef(p)==0))      {        p = p-lead(p)+lead(p)/leadcoef(p);  }
+   p = p-lead(p)+lead(p)/leadcoef(p); 
    //dbprint(1,"p=",p);
    def l = factorize(p);
   
@@ -55,7 +55,7 @@ proc getRandomMinpolyStr(characteristic, mpVarStr , genTable)
     while (size(l[1])<2)
     {
       p = genTable.polyG();
-      if (not (leadcoef(p)==0))      {        p = p-lead(p)+lead(p)/leadcoef(p);  }
+      p = p-lead(p)+lead(p)/leadcoef(p);  
       //dbprint(1,"p=",p);
       l = factorize(p);
     }
@@ -231,6 +231,7 @@ proc randomLocalWeights(wlen, wmin, wmax)
     ASSUME(0, wlen>0);
 
     ASSUME(0, wmax>=wmin );
+    ASSUME(0, wmax>0 );
     if (wmin==wmax)
     {
       ASSUME(0, wmin<>0);
@@ -238,13 +239,12 @@ proc randomLocalWeights(wlen, wmin, wmax)
     int i;
     int www;
     
-    while (www==0)   {   www =  random(wmin, wmax);  }
+    while (www<=0)   {   www =  random(wmin, wmax);  }
       
     intvec vv = www;
     for (i = 2; i<=wlen; i++)
     {
        www =  random(wmin,wmax);
-       while (www==0)   {   www =  random(wmin, wmax);  }
        vv = vv,www;
     }
     return(vv);
@@ -411,6 +411,12 @@ proc randomOrdering()
     return(l[random(1, size(l) ) ]);
 }
 
+proc chooseStraightOrdering()
+{
+    list l = randomOrderingList();
+    return(l[random(1, size(l) ) ]);
+}
+
 
 proc randomGLWOrderingList()
 {
@@ -424,6 +430,18 @@ proc chooseGLWOrdering()
     return(l[random(1, size(l) ) ]);
 }
 
+
+proc globalOrderingStringList()
+{
+  list l = "lp","rp","dp","Dp","Wp","wp";
+  return(l);
+}
+
+proc chooseGlobalOrdering()
+{
+    list l = globalOrderingStringList();
+    return(l[random(1, size(l) ) ]);
+}
 
 
 
