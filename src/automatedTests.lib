@@ -444,6 +444,18 @@ proc chooseGlobalOrdering()
 }
 
 
+proc randomGLWOrderingListNoWs()
+{
+  list l = "ls","rs","ds","Ds","lp","rp","dp","Dp","Wp","wp";
+  return(l);
+}
+
+
+proc chooseGLWOrderingNoWs()
+{
+    list l = randomGLWOrderingListNoWs();
+    return(l[random(1, size(l) ) ]);
+}
 
 
 
