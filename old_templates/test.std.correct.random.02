@@ -1,0 +1,93 @@
+
+
+option(nowarn);
+
+LIB("bugs/test.std.correct");
+
+LIB("src/automatedTests.lib");
+
+//monitor("log/test.std.correct.01","io");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+//genParams.absMaxCoeff       = 150;
+genParams.absMaxCoeff       = 10;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3;
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 3;
+
+def gens = createRandomGeneratorsByParams( genParams  );
+
+
+
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ def optionlist = list ("redSB", "redTail");
+ 
+  TWeightedOpts wopts;  
+  wopts.randomOrdProc = chooseGLWOrdering;
+  wopts.wmin = -10;
+  wopts.wmax = 5;
+  int numvars = 5;
+   
+proc getRandomRing( genTable )
+{
+
+   int maxChar = 32003;
+
+   //int maxChar = 100;
+
+   int c =  randomChar( maxChar );
+   
+   
+   int maxVars = 3;
+   
+   int numVars = random(1,maxVars);
+
+   string vstr = "(x(1.."+string(numVars)+"))";
+         
+   string str_rng = "ring rng = (c),"+vstr+",";  
+
+   int doExt = random(0,1);      
+   
+   doExt = 0 ;
+   
+   if (doExt)    {    str_rng = "ring rng = (c,vv),"+vstr+",";    }
+   
+
+   
+   string orderingString = randomGLWBlockOrdering(wopts, numVars);   
+   str_rng = str_rng + orderingString + ";";
+   execute(str_rng);
+   setring rng;
+
+   if (doExt)
+   {
+      dbprint(1, "// getRandomMinpolyStr");
+      string str_mp = getRandomMinpolyStr(c, "vv", genTable );
+      dbprint(1, "// getRandomMinpolyStr");
+      execute(str_mp);
+   }
+   option(redTail);
+   dbprint(1, "basering");
+   return (basering);
+}
+
+
+option(warn);
+
+testGroebner( getRandomRing, gens, optionlist, trials, logfile);
+
+
