@@ -44,7 +44,7 @@ proc getRandomMinpolyStr(characteristic, mpVarStr , genTable)
    execute(rngstr);
    setring rng;
    poly p = genTable.polyG();
-   p = p-lead(p)+lead(p)/leadcoef(p); 
+   if (not (leadcoef(p) == 0)) {  p = p-lead(p)+lead(p)/leadcoef(p); }
    //dbprint(1,"p=",p);
    def l = factorize(p);
   
@@ -55,7 +55,7 @@ proc getRandomMinpolyStr(characteristic, mpVarStr , genTable)
     while (size(l[1])<2)
     {
       p = genTable.polyG();
-      p = p-lead(p)+lead(p)/leadcoef(p);  
+      if (not (leadcoef(p) == 0)) { p = p-lead(p)+lead(p)/leadcoef(p);  }
       //dbprint(1,"p=",p);
       l = factorize(p);
     }
@@ -443,6 +443,18 @@ proc chooseGlobalOrdering()
     return(l[random(1, size(l) ) ]);
 }
 
+proc globalStraightOrderingStringList()
+{
+  list l = "lp","rp","dp","Dp";
+  return(l);
+}
+
+proc chooseStraightGlobalOrdering()
+{
+    list l = globalStraightOrderingStringList();
+    return(l[random(1, size(l) ) ]);
+}
+
 
 proc randomGLWOrderingListNoWs()
 {
@@ -520,6 +532,22 @@ proc testRandomWeightedBlockOrdering()
 }
 
 
+proc weakSBCheck(ideal I)
+{
+
+  ideal lI = lead(I);
+  ideal sI = groebner(I);
+  ideal lsI = lead(sI);
+
+  ASSUME(0, 0==size( std(reduce(lI,lsI))  )   );
+    
+  // todo: multiply lsI by random ring elements.
+  ASSUME(0, 0==size( std(reduce(lsI,lI))  )   );
+
+  
+  ASSUME(0, 0==size(std(reduce(I,sI  )) )    );
+  
+}
 
 
 /*
