@@ -11,12 +11,14 @@ info="";
 
 static proc mod_init()
 {
- 
+    LIB "randomIdeal.lib";
     if (not defined(TWeighttedOpts_def) )
     {
+
         int TWeighttedOpts_def = 0;
-        newstruct("TWeightedOpts",   " int wmin,   int wmax");   
-        newstruct("TRandomRingOpts", "int maxChar, int doExt, int maxVars, TWeightedOpts wopts, TIdealGeneratingParameters minpolyGenParams");
+        newstruct("TOrderingOpts",   " int wmin,   int wmax, proc randomOrd");   
+        newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int maxChar, int doExt, int maxVars,  TOrderingOpts oopts, proc ordString");
+        //newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int maxChar, int doExt, int maxVars");
         newstruct("TRandomRingGens", "proc randomOrd, proc getMinPolyStr, proc ordString, proc getChar, proc doExt, proc numVars, proc getRing");            
     }
 }
@@ -372,18 +374,18 @@ proc randomWeights(word, wlen, wmin, wmax)
   ERROR("Unhandled weighted ordering");
 }
 
-proc  randomWeightedOrderingBlock(word, blocksize, wopts)
+proc  randomWeightedOrderingBlock(word, blocksize, oopts)
 {
-   string wstr = randomWeights(word, blocksize, wopts.wmin, wopts.wmax);
+   string wstr = randomWeights(word, blocksize, oopts.wmin, oopts.wmax);
    wstr = word+"("+wstr+")";
    return (wstr);
 }
 
-proc randomGLWBlock(word, blocksize, wopts)
+proc randomGLWBlock(word, blocksize, oopts)
 {
    if (isWeightedOrderingStr(word))
    {
-      return( randomWeightedOrderingBlock(word, blocksize, wopts) );
+      return( randomWeightedOrderingBlock(word, blocksize, oopts) );
    }
    if (isStraightOrderingStr(word))
    {
@@ -481,17 +483,17 @@ proc chooseGLWOrderingNoWs()
 
 
 
-static proc randomGLWBlockOrdering_i(wopts, numvars , mixed )
+static proc randomGLWBlockOrdering_i(oopts, numvars , mixed )
 {
-    string boType = wopts.randomOrd();
+    string boType = oopts.randomOrd();
     intvec block = randomBlock(numvars);
 
     int pos;
     string result = "(";
     for ( pos=1; pos <=size(block); pos++ )
     {
-         if (mixed) {    boType = wopts.randomOrd(); }
-         result = result + randomGLWBlock(boType, block[pos], wopts);
+         if (mixed) {    boType = oopts.randomOrd(); }
+         result = result + randomGLWBlock(boType, block[pos], oopts);
          if  (pos< size(block) )
          {
             result = result + ", ";
@@ -502,39 +504,39 @@ static proc randomGLWBlockOrdering_i(wopts, numvars , mixed )
 }
 
 
-proc randomGLWMixedOrdering(wopts, numvars )
+proc randomGLWMixedOrdering(oopts, numvars )
 {
-   return(randomGLWBlockOrdering_i(wopts, numvars , 1 ));
+   return(randomGLWBlockOrdering_i(oopts, numvars , 1 ));
 }
 
-proc randomGLWBlockOrdering(wopts, numvars)
+proc randomGLWBlockOrdering(oopts, numvars)
 {
-   return(randomGLWBlockOrdering_i(wopts, numvars , 0 ));
+   return(randomGLWBlockOrdering_i(oopts, numvars , 0 ));
 }
 
 
 proc testRandomWeightedBlockOrdering()
 {
    // LIB("src/automatedTests.lib");
-   TWeightedOpts wopts;  
-   wopts.randomOrd = chooseWeightedLocalOrdering;
-   wopts.wmin = -10;
-   wopts.wmax = 5;
+   TOrderingOpts oopts;  
+   oopts.randomOrd = chooseWeightedLocalOrdering;
+   oopts.wmin = -10;
+   oopts.wmax = 5;
    int numvars = 5;
-   def result = randomGLWBlockOrdering(wopts,numvars);
+   def result = randomGLWBlockOrdering(oopts,numvars);
    
-   wopts.randomOrd = chooseGLWOrdering;
-   wopts.wmin = -10;
-   wopts.wmax = 5;
+   oopts.randomOrd = chooseGLWOrdering;
+   oopts.wmin = -10;
+   oopts.wmax = 5;
    int numvars = 5;
-   def result = randomGLWBlockOrdering(wopts,numvars);
+   def result = randomGLWBlockOrdering(oopts,numvars);
    
    
-   wopts.randomOrd = chooseGLWOrdering;
-   wopts.wmin = -10;
-   wopts.wmax = 5;
+   oopts.randomOrd = chooseGLWOrdering;
+   oopts.wmin = -10;
+   oopts.wmax = 5;
    int numvars = 5;
-   def result = randomGLWMixedOrdering(wopts,numvars);
+   def result = randomGLWMixedOrdering(oopts,numvars);
    
    
 }
@@ -583,13 +585,14 @@ proc testRandomWeightedBlockOrdering()
      string ringOptsName = getRandomName(); 
      string cmd = "def RandomRing::"+ringOptsName+";";
      execute(cmd);
-
+     cmd ="export("+ringOptsName+");";
+     execute(cmd);
      cmd = "RandomRing::"+ringOptsName+" = ropts;";
      execute(cmd); 
      
      cmd = "proc ordString(numVars)
      {
-         return(RandomRing::"+ringOptsName+".ordString(RandomRing::"+ringOptsName+".wopts, numVars ));
+         return(RandomRing::"+ringOptsName+".ordString(RandomRing::"+ringOptsName+".oopts, numVars ));
      }
      ";
      execute(cmd);  
@@ -601,6 +604,8 @@ proc testRandomWeightedBlockOrdering()
  {
      string genTableName = getRandomName(); 
      string cmd = "def RandomRing::"+genTableName+";";
+     execute(cmd);
+     cmd ="export("+genTableName+");";
      execute(cmd);
 
      cmd = "RandomRing::"+genTableName+" = createRandomGeneratorsByParams( ropts.minpolyGenParams   );";
@@ -617,8 +622,8 @@ proc testRandomWeightedBlockOrdering()
  
  proc createRandomRingGens(ropts)
  {
- 
-   rgens.randomOrd = ropts.randomOrd;   
+   TRandomRingGens rgens;
+   rgens.randomOrd = ropts.oopts.randomOrd;   
    rgens.ordString = createOrdStringProc(ropts);  
    rgens.getChar = createRandomCharGen(ropts);
    rgens.getMinPolyStr = createMinPolyStrGen(ropts);
@@ -638,8 +643,10 @@ proc testRandomWeightedBlockOrdering()
 
      cmd = "RandomRing::"+ringGenTableName+" = rgens;";
      execute(cmd);       
+     cmd ="export("+ringGenTableName+");";
+     execute(cmd);
  
-    string cmd = "proc getRandomRing( )
+    cmd = "proc getRandomRing( )
     {
 
        int c =  RandomRing::"+ringGenTableName+".getChar();  

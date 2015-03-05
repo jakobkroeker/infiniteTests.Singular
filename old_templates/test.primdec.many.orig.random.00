@@ -2,7 +2,7 @@
 
 LIB("src/test.primdec.many.orig.mp");
 
-LIB("src/automatedTests.lib");
+LIB("src/randomRing.lib");
 
 //////////////////////////////////////////////////////////////////////////////// 
 //////// adjust verbosity
@@ -29,9 +29,10 @@ def genTable = createRandomGeneratorsByParams( genParams  );
  ////////////////////////////////// random ring options   ////////////////////////////////
   
  // ordering settings
-  TWeightedOpts wopts;  
-  wopts.wmin = -10;
-  wopts.wmax = 5;
+  TOrderingOpts oopts;  
+  oopts.wmin = -10;
+  oopts.wmax = 5;
+  oopts.randomOrd = chooseStraightGlobalOrdering;
   
   // minpoly settings
   TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
@@ -50,14 +51,15 @@ def genTable = createRandomGeneratorsByParams( genParams  );
   ropts.maxVars = 5;
   
   ropts.minpolyGenParams = minpolyGenParams;
-  ropts.wopts   = wopts;     
-  ropts.randomOrd = chooseStraightGlobalOrdering;
-  ropts.ordString = randomGLWMixedOrdering; // depends on wopts
+  ropts.oopts   = oopts;     
+
+  ropts.ordString = randomGLWMixedOrdering; // depends on oopts
  
   /////////////////////////////////////////////////////////////////////////////////////////
 
   TRandomRingGens rgens = createRandomRingGens(ropts);  
 
+  // def R = rgens.getRing(); setring R;
 
 option(warn);
 
