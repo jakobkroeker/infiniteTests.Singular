@@ -1,8 +1,13 @@
+//
 version=" ";
 category = "Automated tests";
 info="";
 
+// todo: rename to randomRing.lib
+
 // LIB "ellipticcovers.lib";  // get a redefining problem...
+
+// eigentlich gehoert dies alles hier noch zu RandomRing.lib
 
 static proc mod_init()
 {
@@ -10,10 +15,13 @@ static proc mod_init()
     if (not defined(TWeighttedOpts_def) )
     {
         int TWeighttedOpts_def = 0;
-        newstruct("TWeightedOpts",   "proc randomOrdProc, int wmin,   int wmax");         
+        newstruct("TWeightedOpts",   " int wmin,   int wmax");   
+        newstruct("TRandomRingOpts", "int maxChar, int doExt, int maxVars, TWeightedOpts wopts, TIdealGeneratingParameters minpolyGenParams");
+        newstruct("TRandomRingGens", "proc randomOrd, proc getMinPolyStr, proc ordString, proc getChar, proc doExt, proc numVars, proc getRing");            
     }
 }
-  
+
+proc randomZeroOne()  {    return (random(0,1));  }  
   
 proc chooseRandomOptionsFromList(list optionList)
 {
@@ -193,9 +201,9 @@ proc straightBlockString(sord,blocksize)
 
 
 
-proc randomBlockOrdering(randomOrdProc, numvars)
+proc randomBlockOrdering(randomOrd, numvars)
 {
-    string boType = randomOrdProc();
+    string boType = randomOrd();
     intvec block = randomBlock(numvars);
 
     int zero = random(0,1);    
@@ -475,14 +483,14 @@ proc chooseGLWOrderingNoWs()
 
 static proc randomGLWBlockOrdering_i(wopts, numvars , mixed )
 {
-    string boType = wopts.randomOrdProc();
+    string boType = wopts.randomOrd();
     intvec block = randomBlock(numvars);
 
     int pos;
     string result = "(";
     for ( pos=1; pos <=size(block); pos++ )
     {
-         if (mixed) {    boType = wopts.randomOrdProc(); }
+         if (mixed) {    boType = wopts.randomOrd(); }
          result = result + randomGLWBlock(boType, block[pos], wopts);
          if  (pos< size(block) )
          {
@@ -509,20 +517,20 @@ proc testRandomWeightedBlockOrdering()
 {
    // LIB("src/automatedTests.lib");
    TWeightedOpts wopts;  
-   wopts.randomOrdProc = chooseWeightedLocalOrdering;
+   wopts.randomOrd = chooseWeightedLocalOrdering;
    wopts.wmin = -10;
    wopts.wmax = 5;
    int numvars = 5;
    def result = randomGLWBlockOrdering(wopts,numvars);
    
-   wopts.randomOrdProc = chooseGLWOrdering;
+   wopts.randomOrd = chooseGLWOrdering;
    wopts.wmin = -10;
    wopts.wmax = 5;
    int numvars = 5;
    def result = randomGLWBlockOrdering(wopts,numvars);
    
    
-   wopts.randomOrdProc = chooseGLWOrdering;
+   wopts.randomOrd = chooseGLWOrdering;
    wopts.wmin = -10;
    wopts.wmax = 5;
    int numvars = 5;
@@ -532,23 +540,141 @@ proc testRandomWeightedBlockOrdering()
 }
 
 
-proc weakSBCheck(ideal I)
-{
 
-  ideal lI = lead(I);
-  ideal sI = groebner(I);
-  ideal lsI = lead(sI);
 
-  ASSUME(0, 0==size( std(reduce(lI,lsI))  )   );
+ proc createRandomCharGen(ropts)
+  {
+     string cmd = "proc getRandomChar()
+     {
+         return (randomChar( "+string(ropts.maxChar)+" ));
+     }";
+     execute(cmd);
+     return (getRandomChar);
+  }
+ 
+  proc createRandomVarNumGen(ropts)
+  {
+     string cmd = "proc getRandomVarNum()
+     {
+         return ( random(1, "+string(ropts.maxVars)+" ));
+     }";
+     execute(cmd);
+     return (getRandomVarNum);
+  }
+  
+  proc createRandomDoExtGen(ropts)
+  {
+  
+     string cmd  = "proc doExt()   
+     {
+       int doExt_ = random(0,1);      
+     
+       if ("+string(ropts.doExt)+"==1)    { doExt_ = 1;  }
+       if ("+string(ropts.doExt)+"==0)    { doExt_ = 0;  }
+       return(doExt_);
+     }
+   ";
+     execute(cmd);
+    return (doExt);
+ }
+ 
+ proc createOrdStringProc(ropts)
+ {
+     string ringOptsName = getRandomName(); 
+     string cmd = "def RandomRing::"+ringOptsName+";";
+     execute(cmd);
+
+     cmd = "RandomRing::"+ringOptsName+" = ropts;";
+     execute(cmd); 
+     
+     cmd = "proc ordString(numVars)
+     {
+         return(RandomRing::"+ringOptsName+".ordString(RandomRing::"+ringOptsName+".wopts, numVars ));
+     }
+     ";
+     execute(cmd);  
+     return (ordString);
+     
+ }
+ 
+ proc createMinPolyStrGen(ropts)
+ {
+     string genTableName = getRandomName(); 
+     string cmd = "def RandomRing::"+genTableName+";";
+     execute(cmd);
+
+     cmd = "RandomRing::"+genTableName+" = createRandomGeneratorsByParams( ropts.minpolyGenParams   );";
+     execute(cmd);  
+
+     cmd = "proc getRandomMinpolyStr(charval, pstr)
+     {
+        return( getRandomMinpolyStr(charval, pstr,RandomRing::"+genTableName+"));
+     }
+     ";
+     execute(cmd);
+     return(getRandomMinpolyStr);
+ }
+ 
+ proc createRandomRingGens(ropts)
+ {
+ 
+   rgens.randomOrd = ropts.randomOrd;   
+   rgens.ordString = createOrdStringProc(ropts);  
+   rgens.getChar = createRandomCharGen(ropts);
+   rgens.getMinPolyStr = createMinPolyStrGen(ropts);
+   rgens.numVars = createRandomVarNumGen(ropts);
+   rgens.doExt   = createRandomDoExtGen(ropts);
+   rgens.getRing = createRandomRingGen(rgens);
+   return(rgens);
+ }
+   
+ 
+ proc createRandomRingGen(rgens)
+ {
+ 
+     string ringGenTableName = getRandomName(); 
+     string cmd = "def RandomRing::"+ringGenTableName+";";
+     execute(cmd);
+
+     cmd = "RandomRing::"+ringGenTableName+" = rgens;";
+     execute(cmd);       
+ 
+    string cmd = "proc getRandomRing( )
+    {
+
+       int c =  RandomRing::"+ringGenTableName+".getChar();  
+        
+       int numVars =  RandomRing::"+ringGenTableName+".numVars();
+
+       string vstr = \"(x(1..\"+string(numVars)+\"))\";
+             
+       string str_rng = \"ring rng = (c),\"+vstr+\",\";  
+
+       int doExt = RandomRing::"+ringGenTableName+".doExt();
+          
+       if (doExt)    {    str_rng = \"ring rng = (c,vv),\"+vstr+\",\";    }
+       
+       string orderingString = RandomRing::"+ringGenTableName+".ordString(numVars);   
+       str_rng = str_rng +  orderingString+ \";\";
+       execute(str_rng);
+       setring rng;
+
+       if (doExt)
+       {
+          dbprint(1, \"// getRandomMinpolyStr\");
+          string str_mp = RandomRing::"+ringGenTableName+".getMinPolyStr(c, \"vv\" );
+          dbprint(1, \"// getRandomMinpolyStr\");
+          execute(str_mp);
+       }
+       return (basering);
+    }";
     
-  // todo: multiply lsI by random ring elements.
-  ASSUME(0, 0==size( std(reduce(lsI,lI))  )   );
-
+    execute(cmd);
+    return (getRandomRing);
   
-  ASSUME(0, 0==size(std(reduce(I,sI  )) )    );
-  
-}
+  }
 
+   
 
 /*
 

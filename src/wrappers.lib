@@ -1706,5 +1706,20 @@ proc intersectPrimaryDecomposition(list pdecomp)
 }
 
 
+proc weakSBCheck(ideal I)
+{
 
+  ideal lI = lead(I);
+  ideal sI = groebner(I);
+  ideal lsI = lead(sI);
+
+  ASSUME(0, 0==size( std(reduce(lI,lsI))  )   );
+    
+  // todo: multiply lsI by random ring elements.
+  ASSUME(0, 0==size( std(reduce(lsI,lI))  )   );
+
+  
+  ASSUME(0, 0==size(std(reduce(I,sI  )) )    );
+  
+}
 
