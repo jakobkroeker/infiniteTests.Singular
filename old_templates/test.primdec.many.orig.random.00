@@ -73,6 +73,6 @@ testPrimdec( rgens.getRing , genTable, trials, logfile);
 
 // ./bin/infiniteTestX.sh ../singular-spielwiese test.primdec.many.orig.random_mp.00 randomsetup/ring/char_0__vars_3__ordering__lp__redSB_redTail randomsetup/genTable/maxCoeff_50__degree_0-3__maxTerms_2__maxGens_3__FractionsOff 30 1000000 1
 
-
+// ./bin/infiniteTestSimpleX.sh bin/alwaysrun.sh ../singular-spielwiese input/test.primdec.many.orig.random.00 1 150 1000000 3 5
 
 
