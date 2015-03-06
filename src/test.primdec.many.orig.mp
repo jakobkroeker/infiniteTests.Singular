@@ -3,7 +3,7 @@ category="Commutative Algebra";
 info="
 ";
 
-LIB "randomIdeal.lib";LIB "primdec.lib";LIB "ringutils.lib";LIB "wrappers.lib";LIB "ehv.lib";
+LIB "primdec.lib";LIB "ringutils.lib";LIB "wrappers.lib";LIB "ehv.lib";
 
 
 proc adjustAssumeLevel()
@@ -163,9 +163,9 @@ proc testPrimdec( getRng, genTable, trials, logfile )
       if (defined(minAss1e)) {kill minAss1e;}
           def minAss1,minAss1e;
       export(rng);
-       dbprint(1, "// get random ideal ");
+       //dbprint(1, "// get random ideal ");
        I = genTable.idealG(  );    
-       dbprint(1, "// got random ideal ");
+       //dbprint(1, "// got random ideal ");
 
        if (not isZero(I) && not idealsAreEqual( ideal(1), I ) )
        {

@@ -1,8 +1,10 @@
 ///
 
-LIB("src/test.primdec.many.orig.mp");
+option(nowarn);
 
-LIB("src/randomRing.lib");
+LIB "src/test.primdec.many.orig.mp";
+
+LIB "src/randomRing.lib";
 
 //////////////////////////////////////////////////////////////////////////////// 
 //////// adjust verbosity
@@ -10,7 +12,7 @@ printlevel = 0 ;
 TRACE = 0;
 echo  = 0;
 
-
+def assumeLevel=3;
 
 //////// adjust random ideal generator params: 
 TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
@@ -30,9 +32,9 @@ def genTable = createRandomGeneratorsByParams( genParams  );
   
  // ordering settings
   TOrderingOpts oopts;  
-  oopts.wmin = -10;
-  oopts.wmax = 5;
-  oopts.randomOrd = chooseStraightGlobalOrdering;
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
+  oopts.randomOrd = chooseStraightGlobalOrdering; //rename to ordStringP
   
   // minpoly settings
   TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
@@ -51,9 +53,9 @@ def genTable = createRandomGeneratorsByParams( genParams  );
   ropts.maxVars = 5;
   
   ropts.minpolyGenParams = minpolyGenParams;
-  ropts.oopts   = oopts;     
+  ropts.oopts   = oopts;     //rename to monomialOrderingOpts
 
-  ropts.ordString = randomGLWMixedOrdering; // depends on oopts
+  ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
  
   /////////////////////////////////////////////////////////////////////////////////////////
 

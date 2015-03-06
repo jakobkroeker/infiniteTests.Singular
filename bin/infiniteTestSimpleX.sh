@@ -45,7 +45,7 @@ export hid=`hostname |sed "s/[^0-9]//g"`
 export idx=$((hid*100+$idx));
 
 echo "idx="$idx
-
+echo "count="$count
 echo "started with " >> log/$filename/id_$idx.log
 echo $0" "$@  >> log/$filename/id_$idx.log
 

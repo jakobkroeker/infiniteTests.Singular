@@ -11,12 +11,16 @@ info="";
 
 static proc mod_init()
 {
-    LIB "randomIdeal.lib";
+
+    if (not defined(RandomIdeal) )
+    {
+      LIB "randomIdeal.lib";
+    }
     if (not defined(TWeighttedOpts_def) )
     {
 
         int TWeighttedOpts_def = 0;
-        newstruct("TOrderingOpts",   " int wmin,   int wmax, proc randomOrd");   
+        newstruct("TOrderingOpts",   " int minWeight,   int maxWeight, proc randomOrd");   
         newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int maxChar, int doExt, int maxVars,  TOrderingOpts oopts, proc ordString");
         //newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int maxChar, int doExt, int maxVars");
         newstruct("TRandomRingGens", "proc randomOrd, proc getMinPolyStr, proc ordString, proc getChar, proc doExt, proc numVars, proc getRing");            
@@ -376,7 +380,7 @@ proc randomWeights(word, wlen, wmin, wmax)
 
 proc  randomWeightedOrderingBlock(word, blocksize, oopts)
 {
-   string wstr = randomWeights(word, blocksize, oopts.wmin, oopts.wmax);
+   string wstr = randomWeights(word, blocksize, ooptsminWeight, oopts.wmax);
    wstr = word+"("+wstr+")";
    return (wstr);
 }
@@ -520,20 +524,20 @@ proc testRandomWeightedBlockOrdering()
    // LIB("src/automatedTests.lib");
    TOrderingOpts oopts;  
    oopts.randomOrd = chooseWeightedLocalOrdering;
-   oopts.wmin = -10;
+   ooptsminWeight = -10;
    oopts.wmax = 5;
    int numvars = 5;
    def result = randomGLWBlockOrdering(oopts,numvars);
    
    oopts.randomOrd = chooseGLWOrdering;
-   oopts.wmin = -10;
+   ooptsminWeight = -10;
    oopts.wmax = 5;
    int numvars = 5;
    def result = randomGLWBlockOrdering(oopts,numvars);
    
    
    oopts.randomOrd = chooseGLWOrdering;
-   oopts.wmin = -10;
+   ooptsminWeight = -10;
    oopts.wmax = 5;
    int numvars = 5;
    def result = randomGLWMixedOrdering(oopts,numvars);
@@ -668,9 +672,7 @@ proc testRandomWeightedBlockOrdering()
 
        if (doExt)
        {
-          dbprint(1, \"// getRandomMinpolyStr\");
           string str_mp = RandomRing::"+ringGenTableName+".getMinPolyStr(c, \"vv\" );
-          dbprint(1, \"// getRandomMinpolyStr\");
           execute(str_mp);
        }
        return (basering);
