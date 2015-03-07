@@ -4,7 +4,7 @@ option(nowarn);
 LIB( "wrappers.lib");
 LIB( "randomIdeal.lib");
 LIB( "normal.lib");
-LIB("src/automatedTests.lib");
+LIB("src/randomRing.lib");
 LIB("bugs/test.normal.lib");
 
 
