@@ -1,9 +1,9 @@
 
 option(nowarn);
 
-LIB("randomIdeal.lib");
-LIB("wrappers.lib");
-LIB("normal.lib");
+LIB( "wrappers.lib");
+LIB( "randomIdeal.lib");
+LIB( "normal.lib");
 LIB("src/randomRing.lib");
 LIB("bugs/test.normal.lib");
 
@@ -24,7 +24,7 @@ def genParams = defaultRandomConstructionParams();
 
 genParams.absMaxCoeff       = 54;
 genParams.minVarFactorsPerMonomial = 0;
-genParams.maxVarFactorsPerMonomial = 4;
+genParams.maxVarFactorsPerMonomial = 5;
 genParams.maxTermsPerGen    = 3;
 genParams.maxGens           = 3;
 
@@ -37,7 +37,6 @@ def gens = createRandomGeneratorsByParams( genParams  );
 int trials = 100000000;
 //////////////////////////////////////////////////////////////////////////////// 
  def optionlist = list ("redSB", "redTail");
- 
  
  
   TOrderingOpts oopts;  
@@ -55,7 +54,7 @@ proc getRandomRing( genTable )
 
    int c =  randomChar( maxChar );
    
-   int maxVars = 3;
+   int maxVars = 4;
    
    int numVars = random(1,maxVars);
 
