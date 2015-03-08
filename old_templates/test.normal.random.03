@@ -1,0 +1,79 @@
+
+option(nowarn);
+
+LIB("randomIdeal.lib");
+LIB("wrappers.lib");
+LIB("normal.lib");
+LIB("src/randomRing.lib");
+LIB("bugs/test.normal.lib");
+
+
+//monitor("log/test.normal.00","io");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+     
+
+genParams.absMaxCoeff       = 54;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 6;
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 3;
+
+def gens = createRandomGeneratorsByParams( genParams  );
+
+
+
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ def optionlist = list ("redSB", "redTail");
+ 
+ 
+ 
+  TOrderingOpts oopts;  
+  oopts.randomOrd = chooseGLWOrderingNoWs;
+ 
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
+   
+proc getRandomRing( genTable )
+{
+
+   int maxChar = 32003;
+
+   //int maxChar = 100;
+
+   int c =  randomChar( maxChar );
+   
+   int maxVars = 6;
+   
+   int numVars = random(1,maxVars);
+
+   string vstr = "(x(1.."+string(numVars)+"))";
+         
+   string str_rng = "ring rng = (c),"+vstr+",";  
+     
+   string orderingString = randomGLWBlockOrdering(oopts, numVars);   
+   str_rng = str_rng + orderingString + ";";
+   execute(str_rng);
+   setring rng;
+
+   return (basering);
+}
+
+
+option(warn);
+ 
+
+testNormal( getRandomRing, gens, optionlist, trials, logfile);
+

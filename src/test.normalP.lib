@@ -8,7 +8,7 @@ info="
 
 
 
-proc testNormal( getRandomRing, gens, optionlist, trials, logfile);
+proc testNormalP( getRandomRing, gens, optionlist, trials, logfile);
 {
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
@@ -99,7 +99,7 @@ proc testNormal( getRandomRing, gens, optionlist, trials, logfile);
                dbprint(1, "trial = "+string(trial)+";");
 
                dbprint(1, "normalResult = normal(component);");
-               normalResult = normal(component);
+               normalResult = normalP(component,"withRing");
                dbprint(1, " testResult = norTest(component, normalResult);");
                testResult = norTest(component, normalResult);
                dbprint(1, "ASSUME(0, v == norTest(component, normalResult) );");
