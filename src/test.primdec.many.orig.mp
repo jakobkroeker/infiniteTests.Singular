@@ -163,8 +163,8 @@ proc testMinAssDecomp(ideal I)
          
             list ML;
             int i;
-                      def minAss1,minAss1e;
-              list methodsPairs = list( list("minAssGTZ",minAssGTZ),
+            def minAss1,minAss1e;
+            list methodsPairs = list( list("minAssGTZ",minAssGTZ),
                                   list("minAssGTZFacSTD",minAssGTZFacSTD),
                                   list("minAssGTZGTZ",minAssGTZGTZ)
                                );
