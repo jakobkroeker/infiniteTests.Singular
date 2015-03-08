@@ -3,31 +3,34 @@
 # $2 = binary
 # $3 = input file
 # $4 = keep log
-# $5 = tmelimit
-# $6 = memory limit
-# $7 = max num bugs
-# $8 = idx 
+# $5 = ignore overflow error
+# $6 = tmelimit
+# $7 = memory limit
+# $8 = max num bugs
+# $9 = idx 
 # set memlimit e.g.:  ulimit -v 1000000 ; 
 $1;
 runornot=$?
     
+ignoreOverflow=$5
+
 echo "binary:   "$2
 echo "testing   "$3
+echo "ignoreOverflow   "$ignoreOverflow
 keepLog=$4
 #echo "keepLog:"$keepLog
 if [ $keepLog -eq 1 ] ; then  echo "keep log " ; fi;
 if [ $keepLog -eq 0 ] ; then  echo " do not keep log " ; fi;
-echo "timeout:  "$5" sec"
-echo "memlimit: "$6" kb"
-echo "maxBugs : "$7" "
-maxBugs=$(($7 + 0));
+echo "timeout:  "$6" sec"
+echo "memlimit: "$7" kb"
+echo "maxBugs : "$8" "
+maxBugs=$(($8 + 0));
 export rnd=$RANDOM
-export idx=$8
+export idx=$9
 echo "idx : "$idx" "
 
-#exit
 read -p "Press [Enter] key to start testing with parameters as above"
-ulimit -v $6
+ulimit -v $7
 export count=0;
 
 
@@ -70,14 +73,14 @@ do
 
     if [ $keepLog -eq 1 ] 
     then
-        set -o pipefail; timeout -s SIGKILL $5 $2 -v < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee -a log/$filename/id_$idx.log;
+        set -o pipefail; timeout -s SIGKILL $6 $2 -v < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee -a log/$filename/id_$idx.log;
         status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
     else
-        set -o pipefail; timeout -s SIGKILL $5 $2 -v < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee log/$filename/id_$idx.log;
+        set -o pipefail; timeout -s SIGKILL $6 $2 -v < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee log/$filename/id_$idx.log;
         status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
     fi;
 
-    if [ $status -eq 14 ] || [ $status -eq 137 ] || [ $status -eq 124 ] || [ $status -eq 0 ] 
+    if [ $status -eq 14 ] || [ $status -eq 137 ] || [ $status -eq 124 ] || [ $status -eq 0 ] || ( [ $status -eq 253 ] && [ $ignoreOverflow -eq 1 ] )
     then
         # export count=$(($count )); 
         echo "doNothing ";echo "doNothing ">> log/$filename/id_$idx.log;
@@ -91,8 +94,10 @@ do
     fi; 
 done
 echo "done"
-echo $1" "$2" "$3" "$4" "$5" "$6" "$7" "$8
+echo $1" "$2" "$3" "$4" "$6" "$7" "$8" "$9
 #timeout:     124
 #out of mem:  14
 
+# singular exit codes:
+#overflow 253
 
