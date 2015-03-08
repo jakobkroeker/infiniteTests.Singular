@@ -1,3 +1,4 @@
+//
 version="version test.primdecGTZ.only.primdec";
 category="Commutative Algebra";
 info="
@@ -121,6 +122,81 @@ proc testPrimdecZeroDim( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTe
 }
 
 
+proc testPrimaryDecomp(ideal I)
+{
+        list PL;
+        int i;
+        
+        list methodsPairs = list( list("primdecGTZ",primdecGTZ),
+                                  list("primdecGTZkeepKomp",primdecGTZkeepKomp),
+                                  list("primdecSY",primdecSY),
+                                  list("primdecSYNoOptimalOrdering",primdecSYNoOptimalOrdering)
+                               );
+         list perms =  permute(methodsPairs);
+         
+         def perm =     perms[random(1,size( perms))];
+         proc foo ;
+         
+         i = 1;
+         
+         dbprint(1, "  PL["+string(i)+"] = "+perm[i][1]+"(I);");
+         foo =  perm[i][2];
+         PL[i] =  foo (I) ;
+              
+         dbprint(1, "ASSUME(0, testPrimary( PL[1] , I ) );");
+         ASSUME(0, testPrimary( PL[i] , I ) );
+        
+         for (i=2;i<=size(perm);i++)
+         { 
+               dbprint(1, "  PL["+string(i)+"] = "+perm[i][1]+"(I);");               
+               foo =  perm[i][2];
+               PL[i] =  foo (I) ;
+               ASSUME(0, testPrimary( PL[i] , I ) );
+               dbprint(1, "ASSUME(0, primDecsAreEquivalent(PL["+string(i-1)+"],PL["+string(i)+"]));");
+               ASSUME(0, primDecsAreEquivalent(  PL[i-1],  PL[i]  )   );
+         }
+}
+
+
+proc testMinAssDecomp(ideal I)
+{
+         
+            list ML;
+            int i;
+                      def minAss1,minAss1e;
+              list methodsPairs = list( list("minAssGTZ",minAssGTZ),
+                                  list("minAssGTZFacSTD",minAssGTZFacSTD),
+                                  list("minAssGTZGTZ",minAssGTZGTZ)
+                               );
+
+             list perms =  permute(methodsPairs);
+         
+             def perm =     perms[random(1,size( perms))];
+            
+            i = 1;
+            proc foo ;
+            dbprint(1, "  PL["+string(i)+"] = "+perm[i][1]+"(I);");
+            foo =  perm[i][2];
+            ML[i] =  foo (I) ;
+
+                        
+         
+            for (i=2;i<=size(perm);i++)
+            { 
+                  dbprint(1, "  PL["+string(i)+"] = "+perm[i][1]+"(I);");
+                  foo =  perm[i][2];
+                  ML[i] =  foo (I) ;
+                  
+                  dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ML["+string(i-1)+"],ML["+string(i)+"]));");
+                  ASSUME(0, minAssDecompAreEquivalent(ML[i-1],ML[i]));
+                        
+            }
+
+            dbprint(1, "minAss1  = minAss(I);");
+                        minAss1  = minAss(I);
+}
+
+
 proc testPrimdec( getRng, genTable, trials, logfile )
 {
     print ("testPrimdec");
@@ -145,6 +221,8 @@ proc testPrimdec( getRng, genTable, trials, logfile )
     def wdec;
 
     def minAss1,minAss1e;
+    
+    int PDfirst;
 
     ideal I;
     string emptystring="";
@@ -161,7 +239,7 @@ proc testPrimdec( getRng, genTable, trials, logfile )
       ideal I;
       if (defined(minAss1)) {kill minAss1;}
       if (defined(minAss1e)) {kill minAss1e;}
-          def minAss1,minAss1e;
+
       export(rng);
        //dbprint(1, "// get random ideal ");
        I = genTable.idealG(  );    
@@ -186,56 +264,21 @@ proc testPrimdec( getRng, genTable, trials, logfile )
            dbprint(1, "bigint trial = "+string(trial)+";");
            dbprint(1, "    def minAss1,minAss1e;");
 
-             dbprint(1, "list  PL,ML;");
-             if (defined(PL)) {kill PL;}
-             if (defined(ML)) {kill ML;}
-             list PL,ML;
-             
-             dbprint(1, "  PL[size(PL)+1] =list(\"primdecGTZ (I)\",primdecGTZ (I));");
-                           PL[size(PL)+1] = list("primdecGTZ (I)",primdecGTZ (I)) ;
+           dbprint(1, "list  PL,ML;");
+           
+           PDfirst = random(0,1);
+           if (PDfirst)
+           {
+               testPrimaryDecomp(I);
+               testMinAssDecomp(I);
+           }
+           else
+           {
 
-             dbprint(1, "  PL[size(PL)+1] = list(\"primdecGTZkeepKomp (I)\",primdecGTZkeepKomp (I));");
-                             PL[size(PL)+1] = list("primdecGTZkeepKomp (I)",primdecGTZkeepKomp (I)) ;
-             
-
-             dbprint(1, "  PL[size(PL)+1] = list(\"primdecSY (I)\",primdecSY (I));");
-                           PL[size(PL)+1] = list("primdecSY (I)",primdecSY (I)) ;
-
-             dbprint(1, "  PL[size(PL)+1] = list(\"primdecSYNoOptimalOrdering (I)\",primdecSYNoOptimalOrdering (I));");
-                           PL[size(PL)+1] = list("primdecSYNoOptimalOrdering (I)",primdecSYNoOptimalOrdering (I)) ;
-
-             dbprint(1, "ASSUME(0, testPrimary( PL[1][2] , I ) );");
-            ASSUME(0, testPrimary( PL[1][2] , I ) );
-            for (i=1;i<size(PL);i++)
-            { 
-                dbprint(1, "ASSUME(0, primDecsAreEquivalent(PL["+string(i)+"][2],PL["+string(i+1)+"][2]));");
-                        ASSUME(0, primDecsAreEquivalent(  PL[i][2],  PL[i+1][2]  )   );
-            }
-
-
-            dbprint(1, "ML[size(ML)+1] =list(\"minAssGTZ (I)\",minAssGTZ (I));");
-                        ML[size(ML)+1] = list("minAssGTZ (I)",minAssGTZ (I)) ;
+               testMinAssDecomp(I);
+               testPrimaryDecomp(I);
+           }
  
-
-            dbprint(1, "ML[size(ML)+1] = list(\"minAssGTZFacSTD (I)\",minAssGTZFacSTD (I));");
-                        ML[size(ML)+1] = list("minAssGTZFacSTD (I)",minAssGTZFacSTD (I)) ;
-
-            dbprint(1, "ML[size(ML)+1] =list(\"minAssGTZGTZ (I)\",minAssGTZGTZ (I));");
-                        ML[size(ML)+1] = list("minAssGTZGTZ (I)",minAssGTZGTZ (I)) ;
-
-
-
-            for (i=1;i<size(ML);i++)
-            { 
-                dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ML["+string(i)+"][2],ML["+string(i+1)+"][2]));");
-                        ASSUME(0, minAssDecompAreEquivalent(ML[i][2],ML[i+1][2]));
-            }
-
-
-         
-            dbprint(1, "minAss1  = minAss(I);");
-                        minAss1  = minAss(I);
-
 
             trial++;
        }

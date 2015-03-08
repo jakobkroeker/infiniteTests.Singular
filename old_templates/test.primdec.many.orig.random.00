@@ -6,6 +6,8 @@ LIB "src/test.primdec.many.orig.mp";
 
 LIB "src/randomRing.lib";
 
+LIB "ellipticcovers.lib";
+
 //////////////////////////////////////////////////////////////////////////////// 
 //////// adjust verbosity
 printlevel = 0 ;
@@ -47,7 +49,7 @@ def genTable = createRandomGeneratorsByParams( genParams  );
  
   //////////////////////  composing ring options  //////////////// 
   TRandomRingOpts ropts;
-
+  ropts.minChar = 0;
   ropts.maxChar = 200;
   ropts.doExt   = 2; //0:no; 1:yes; 2:randomly
   ropts.maxVars = 5;
