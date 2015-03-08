@@ -21,7 +21,7 @@ static proc mod_init()
 
         int TWeighttedOpts_def = 0;
         newstruct("TOrderingOpts",   " int minWeight,   int maxWeight, proc randomOrd");   
-        newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int maxChar, int doExt, int maxVars,  TOrderingOpts oopts, proc ordString");
+        newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int minChar, int maxChar, int doExt, int maxVars,  TOrderingOpts oopts, proc ordString");
         //newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int maxChar, int doExt, int maxVars");
         newstruct("TRandomRingGens", "proc randomOrd, proc getMinPolyStr, proc ordString, proc getChar, proc doExt, proc numVars, proc getRing");            
     }
@@ -180,15 +180,20 @@ proc randomBlock(numVars)
 }
 
 
-proc randomChar(maxChar)
+proc randomChar(minChar, maxChar)
 {
+    ASSUME(0, minChar>=0);
     ASSUME(0, maxChar>=0);
-    if (maxChar==0) { return (0); }
+    ASSUME(0, minChar<=maxChar);
+   if (maxChar==0) { return (0); }
 
+   if (minChar==0)
+   {
     int zero = random(0,1);    
     if ( (zero) ) { return (0); }
+   }
 
-    int preNextChar = random(0,maxChar);
+    int preNextChar = random(minChar,maxChar);
     return( prime(preNextChar) );
 }
 
@@ -552,7 +557,7 @@ proc testRandomWeightedBlockOrdering()
   {
      string cmd = "proc getRandomChar()
      {
-         return (randomChar( "+string(ropts.maxChar)+" ));
+         return (randomChar( "+string(ropts.minChar)+","+string(ropts.maxChar)+" ));
      }";
      execute(cmd);
      return (getRandomChar);
