@@ -84,11 +84,7 @@ proc testGroebner( getRng, gens, optionlist, trials, basic, logfile )
        
        //if ( hasGlobalOrdering(basering))
        //{
-           dbprint(1,"ASSUME(0, size(gJ)== size(ggJ) );");
-           ASSUME(0, size(gJ)== size(ggJ) );
-           
-           dbprint(1,"ASSUME(0, size(gI)== size(ggI) );");
-           ASSUME(0, size(gI)== size(ggI) );
+
        //}
    
        dbprint(1,"ASSUME(0, idealsAreEqual(gI,ggI ));");
@@ -113,6 +109,13 @@ proc testGroebner( getRng, gens, optionlist, trials, basic, logfile )
   
           if ( optionIsSet("redSB") )
           {
+
+           dbprint(1,"ASSUME(0, size(gJ)== size(ggJ) );");
+           ASSUME(0, size(gJ)== size(ggJ) );
+           
+           dbprint(1,"ASSUME(0, size(gI)== size(ggI) );");
+           ASSUME(0, size(gI)== size(ggI) );
+
 
                 if (not idealRepresentationReducedTail(gI ) )
                 {
