@@ -1705,7 +1705,32 @@ proc intersectPrimaryDecomposition(list pdecomp)
     return(I);
 }
 
+proc qringStdCheck( J, gJ )
+{
+    def rl = ringlist(basering);
+    def BAS = basering;
+    rl[4] = ideal(0);
+    def rngnew = ring(rl);
+    ideal Q = ideal(BAS);
+    
+    ideal QJ= fetch(BAS,J);
 
+    ideal gQJ= fetch(BAS,gJ);
+
+    ideal A = Q,QJ;
+
+    ideal gA = std(A);
+
+    ideal pgQJ = Q, gQJ;
+
+    attrib(pgQJ, "isSB", 1);
+
+    ASSUME(0, 0==size(reduce( pgQJ, gA )) ) ; // expected 0
+
+    ASSUME(0, 0==size( reduce( gA , pgQJ )) ) ; // expected 0
+    
+    
+}
 proc weakSBCheck(ideal I)
 {
 
