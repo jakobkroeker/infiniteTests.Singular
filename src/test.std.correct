@@ -45,7 +45,7 @@ proc testGroebner( getRng, gens, optionlist, trials, basic, logfile )
        write(":w "+logfile,emptystring);
        dbprint(1, "LIB \"primdec.lib\";");
        dbprint(1, "LIB \"wrappers.lib\";");
-       dbprint(1, "LIB \"src/automatedTests.lib\" ;");
+       dbprint(1, "LIB \"src/randomRing.lib\" ;");
        dbprint( 1, "ring rng = "  + string( basering)+";" );
        dbprint( 1, "short = 0 ;" );
        dbprint( 1, "minpoly = " + string(minpoly) + ";");
