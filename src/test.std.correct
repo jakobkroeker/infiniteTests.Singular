@@ -14,18 +14,18 @@ proc testGroebner( getRng, gens, optionlist, trials, basic, logfile )
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
-      def rng = getRandomRing(gens);
+      def rng = getRandomRing( );
       setring rng;
       option(warn);
       
     short = 0;
     int trial;
 
-    while( trial<trials )
+    while( 1 )
     {   
       option(nowarn);  
       kill rng;      
-      def rng = getRandomRing(gens);
+      def rng = getRandomRing( );
       setring rng;
       ideal cs,  I, J, gI, gJ, ggI, ggJ;
 
@@ -104,51 +104,51 @@ proc testGroebner( getRng, gens, optionlist, trials, basic, logfile )
        dbprint(1,"ASSUME(0, idealsEqual(gJ,ggJ ));");
        ASSUME(0, idealsEqual(gJ,ggJ ));
 
-      if (basic)
+      if (not (checkRedSB))
       {
          continue;
       }
       if ( hasGlobalOrdering(basering))
       {
-          if ( optionIsSet("redTail") )
-          {
-            if (not idealRepresentationReducedTail(gI ) )
-            {
-               dbprint( 1, "//        gI = "+string(gI) );
-            }
-            if (not idealRepresentationReducedTail(ggI ) )
-            {
-               dbprint( 1, "//        ggI = "+string(ggI) +";");
-            }
-            if (not idealRepresentationReducedTail(gJ ) )
-            {
-               dbprint( 1, "//        gJ = "+string(gJ) );
-            }
-            if (not idealRepresentationReducedTail(ggJ ) )
-            {
-               dbprint( 1, "//        ggJ = "+string(ggJ) +";");
-            }
-            
-           dbprint(1,"ASSUME(0, idealRepresentationReducedTail( gI ));");
-           ASSUME(0, idealRepresentationReducedTail( gI ));
-           dbprint(1,"ASSUME(0, idealRepresentationReducedTail( ggI ));");
-           ASSUME(0, idealRepresentationReducedTail( ggI ));
-           
-           dbprint(1,"ASSUME(0, idealRepresentationReducedTail( gJ ));");
-           ASSUME(0, idealRepresentationReducedTail( gJ ));
-           dbprint(1,"ASSUME(0, idealRepresentationReducedTail( ggJ ));");
-           ASSUME(0, idealRepresentationReducedTail( ggJ ));
-          }
+  
           if ( optionIsSet("redSB") )
           {
-           dbprint(1,"ASSUME(0, idealRepresentationReduced( gI ));");
-           ASSUME(0, idealRepresentationReduced( gI ));
-           dbprint(1,"ASSUME(0, idealRepresentationReduced( ggI ));");
-           ASSUME(0, idealRepresentationReduced( ggI ));
-           dbprint(1,"ASSUME(0, idealRepresentationReduced( gJ ));");
-           ASSUME(0, idealRepresentationReduced( gJ ));
-           dbprint(1,"ASSUME(0, idealRepresentationReduced( ggJ ));");
-           ASSUME(0, idealRepresentationReduced( ggJ ));
+
+                if (not idealRepresentationReducedTail(gI ) )
+                {
+                   dbprint( 1, "//        gI = "+string(gI) );
+                }
+                if (not idealRepresentationReducedTail(ggI ) )
+                {
+                   dbprint( 1, "//        ggI = "+string(ggI) +";");
+                }
+                if (not idealRepresentationReducedTail(gJ ) )
+                {
+                   dbprint( 1, "//        gJ = "+string(gJ) );
+                }
+                if (not idealRepresentationReducedTail(ggJ ) )
+                {
+                   dbprint( 1, "//        ggJ = "+string(ggJ) +";");
+                }
+
+               dbprint(1,"ASSUME(0, idealRepresentationReducedTail( gI ));");
+               ASSUME(0, idealRepresentationReducedTail( gI ));
+               dbprint(1,"ASSUME(0, idealRepresentationReducedTail( ggI ));");
+               ASSUME(0, idealRepresentationReducedTail( ggI ));
+               
+               dbprint(1,"ASSUME(0, idealRepresentationReducedTail( gJ ));");
+               ASSUME(0, idealRepresentationReducedTail( gJ ));
+               dbprint(1,"ASSUME(0, idealRepresentationReducedTail( ggJ ));");
+               ASSUME(0, idealRepresentationReducedTail( ggJ ));
+
+               dbprint(1,"ASSUME(0, idealRepresentationReduced( gI ));");
+               ASSUME(0, idealRepresentationReduced( gI ));
+               dbprint(1,"ASSUME(0, idealRepresentationReduced( ggI ));");
+               ASSUME(0, idealRepresentationReduced( ggI ));
+               dbprint(1,"ASSUME(0, idealRepresentationReduced( gJ ));");
+               ASSUME(0, idealRepresentationReduced( gJ ));
+               dbprint(1,"ASSUME(0, idealRepresentationReduced( ggJ ));");
+               ASSUME(0, idealRepresentationReduced( ggJ ));
           }
 
       }
