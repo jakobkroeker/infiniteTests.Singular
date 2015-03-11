@@ -104,8 +104,8 @@ proc testGroebner( getRng, gens, optionlist, trials, basic, logfile )
       {
          continue;
       }
-      if ( hasGlobalOrdering(basering))
-      {
+     // if ( hasGlobalOrdering(basering))
+     // {
   
           if ( optionIsSet("redSB") )
           {
@@ -154,7 +154,7 @@ proc testGroebner( getRng, gens, optionlist, trials, basic, logfile )
                ASSUME(0, idealRepresentationReduced( ggJ ));
           }
 
-      }
+   //   }
 
 
    /*
