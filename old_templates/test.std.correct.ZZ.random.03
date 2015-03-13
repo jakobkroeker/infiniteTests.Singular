@@ -51,7 +51,7 @@ proc getRandomRing(  )
          
    string str_rng = "ring rng = integer,"+vstr+",";  
    
-   string orderingString = randomBlockOrdering(oopts, numVars);   
+   string orderingString = randomGLWBlockOrdering(oopts, numVars);   
 
    str_rng = str_rng + orderingString + ";";
    execute(str_rng);
