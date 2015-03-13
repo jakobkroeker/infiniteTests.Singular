@@ -1,30 +1,35 @@
 
-option("nowarn");
 
 LIB("bugs/test.std.correct");
 
 LIB("src/randomRing.lib");
-
+//monitor("log/test.std.correct.00","io");
 
 
 
 //////////////////////////////////////////////////////////////////////////////// 
 //////// adjust verbosity
-printlevel = 2 ;
+printlevel = 0 ;
 TRACE = 0;
-echo  = 2;
+echo  = 0;
 
 //////// adjust random ideal generator params: 
 def genParams = defaultRandomConstructionParams();
 
-//genParams.absMaxCoeff       = 150;
 genParams.absMaxCoeff       = 10;
 genParams.minVarFactorsPerMonomial = 0;
-genParams.maxVarFactorsPerMonomial = 3;
+genParams.maxVarFactorsPerMonomial = 3; // max degree
 genParams.maxTermsPerGen    = 2;
 genParams.maxGens           = 2;
 
 def gens = createRandomGeneratorsByParams( genParams  );
+
+
+option("nowarn");
+
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+def optionlist = list ("redSB", "redTail");
 
   TOrderingOpts oopts;  
   oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
@@ -35,29 +40,20 @@ def gens = createRandomGeneratorsByParams( genParams  );
   oopts.maxWeight = 5; //rename to maxWeight
 
 
-//////// adjust num of trials  
-int trials = 100000000;
-//////////////////////////////////////////////////////////////////////////////// 
- 
-def optionlist = list ("redSB", "redTail");
-
 proc getRandomRing(  )
 {
 
-  int maxVars = 4;
+    int maxVars = 3;
    
    int numVars = random(1,maxVars);
 
    string vstr = "(x(1.."+string(numVars)+"))";
          
    string str_rng = "ring rng = integer,"+vstr+",";  
-
-   string orderingString = randomBlockOrdering(oopts, numVars);   
-
+   
+   string orderingString = randomGLWBlockOrdering(oopts, numVars);   
    str_rng = str_rng + orderingString + ";";
-
    execute(str_rng);
-
    setring rng;
 
    return (basering);
@@ -65,7 +61,11 @@ proc getRandomRing(  )
 
 option("warn");
 
+int trials = 10000;
+
 int checkRedSB=1;
 
 testGroebner( getRandomRing, gens, optionlist, trials,checkRedSB, logfile);
+
+
 
