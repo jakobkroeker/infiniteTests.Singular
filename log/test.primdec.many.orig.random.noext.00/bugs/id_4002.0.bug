@@ -1,0 +1,19 @@
+proc tt()
+{
+////////////////////////////////////////////////////////////////////////////////////////
+def assumeLevel = 3;
+//  voice = 2;
+system("random",1280187872);
+//random: 1280187872
+LIB("bugs/test.primdec.many.orig");
+intvec op = 0,16787537;
+ring rng = (109),(x(1),x(2),x(3),x(4),x(5)),(lp(1),Dp(2),lp(1),lp(1),C);
+minpoly = 0;
+ideal I = -48*x(1)*x(3)*x(4)-34,50*x(1)*x(5)^2-42*x(2)*x(4)*x(5)-3*x(4);
+bigint trial = 142;
+    def minAss1,minAss1e;
+list  PL,ML;
+  PL[1] = primdecGTZ(I);
+  testPrimary(PL[1],I);
+}
+tt();
