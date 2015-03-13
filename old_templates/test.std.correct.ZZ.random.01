@@ -3,7 +3,7 @@ option("nowarn");
 
 LIB("bugs/test.std.correct");
 
-LIB("src/automatedTests.lib");
+LIB("src/randomRing.lib");
 
 
 
@@ -26,7 +26,13 @@ genParams.maxGens           = 2;
 
 def gens = createRandomGeneratorsByParams( genParams  );
 
+  TOrderingOpts oopts;  
+  oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
 
+ oopts.randomOrd = chooseGlobalOrdering; // see randomRing
+ 
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
 
 
 //////// adjust num of trials  
@@ -38,9 +44,15 @@ def optionlist = list ("redSB", "redTail");
 proc getRandomRing(  )
 {
 
-   string str_rng = "ring rng = (integer),(x, y, z),";
+  int maxVars = 4;
+   
+   int numVars = random(1,maxVars);
 
-   string orderingString = randomBlockOrdering(randomOrdering, 3);
+   string vstr = "(x(1.."+string(numVars)+"))";
+         
+   string str_rng = "ring rng = integer,"+vstr+",";  
+
+   string orderingString = randomGLWBlockOrdering(oopts, numVars);   
 
    str_rng = str_rng + orderingString + ";";
 
@@ -53,5 +65,7 @@ proc getRandomRing(  )
 
 option("warn");
 
-testGroebner( getRandomRing, gens, optionlist, trials, logfile);
+int checkRedSB=1;
+
+testGroebner( getRandomRing, gens, optionlist, trials,checkRedSB, logfile);
 

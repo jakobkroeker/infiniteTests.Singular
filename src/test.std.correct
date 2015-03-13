@@ -14,18 +14,18 @@ proc testGroebner( getRng, gens, optionlist, trials, basic, logfile )
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
-      def rng = getRandomRing(gens);
+      def rng = getRandomRing( );
       setring rng;
       option(warn);
       
     short = 0;
     int trial;
 
-    while( trial<trials )
+    while( 1 )
     {   
       option(nowarn);  
       kill rng;      
-      def rng = getRandomRing(gens);
+      def rng = getRandomRing( );
       setring rng;
       ideal cs,  I, J, gI, gJ, ggI, ggJ;
 
@@ -45,7 +45,7 @@ proc testGroebner( getRng, gens, optionlist, trials, basic, logfile )
        write(":w "+logfile,emptystring);
        dbprint(1, "LIB \"primdec.lib\";");
        dbprint(1, "LIB \"wrappers.lib\";");
-       dbprint(1, "LIB \"src/automatedTests.lib\" ;");
+       dbprint(1, "LIB \"src/randomRing.lib\" ;");
        dbprint( 1, "ring rng = "  + string( basering)+";" );
        dbprint( 1, "short = 0 ;" );
        dbprint( 1, "minpoly = " + string(minpoly) + ";");
@@ -82,14 +82,10 @@ proc testGroebner( getRng, gens, optionlist, trials, basic, logfile )
        dbprint(1, "ASSUME(0, 0== size( std(reduce (J,gJ ) ))  );");
        ASSUME(0, 0== size( std(reduce (J,gJ ) ))  );
        
-       if ( hasGlobalOrdering(basering))
-       {
-           dbprint(1,"ASSUME(0, size(gJ)== size(ggJ) );");
-           ASSUME(0, size(gJ)== size(ggJ) );
-           
-           dbprint(1,"ASSUME(0, size(gI)== size(ggI) );");
-           ASSUME(0, size(gI)== size(ggI) );
-       }
+       //if ( hasGlobalOrdering(basering))
+       //{
+
+       //}
    
        dbprint(1,"ASSUME(0, idealsAreEqual(gI,ggI ));");
        ASSUME(0, idealsAreEqual(gI,ggI ));
@@ -104,54 +100,61 @@ proc testGroebner( getRng, gens, optionlist, trials, basic, logfile )
        dbprint(1,"ASSUME(0, idealsEqual(gJ,ggJ ));");
        ASSUME(0, idealsEqual(gJ,ggJ ));
 
-      if (basic)
+      if (not (checkRedSB))
       {
          continue;
       }
-      if ( hasGlobalOrdering(basering))
-      {
-          if ( optionIsSet("redTail") )
-          {
-            if (not idealRepresentationReducedTail(gI ) )
-            {
-               dbprint( 1, "//        gI = "+string(gI) );
-            }
-            if (not idealRepresentationReducedTail(ggI ) )
-            {
-               dbprint( 1, "//        ggI = "+string(ggI) +";");
-            }
-            if (not idealRepresentationReducedTail(gJ ) )
-            {
-               dbprint( 1, "//        gJ = "+string(gJ) );
-            }
-            if (not idealRepresentationReducedTail(ggJ ) )
-            {
-               dbprint( 1, "//        ggJ = "+string(ggJ) +";");
-            }
-            
-           dbprint(1,"ASSUME(0, idealRepresentationReducedTail( gI ));");
-           ASSUME(0, idealRepresentationReducedTail( gI ));
-           dbprint(1,"ASSUME(0, idealRepresentationReducedTail( ggI ));");
-           ASSUME(0, idealRepresentationReducedTail( ggI ));
-           
-           dbprint(1,"ASSUME(0, idealRepresentationReducedTail( gJ ));");
-           ASSUME(0, idealRepresentationReducedTail( gJ ));
-           dbprint(1,"ASSUME(0, idealRepresentationReducedTail( ggJ ));");
-           ASSUME(0, idealRepresentationReducedTail( ggJ ));
-          }
+     // if ( hasGlobalOrdering(basering))
+     // {
+  
           if ( optionIsSet("redSB") )
           {
-           dbprint(1,"ASSUME(0, idealRepresentationReduced( gI ));");
-           ASSUME(0, idealRepresentationReduced( gI ));
-           dbprint(1,"ASSUME(0, idealRepresentationReduced( ggI ));");
-           ASSUME(0, idealRepresentationReduced( ggI ));
-           dbprint(1,"ASSUME(0, idealRepresentationReduced( gJ ));");
-           ASSUME(0, idealRepresentationReduced( gJ ));
-           dbprint(1,"ASSUME(0, idealRepresentationReduced( ggJ ));");
-           ASSUME(0, idealRepresentationReduced( ggJ ));
+
+           dbprint(1,"ASSUME(0, size(gJ)== size(ggJ) );");
+           ASSUME(0, size(gJ)== size(ggJ) );
+           
+           dbprint(1,"ASSUME(0, size(gI)== size(ggI) );");
+           ASSUME(0, size(gI)== size(ggI) );
+
+
+                if (not idealRepresentationReducedTail(gI ) )
+                {
+                   dbprint( 1, "//        gI = "+string(gI) );
+                }
+                if (not idealRepresentationReducedTail(ggI ) )
+                {
+                   dbprint( 1, "//        ggI = "+string(ggI) +";");
+                }
+                if (not idealRepresentationReducedTail(gJ ) )
+                {
+                   dbprint( 1, "//        gJ = "+string(gJ) );
+                }
+                if (not idealRepresentationReducedTail(ggJ ) )
+                {
+                   dbprint( 1, "//        ggJ = "+string(ggJ) +";");
+                }
+
+               dbprint(1,"ASSUME(0, idealRepresentationReducedTail( gI ));");
+               ASSUME(0, idealRepresentationReducedTail( gI ));
+               dbprint(1,"ASSUME(0, idealRepresentationReducedTail( ggI ));");
+               ASSUME(0, idealRepresentationReducedTail( ggI ));
+               
+               dbprint(1,"ASSUME(0, idealRepresentationReducedTail( gJ ));");
+               ASSUME(0, idealRepresentationReducedTail( gJ ));
+               dbprint(1,"ASSUME(0, idealRepresentationReducedTail( ggJ ));");
+               ASSUME(0, idealRepresentationReducedTail( ggJ ));
+
+               dbprint(1,"ASSUME(0, idealRepresentationReduced( gI ));");
+               ASSUME(0, idealRepresentationReduced( gI ));
+               dbprint(1,"ASSUME(0, idealRepresentationReduced( ggI ));");
+               ASSUME(0, idealRepresentationReduced( ggI ));
+               dbprint(1,"ASSUME(0, idealRepresentationReduced( gJ ));");
+               ASSUME(0, idealRepresentationReduced( gJ ));
+               dbprint(1,"ASSUME(0, idealRepresentationReduced( ggJ ));");
+               ASSUME(0, idealRepresentationReduced( ggJ ));
           }
 
-      }
+   //   }
 
 
    /*
