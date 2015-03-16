@@ -501,7 +501,8 @@ static proc randomGLWBlockOrdering_i(oopts, numvars , mixed )
     string result = "(";
     for ( pos=1; pos <=size(block); pos++ )
     {
-         if (mixed) {    boType = oopts.randomOrd(); }
+         
+         if (mixed) { dbprint(1, "//mixed");   boType = oopts.randomOrd(); }
          result = result + randomGLWBlock(boType, block[pos], oopts);
          if  (pos< size(block) )
          {
