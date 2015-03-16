@@ -1,0 +1,75 @@
+
+option("nowarn");
+
+LIB("bugs/test.std.extend");
+
+LIB("src/randomRing.lib");
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 2 ;
+TRACE = 0;
+echo  = 2;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+//genParams.absMaxCoeff       = 150;
+genParams.absMaxCoeff       = 20;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 2;
+
+def genTable = createRandomGeneratorsByParams( genParams  );
+
+  TOrderingOpts oopts;  
+ oopts.randomOrd = chooseGlobalOrdering; // see randomRing
+ 
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
+
+  // minpoly settings
+  TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
+
+  minpolyGenParams.absMaxCoeff       = 300;
+  minpolyGenParams.minVarFactorsPerMonomial = 0;
+  minpolyGenParams.maxVarFactorsPerMonomial = 3;
+  minpolyGenParams.maxTermsPerGen    = 4;
+  minpolyGenParams.bFractionsOn      = 0;
+ 
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+def optionlist = list ("redSB", "redTail");
+
+ //////////////////////  composing ring options  //////////////// 
+  TRandomRingOpts ropts;
+  ropts.minChar = 0;
+  ropts.maxChar = 200;
+  ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.maxVars = 2;
+  
+  ropts.minpolyGenParams = minpolyGenParams;
+  ropts.oopts   = oopts;     //rename to monomialOrderingOpts
+
+  //ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
+ 
+  ropts.ordString = randomGLWOrdering; // rename to ordStringP or ordStringF
+ 
+  /////////////////////////////////////////////////////////////////////////////////////////
+
+  TRandomRingGens rgens = createRandomRingGens(ropts);  
+
+  // def R = rgens.getRing(); setring R;
+
+option(warn);
+
+int trials = 10000000;
+
+int checkRedSB=1;
+
+testGroebnerAppend( rgens.getRing, genTable, optionlist, trials,checkRedSB, logfile);
+
