@@ -206,7 +206,9 @@ proc randomGlobalOrdering()
 
 
 proc straightBlockString(sord,blocksize)
-{
+{ 
+
+  dbprint(1, "// sord : "+ sord);
   return(sord + "("+ string(blocksize) + ")");
 }
 
@@ -392,6 +394,7 @@ proc  randomWeightedOrderingBlock(word, blocksize, oopts)
 
 proc randomGLWBlock(word, blocksize, oopts)
 {
+   dbprint(1, " //// word: "+word);
    if (isWeightedOrderingStr(word))
    {
       return( randomWeightedOrderingBlock(word, blocksize, oopts) );
@@ -496,14 +499,17 @@ static proc randomGLWBlockOrdering_i(oopts, numvars , mixed )
 {
     string boType = oopts.randomOrd();
     intvec block = randomBlock(numvars);
-
+    
     int pos;
     string result = "(";
     for ( pos=1; pos <=size(block); pos++ )
     {
-         
+         dbprint(1, "// ");
+         dbprint(1, "// pos : " + string(result));
          if (mixed) { dbprint(1, "//mixed");   boType = oopts.randomOrd(); }
+         dbprint(1, "// boType : " + boType);
          result = result + randomGLWBlock(boType, block[pos], oopts);
+         dbprint(1, "// result : " + result);
          if  (pos< size(block) )
          {
             result = result + ", ";
@@ -523,6 +529,18 @@ proc randomGLWBlockOrdering(oopts, numvars)
 {
    return(randomGLWBlockOrdering_i(oopts, numvars , 0 ));
 }
+
+
+
+
+proc randomGLWOrdering(oopts, numvars)
+{
+    string boType = oopts.randomOrd();
+    string result = "("+boType+ ")";
+    return (result);
+}
+
+
 
 
 proc testRandomWeightedBlockOrdering()
@@ -602,6 +620,7 @@ proc testRandomWeightedBlockOrdering()
      
      cmd = "proc ordString(numVars)
      {
+         dbprint(1, \"ordstrname \",RandomRing::"+ringOptsName+".ordString);
          return(RandomRing::"+ringOptsName+".ordString(RandomRing::"+ringOptsName+".oopts, numVars ));
      }
      ";
