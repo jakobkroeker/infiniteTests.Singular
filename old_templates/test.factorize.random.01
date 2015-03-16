@@ -3,9 +3,8 @@ option("nowarn");
 
 LIB("ellipticcovers.lib");
 
-LIB("src/automatedTests.lib");
-
 LIB("randomIdeal.lib");
+LIB("src/randomRing.lib");
 
 LIB("src/test.factorize.lib");
 

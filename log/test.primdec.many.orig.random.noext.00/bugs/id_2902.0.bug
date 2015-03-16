@@ -1,0 +1,18 @@
+proc tt()
+{
+////////////////////////////////////////////////////////////////////////////////////////
+def assumeLevel = 3;
+//  voice = 2;
+system("random",1266950076);
+//random: 1266950076
+LIB("bugs/test.primdec.many.orig");
+intvec op = 67108864,16787537;
+ring rng = (0),(x(1),x(2),x(3),x(4),x(5)),(lp(1),rp(4),C);
+minpoly = 0;
+ideal I = 33/76*x(2)*x(3)*x(4)-28,95/276*x(1)*x(4)^2-13*x(1)*x(2);
+bigint trial = 468;
+    def minAss1,minAss1e;
+list  PL,ML;
+  PL[1] = primdecSYNoOptimalOrdering(I);
+}
+tt();

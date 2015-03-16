@@ -16,13 +16,20 @@ echo  = 0;
 //////// adjust random ideal generator params: 
 def genParams = defaultRandomConstructionParams();
 
-genParams.absMaxCoeff       = 50;
+genParams.absMaxCoeff       = 10;
 genParams.minVarFactorsPerMonomial = 0;
-genParams.maxVarFactorsPerMonomial = 5;
-genParams.maxTermsPerGen    = 3;
-genParams.maxGens           = 3;
+genParams.maxVarFactorsPerMonomial = 3; // max degree
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 2;
 
 def gens = createRandomGeneratorsByParams( genParams  );
+
+
+option("nowarn");
+
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+def optionlist = list ("redSB", "redTail");
 
   TOrderingOpts oopts;  
   oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
@@ -31,38 +38,30 @@ def gens = createRandomGeneratorsByParams( genParams  );
  
   oopts.minWeight = -10; //rename to minWeight
   oopts.maxWeight = 5; //rename to maxWeight
-  
-option("nowarn");
 
-//////// adjust num of trials  
-int trials = 100000000;
-//////////////////////////////////////////////////////////////////////////////// 
- 
-def optionlist = list ("redSB", "redTail");
 
 proc getRandomRing(  )
 {
 
-int maxVars = 3;
+    int maxVars = 3;
    
    int numVars = random(1,maxVars);
 
    string vstr = "(x(1.."+string(numVars)+"))";
          
    string str_rng = "ring rng = integer,"+vstr+",";  
-
+   
    string orderingString = randomGLWBlockOrdering(oopts, numVars);   
-
    str_rng = str_rng + orderingString + ";";
-
    execute(str_rng);
-
    setring rng;
 
    return (basering);
 }
 
 option("warn");
+
+int trials = 10000;
 
 int checkRedSB=1;
 

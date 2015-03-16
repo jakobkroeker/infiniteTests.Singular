@@ -1,0 +1,27 @@
+proc tt()
+{
+////////////////////////////////////////////////////////////////////////////////////////
+def assumeLevel = 3;
+//  voice = 2;
+system("random",427271349);
+//random: 427271349
+LIB("bugs/test.primdec.many.orig");
+intvec op = 0,16787537;
+ring rng = (31),(x(1),x(2),x(3)),(lp(3),C);
+minpoly = 0;
+ideal I = 4*x(1)-2*x(2),-6*x(1)^3-6*x(1)*x(3)^2-3*x(2)^2*x(3),-15*x(3)^2-11;
+bigint trial = 147;
+    def minAss1,minAss1e;
+list  PL,ML;
+  PL[1] = minAssGTZ(I);
+  PL[2] = minAssGTZFacSTD(I);
+ASSUME(0, minAssDecompAreEquivalent(PL[1],PL[2]));
+  PL[3] = minAssGTZGTZ(I);
+ASSUME(0, minAssDecompAreEquivalent(PL[2],PL[3]));
+minAss1  = minAss(I);
+  PL[1] = primdecSYNoOptimalOrdering(I);
+ASSUME(0, testPrimary( PL[1] , I ) );
+  PL[2] = primdecGTZ(I);
+ASSUME(0, primDecsAreEquivalent(PL[1],PL[2]));
+}
+tt();
