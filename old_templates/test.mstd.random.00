@@ -1,0 +1,76 @@
+
+
+LIB("bugs/test.mstd");
+
+LIB("src/randomRing.lib");
+//monitor("log/test.std.correct.00","io");
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+def assumeLevel=3;
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 300;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3;
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 3;
+genParams.bFractionsOn      = 1;
+
+def genTable = createRandomGeneratorsByParams( genParams  );
+
+ def optionlist = list ("redSB", "redTail");
+ 
+ ////////////////////////////////// random ring options   ////////////////////////////////
+  
+ // ordering settings
+  TOrderingOpts oopts;  
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
+  oopts.randomOrd = chooseStraightGlobalOrdering; //rename to ordStringP
+  
+  // minpoly settings
+  TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
+
+  minpolyGenParams.absMaxCoeff       = 300;
+  minpolyGenParams.minVarFactorsPerMonomial = 0;
+  minpolyGenParams.maxVarFactorsPerMonomial = 3;
+  minpolyGenParams.maxTermsPerGen    = 4;
+  minpolyGenParams.bFractionsOn      = 0;
+ 
+  //////////////////////  composing ring options  //////////////// 
+  TRandomRingOpts ropts;
+  ropts.minChar = 0;
+  ropts.maxChar = 200;
+  ropts.doExt   = 2; //0:no; 1:yes; 2:randomly
+  ropts.maxVars = 5;
+  
+  ropts.minpolyGenParams = minpolyGenParams;
+  ropts.oopts   = oopts;     //rename to monomialOrderingOpts
+
+  ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
+ 
+  /////////////////////////////////////////////////////////////////////////////////////////
+
+  TRandomRingGens rgens = createRandomRingGens(ropts);  
+
+  // def R = rgens.getRing(); setring R;
+
+option(warn);
+
+int trials = 10000000;
+
+
+int checkRedSB=1;
+
+testMStd( rgens.getRing, genTable, optionlist, trials,checkRedSB, logfile);
+
+
+
