@@ -2,7 +2,7 @@
 
 LIB("bugs/test.std.correct");
 
-LIB("src/automatedTests.lib");
+LIB("src/randomRing.lib");
 //monitor("log/test.std.correct.00","io");
 
 
@@ -49,9 +49,17 @@ proc getRandomRing(  )
    return (basering);
 }
 
+TGroebnerTestFlags flags = defaultGroebnerTestFlags();
+
+  flags.reduceTest = 0;
+  flags.repeatApplication = 0;
+  flags.equalTest = 0;
+  flags.optionflagTest = 0;
+  
+
 option("warn");
 
-testGroebner( getRandomRing, gens, optionlist, trials, logfile);
+testGroebner( getRandomRing, gens, optionlist, trials, flags, logfile);
 
 
 
