@@ -1,0 +1,77 @@
+
+option("nowarn");
+
+LIB("bugs/test.std.correct");
+
+LIB("src/randomRing.lib");
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 2 ;
+TRACE = 0;
+echo  = 2;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+//genParams.absMaxCoeff       = 150;
+genParams.absMaxCoeff       = 40;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 2;
+
+def gens = createRandomGeneratorsByParams( genParams  );
+
+  TOrderingOpts oopts;  
+  oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
+
+ oopts.randomOrd = chooseGlobalOrdering; // see randomRing
+ 
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
+
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+def optionlist = list ("redSB", "redTail");
+
+proc getRandomRing(  )
+{
+
+  int maxVars = 2;
+   
+   int numVars = random(1,maxVars);
+
+   string vstr = "(x(1.."+string(numVars)+"))";
+         
+   string str_rng = "ring rng = integer,"+vstr+",";  
+
+   string orderingString = randomGLWBlockOrdering(oopts, numVars);   
+
+   str_rng = str_rng + orderingString + ";";
+
+   execute(str_rng);
+
+   setring rng;
+
+   return (basering);
+}
+
+TGroebnerTestFlags flags = defaultGroebnerTestFlags();
+
+  flags.reduceTest = 0;
+  flags.repeatApplication = 1;
+  flags.equalTest = 0;
+  flags.optionflagTest = 0;
+  
+
+option("warn");
+
+testGroebner( getRandomRing, gens, optionlist, trials, flags, logfile);
+

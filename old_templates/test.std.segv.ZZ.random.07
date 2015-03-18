@@ -1,0 +1,65 @@
+
+
+LIB("bugs/test.std.correct");
+
+LIB("src/randomRing.lib");
+//monitor("log/test.std.correct.00","io");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 30;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 2;
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 3;
+
+def gens = createRandomGeneratorsByParams( genParams  );
+
+
+option("nowarn");
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+def optionlist = list ("redSB", "redTail");
+
+proc getRandomRing(  )
+{
+
+   string str_rng = "ring rng = (integer),(x, y, z,w),";
+
+   string orderingString = randomBlockOrdering(randomOrdering, 4);
+
+   str_rng = str_rng + orderingString + ";";
+
+   execute(str_rng);
+
+   setring rng;
+
+   return (basering);
+}
+
+TGroebnerTestFlags flags = defaultGroebnerTestFlags();
+
+  flags.reduceTest = 0;
+  flags.repeatApplication = 1;
+  flags.equalTest = 0;
+  flags.optionflagTest = 0;
+  
+
+option("warn");
+
+testGroebner( getRandomRing, gens, optionlist, trials, flags, logfile);
+
+
+
