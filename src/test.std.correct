@@ -73,7 +73,11 @@ proc testGroebner( getRng, gens, optionlist, trials, testflags, logfile )
        dbprint(1, "LIB \"src/randomRing.lib\" ;");
        dbprint( 1, "ring rng = "  + string( basering)+";" );
        dbprint( 1, "short = 0 ;" );
-       dbprint( 1, "minpoly = " + string(minpoly) + ";");
+       
+       if ( not ("0" == string(minpoly) ))
+       {
+         dbprint( 1, "minpoly = " + string(minpoly) + ";");
+       }
        dbprint( 1, "intvec op = "+string( option(get) )+";");           
        dbprint( 1, " option(set, op) ;");
        dbprint( 1, " option() ;");
