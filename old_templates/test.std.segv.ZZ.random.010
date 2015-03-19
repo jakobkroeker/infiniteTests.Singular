@@ -67,7 +67,7 @@ TGroebnerTestFlags flags = defaultGroebnerTestFlags();
   flags.equalTest = 0;
   flags.optionflagTest = 0;
   
-
+int trials = 10000;
 option("warn");
 
 testGroebner( getRandomRing, gens, optionlist, trials, flags, logfile);
