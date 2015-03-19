@@ -50,11 +50,6 @@ proc getRandomRing(  )
 }
 
 TGroebnerTestFlags flags = defaultGroebnerTestFlags();
-
-  flags.reduceTest = 0;
-  flags.repeatApplication = 0;
-  flags.equalTest = 0;
-  flags.optionflagTest = 0;
   
 
 option("warn");
