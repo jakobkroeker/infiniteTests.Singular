@@ -18,7 +18,7 @@ echo  = 2;
 def genParams = defaultRandomConstructionParams();
 
 //genParams.absMaxCoeff       = 150;
-genParams.absMaxCoeff       = 40;
+genParams.absMaxCoeff       = 50;
 genParams.minVarFactorsPerMonomial = 0;
 genParams.maxVarFactorsPerMonomial = 3;
 genParams.maxTermsPerGen    = 2;

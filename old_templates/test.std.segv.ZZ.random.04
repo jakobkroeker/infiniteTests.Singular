@@ -20,7 +20,7 @@ genParams.absMaxCoeff       = 45;
 genParams.minVarFactorsPerMonomial = 0;
 genParams.maxVarFactorsPerMonomial = 3; // max degree
 genParams.maxTermsPerGen    = 2;
-genParams.maxGens           = 2;
+genParams.maxGens           = 3;
 
 def gens = createRandomGeneratorsByParams( genParams  );
 

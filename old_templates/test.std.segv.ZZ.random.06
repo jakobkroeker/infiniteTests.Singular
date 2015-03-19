@@ -16,7 +16,7 @@ echo  = 0;
 //////// adjust random ideal generator params: 
 def genParams = defaultRandomConstructionParams();
 
-genParams.absMaxCoeff       = 10;
+genParams.absMaxCoeff       = 30;
 genParams.minVarFactorsPerMonomial = 0;
 genParams.maxVarFactorsPerMonomial = 3; // max degree
 genParams.maxTermsPerGen    = 2;
