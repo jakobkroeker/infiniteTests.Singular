@@ -1748,3 +1748,13 @@ proc weakSBCheck(ideal I)
   
 }
 
+
+proc checkRadicalEntries(list L)
+{
+  int i,j;
+  for (i=1;i<=size(L);i++)
+  {
+      ASSUME(0, idealsAreEqual( L[i][2], radical(L[i][1]) ) );
+  }
+}
+
