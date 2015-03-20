@@ -260,7 +260,9 @@ proc randomLocalWeights(wlen, wmin, wmax)
     int i;
     int www;
     
-    while (www<=0)   {   www =  random(wmin, wmax);  }
+    //while (www<=0)   { 
+      www =  random(wmin, wmax);  
+   //  }
       
     intvec vv = www;
     for (i = 2; i<=wlen; i++)

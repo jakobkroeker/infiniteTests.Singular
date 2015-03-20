@@ -53,10 +53,10 @@ proc testGroebner( getRng, gens, optionlist, trials, testflags, logfile )
 
       if (testflags.optionflagTest)
       {
-        //if ( hasGlobalOrdering(basering))
-        //{
+        if ( hasGlobalOrLocalOrdering(basering))
+        {
            chooseRandomOptionsFromList(optionlist);
-        //}
+        }
       }
       if (warnIsSet)
       {
@@ -163,7 +163,7 @@ proc testGroebner( getRng, gens, optionlist, trials, testflags, logfile )
      {
         continue;
      }
-     // if ( hasGlobalOrdering(basering))
+     // if ( hasGlobalOrLocalOrdering(basering))
      // {
   
           if ( optionIsSet("redSB") )
