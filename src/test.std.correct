@@ -285,7 +285,7 @@ proc testGroebnerAppend( getRng, gens, optionlist, trials, testflags, logfile )
       ideal cs,  I, J,gI,IJ, gIJ, gI_J, Ip, gIp, gI_p; 
       poly p ;
 
-      if ( hasGlobalOrdering(basering))
+      if ( hasGlobalOrLocalOrdering(basering))
       {
          chooseRandomOptionsFromList(optionlist);
       }
