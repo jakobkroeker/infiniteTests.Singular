@@ -163,8 +163,8 @@ proc testGroebner( getRng, gens, optionlist, trials, testflags, logfile )
      {
         continue;
      }
-     // if ( hasGlobalOrLocalOrdering(basering))
-     // {
+      if ( hasGlobalOrdering(basering))
+      {
   
           if ( optionIsSet("redSB") )
           {
@@ -233,7 +233,7 @@ proc testGroebner( getRng, gens, optionlist, trials, testflags, logfile )
 
           }
 
-   //   }
+      }
    
 
 
