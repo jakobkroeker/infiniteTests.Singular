@@ -16,7 +16,7 @@ echo  = 0;
 //////// adjust random ideal generator params: 
 def genParams = defaultRandomConstructionParams();
 
-genParams.absMaxCoeff       = 15;
+genParams.absMaxCoeff       = 45;
 genParams.minVarFactorsPerMonomial = 0;
 genParams.maxVarFactorsPerMonomial = 3; // max degree
 genParams.maxTermsPerGen    = 3;
@@ -43,7 +43,7 @@ def optionlist = list ("redSB", "redTail");
 proc getRandomRing(  )
 {
 
-    int maxVars = 3;
+    int maxVars = 4;
    
    int numVars = random(1,maxVars);
 
@@ -60,14 +60,17 @@ proc getRandomRing(  )
    return (basering);
 }
 
-option("warn");
-
-int trials = 10000;
-
 TGroebnerTestFlags flags = defaultGroebnerTestFlags();
-  
 
+  flags.reduceTest = 0;
+  flags.repeatApplication = 1;
+  flags.equalTest = 0;
+  flags.optionflagTest = 0;
+  
+int trials = 10000;
 option("warn");
 
 testGroebner( getRandomRing, gens, optionlist, trials, flags, logfile);
+
+
 

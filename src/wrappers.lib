@@ -1758,3 +1758,16 @@ proc checkRadicalEntries(list L)
   }
 }
 
+proc hasLocalOrdering(rng)
+{
+	if (ord_test(rng)==-1)         { return(1); }
+	return(0);
+}
+
+proc hasGlobalOrLocalOrdering(rng)
+{
+	if (ord_test(rng)==-1)         { return(1); }
+        if (hasGlobalOrdering(rng))    { return(1); }
+	return(0);
+}
+

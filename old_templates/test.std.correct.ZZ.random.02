@@ -65,8 +65,10 @@ proc getRandomRing(  )
 
 option("warn");
 
-int checkRedSB=1;
+TGroebnerTestFlags flags = defaultGroebnerTestFlags();
+  
 
-testGroebner( getRandomRing, gens, optionlist, trials,checkRedSB, logfile);
+option("warn");
 
+testGroebner( getRandomRing, gens, optionlist, trials, flags, logfile);
 

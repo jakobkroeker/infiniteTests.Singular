@@ -175,7 +175,7 @@ proc testMinAssDecomp(ideal I)
             
             i = 1;
             proc foo ;
-            dbprint(1, "  PL["+string(i)+"] = "+perm[i][1]+"(I);");
+            dbprint(1, "  ML["+string(i)+"] = "+perm[i][1]+"(I);");
             foo =  perm[i][2];
             ML[i] =  foo (I) ;
 
@@ -183,7 +183,7 @@ proc testMinAssDecomp(ideal I)
          
             for (i=2;i<=size(perm);i++)
             { 
-                  dbprint(1, "  PL["+string(i)+"] = "+perm[i][1]+"(I);");
+                  dbprint(1, "  ML["+string(i)+"] = "+perm[i][1]+"(I);");
                   foo =  perm[i][2];
                   ML[i] =  foo (I) ;
                   
