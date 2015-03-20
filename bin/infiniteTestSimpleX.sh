@@ -73,10 +73,10 @@ do
 
     if [ $keepLog -eq 1 ] 
     then
-        set -o pipefail; timeout -s SIGKILL $6 $2 -v < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee -a log/$filename/id_$idx.log;
+        set -o pipefail; timeout -s SIGKILL $6 $2 -v -r $(od -N 6 -t uL -An /dev/urandom | tr -d " ") < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee -a log/$filename/id_$idx.log;
         status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
     else
-        set -o pipefail; timeout -s SIGKILL $6 $2 -v < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee log/$filename/id_$idx.log;
+        set -o pipefail; timeout -s SIGKILL $6 $2 -v -r $(od -N 6 -t uL -An /dev/urandom | tr -d " ") < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee log/$filename/id_$idx.log;
         status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
     fi;
 
