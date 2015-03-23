@@ -79,8 +79,14 @@ do
         set -o pipefail; timeout -s SIGKILL $6 $2 -v -r $(od -N 6 -t uL -An /dev/urandom | tr -d " ") < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee log/$filename/id_$idx.log;
         status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
     fi;
-
-    if [ $status -eq 14 ] || [ $status -eq 137 ] || [ $status -eq 124 ] || [ $status -eq 0 ] || ( [ $status -eq 253 ] && [ $ignoreOverflow -eq 1 ] )
+    if [ $status -eq 253 ] || [ $status -eq 252 ]
+    then
+       overflow=1;
+    else
+       overflow=0;
+    fi;
+    
+    if [ $status -eq 14 ] || [ $status -eq 137 ] || [ $status -eq 124 ] || [ $status -eq 0 ] || ( [ $overflow -eq 1 ] && [ $ignoreOverflow -eq 1 ] )
     then
         # export count=$(($count )); 
         echo "doNothing ";echo "doNothing ">> log/$filename/id_$idx.log;
@@ -99,5 +105,6 @@ echo $1" "$2" "$3" "$4" "$6" "$7" "$8" "$9
 #out of mem:  14
 
 # singular exit codes:
-#overflow 253
+# overflow 253
+# expoent overflow - wrong ordering 252
 
