@@ -34,7 +34,7 @@ def optionlist = list ("redSB", "redTail");
   TOrderingOpts oopts;  
   oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
 
- oopts.randomOrd = chooseGlobalOrdering; // see randomRing
+ oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
  
   oopts.minWeight = -10; //rename to minWeight
   oopts.maxWeight = 5; //rename to maxWeight
