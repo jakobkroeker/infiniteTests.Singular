@@ -1,0 +1,33 @@
+//
+
+option(nowarn);
+LIB( "wrappers.lib" );
+LIB( "reslipman.lib" );
+LIB( "randomIdeal.lib" );
+LIB("src/randomRing.lib");
+LIB("bugs/test.lipmanresolve.lib");
+def assumeLevel = 3;
+
+
+def genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 10;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3; // max degree
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 3;
+
+def genTable = createRandomGeneratorsByParams( genParams  );
+
+ 
+  
+ring rng = 0,(x,y,z), dp;
+ 
+int trials = 1000000;
+
+option(warn);
+testLipmanResolve( rng, genTable.idealG,  trials, logfile );
+
+
+
+

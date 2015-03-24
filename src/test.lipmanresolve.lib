@@ -1,16 +1,19 @@
+//
+version="version test.lipmanresolve";
+category="algebraic geometry";
+info="
+";
 
 
-option("redSB");
-
-LIB("ringutils.lib");
-LIB("wrappers.lib");
-LIB("reslipman.lib");
-LIB("randomIdeal.lib");
+//LIB "ringutils.lib" ;
+//LIB "wrappers.lib" ;
+//LIB "reslipman.lib" ;
+//LIB "randomIdeal.lib" ;
 
 
-proc testLipmanResolve( rng, idealG, trials)
+proc testLipmanResolve( rng, idealG, trials, logfile)
 {
-    print ("testResolve");
+    print ("//testResolve");
     if (defined(basering) ) {   def BAS=basering; }
 
 
@@ -25,6 +28,7 @@ proc testLipmanResolve( rng, idealG, trials)
     for (trial = 1; trial<=trials; )
     {   
        setring rng;
+
 
        J = idealG();
        //dbprint( 1, "J:", J, "" );
@@ -46,17 +50,29 @@ proc testLipmanResolve( rng, idealG, trials)
            {
                if ( defined(Rnew) )  { kill Rnew; }
                execute(" ring Rnew = ("+charstr(rng)+"), ("+string( occuringVariableData[1] )+"), dp; ");
-               dbprint( 1, "rnew:", Rnew, "" );
-               ideal I = imap(rng,I);
+
+               //dbprint( 1, "rnew:", Rnew, "" );
+               ideal I = imap(rng,I);   
+             
                I = Radical(I);
                I = std(I);
-
+               
                if (    dimIdeal(I)==2 && ( not isZero(I) ) && ( not idealsAreEqual(ideal(1), I) )    )
                {
-                   print ( "trial: "+string(trial) );
-                   dbprint( 1, "basering:", basering, "" );
-                   dbprint( 1, "I:", I, "" );
-                   dbprint( 1, "call lipmanresolve", "" );
+                   write(":w "+logfile,emptystring);
+                   monitor(logfile,"io");
+                   write(":w "+logfile,emptystring);
+                   dbprint(1, "LIB \"wrappers.lib\";");
+                   dbprint(1, "LIB \"reslipman.lib\";");
+                   dbprint( 1, "ring rng = "  + string( basering)+";" );
+                   dbprint( 1, "short = 0 ;" );                   
+                   dbprint( 1, "intvec op = "+string( option(get) )+";");           
+                   dbprint( 1, " option(set, op) ;");
+                   dbprint( 1, " option() ;");
+                   dbprint( 1, " // option() ;" + option() );
+                   dbprint( 1, "int trial = " + string( trial) + ";" );
+                   dbprint( 1, "   ideal I = "+string(I)+";");
+                   dbprint( 1, "def L = lipmanresolve(I);" );
                    trial = trial+1;
                    L = lipmanresolve(I);
                    L; 
@@ -71,42 +87,6 @@ proc testLipmanResolve( rng, idealG, trials)
 }
 
 
-
-proc testResolverapper(cchar, cord )
-{
-    def genParams = defaultIdealGeneratorParams();
-
-    // adjust random ideal generator params:
- 
-    genParams.absMaxCoeff = 15;
-    genParams.maxMonomialDegree = 3;
-    genParams.maxTermsPerGen = 2;
-    genParams.maxGens = 3;
-
-    def idealG = idealGeneratorFromParams( genParams  );
-
-	// seems doable
-	int numVars = 3;
-	int trials = 10000;
-
-    def rng = createRing(cchar,cord, numVars) ;
-
-
-	testLipmanResolve( rng, idealG,  trials);
-}
-
-
-def assumeLevel = 3;
-echo = 2;
-
-printlevel = 3 ;
-TRACE = 0;
-
-testResolverapper("0", "dp" );
-testResolverapper("0", "lp" );
-
-testResolverapper("integer", "dp" );
-testResolverapper("integer", "lp" );
 
  
 
