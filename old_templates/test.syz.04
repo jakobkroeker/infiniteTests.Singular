@@ -1,0 +1,74 @@
+
+
+option("nowarn");
+
+LIB("bugs/randomRing.lib");
+LIB("bugs/test.syz");
+LIB("bugs/test.std.correct");
+// monitor("log/test.syz.02","io");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 45;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3; // max degree
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 3;
+
+def genTable = createRandomGeneratorsByParams( genParams  );
+
+   // minpoly settings
+  TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
+
+  minpolyGenParams.absMaxCoeff       = 300;
+  minpolyGenParams.minVarFactorsPerMonomial = 0;
+  minpolyGenParams.maxVarFactorsPerMonomial = 4;
+  minpolyGenParams.maxTermsPerGen    = 3;
+  minpolyGenParams.bFractionsOn      = 0;
+  
+
+ 
+ TOrderingOpts oopts;  
+  oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
+
+  oopts.randomOrd = randomStraightGlobalOrdering; // see randomRing
+ 
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
+
+ //////////////////////  composing ring options  //////////////// 
+  TRandomRingOpts ropts;
+  ropts.minChar = 0;
+  ropts.maxChar = 200;
+  ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.maxVars = 5;
+  
+  ropts.minpolyGenParams = minpolyGenParams;
+  ropts.oopts   = oopts;     //rename to monomialOrderingOpts
+
+  //ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
+ 
+  ropts.ordString = randomGLWBlockOrdering; // rename to ordStringP or ordStringF
+ 
+  /////////////////////////////////////////////////////////////////////////////////////////
+
+  TRandomRingGens rgens = createRandomRingGens(ropts);  
+  
+ 
+TGroebnerTestFlags flags = defaultGroebnerTestFlags();
+
+def optionlist = list ("redSB", "redTail");
+
+int trials = 1000;
+
+testSyz( rgens.getIntegerRing, genTable.idealG, trials, optionlist, flags, logfile);
+ 
