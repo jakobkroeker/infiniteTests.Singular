@@ -311,6 +311,10 @@ proc chooseWeightedGlobalOrdering()
     return( l[random(1, size(l) ) ]);
 }
 
+proc choose_dp()
+{
+    return( "dp");
+}
 
 proc chooseWeightedLocalOrdering()
 {
