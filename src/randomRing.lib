@@ -23,7 +23,7 @@ static proc mod_init()
         newstruct("TOrderingOpts",   " int minWeight,   int maxWeight, proc randomOrd");   
         newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int minChar, int maxChar, int doExt, int maxVars,  TOrderingOpts oopts, proc ordString");
         //newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int maxChar, int doExt, int maxVars");
-        newstruct("TRandomRingGens", "proc randomOrd, proc getMinPolyStr, proc ordString, proc getChar, proc doExt, proc numVars, proc getRing");            
+        newstruct("TRandomRingGens", "proc randomOrd, proc getMinPolyStr, proc ordString, proc getChar, proc doExt, proc numVars, proc getRing, proc getIntegerRing");            
     }
 }
 
@@ -204,6 +204,12 @@ proc randomGlobalOrdering()
     return( l[random(1, size(l) ) ]);
 }
 
+proc randomStraightGlobalOrdering()
+{
+    list l = "lp","rp","dp","Dp";
+    return( l[random(1, size(l) ) ]);
+}
+
 
 proc straightBlockString(sord,blocksize)
 { 
@@ -305,6 +311,10 @@ proc chooseWeightedGlobalOrdering()
     return( l[random(1, size(l) ) ]);
 }
 
+proc choose_dp()
+{
+    return( "dp");
+}
 
 proc chooseWeightedLocalOrdering()
 {
@@ -661,9 +671,57 @@ proc testRandomWeightedBlockOrdering()
    rgens.numVars = createRandomVarNumGen(ropts);
    rgens.doExt   = createRandomDoExtGen(ropts);
    rgens.getRing = createRandomRingGen(rgens);
+   rgens.getIntegerRing = createRandomIntegerRingGen(rgens);
    return(rgens);
  }
-   
+
+
+ proc createRandomIntegerRingGen(rgens)
+ {
+ 
+     string ringGenTableName = getRandomName(); 
+     string cmd = "def RandomRing::"+ringGenTableName+";";
+     execute(cmd);
+
+     cmd = "RandomRing::"+ringGenTableName+" = rgens;";
+     execute(cmd);       
+     cmd ="export("+ringGenTableName+");";
+     execute(cmd);
+ 
+    cmd = "proc getRandomRing( )
+    {
+
+       int c =  RandomRing::"+ringGenTableName+".getChar();  
+        
+       int numVars =  RandomRing::"+ringGenTableName+".numVars();
+
+       string vstr = \"(x(1..\"+string(numVars)+\"))\";
+       
+       if (c==0)
+       {            
+           string str_rng = \"ring rng = (integer),\"+vstr+\",\";  
+       }
+       else
+       {
+           string str_rng = \"ring rng = (integer,c),\"+vstr+\",\";  
+       }
+
+       int doExt = RandomRing::"+ringGenTableName+".doExt();
+              
+       string orderingString = RandomRing::"+ringGenTableName+".ordString(numVars);   
+       str_rng = str_rng +  orderingString+ \";\";
+       execute(str_rng);
+       setring rng;
+       
+       return (basering);
+    }";
+    
+    execute(cmd);
+    return (getRandomRing);
+  
+}
+
+
  
  proc createRandomRingGen(rgens)
  {
@@ -708,7 +766,7 @@ proc testRandomWeightedBlockOrdering()
     execute(cmd);
     return (getRandomRing);
   
-  }
+}
 
    
 

@@ -1,7 +1,11 @@
 
 
+option("nowarn");
+
+LIB("bugs/randomRing.lib");
 LIB("bugs/test.syz");
-monitor("log/test.syz.02","io");
+LIB("bugs/test.std.correct");
+// monitor("log/test.syz.02","io");
 
 
 
@@ -14,33 +18,57 @@ echo  = 0;
 //////// adjust random ideal generator params: 
 def genParams = defaultRandomConstructionParams();
 
-// genParams.absMaxCoeff       = 150;
-genParams.absMaxCoeff       = 15;
+genParams.absMaxCoeff       = 45;
 genParams.minVarFactorsPerMonomial = 0;
-genParams.maxVarFactorsPerMonomial = 5;
+genParams.maxVarFactorsPerMonomial = 5; // max degree
 genParams.maxTermsPerGen    = 3;
 genParams.maxGens           = 3;
 
-def gens = createRandomGeneratorsByParams( genParams  );
+def genTable = createRandomGeneratorsByParams( genParams  );
 
-//////// adjust ring  
-string cchar    = "integer";
-string ordering = "dp";
-int    numVars  = 3;
+   // minpoly settings
+  TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
 
-//def rng = createRing( cchar, ordering, numVars ) ;
-ring rng = integer,(x,y,z),(dp);
+  minpolyGenParams.absMaxCoeff       = 300;
+  minpolyGenParams.minVarFactorsPerMonomial = 0;
+  minpolyGenParams.maxVarFactorsPerMonomial = 4;
+  minpolyGenParams.maxTermsPerGen    = 3;
+  minpolyGenParams.bFractionsOn      = 0;
+  
 
-option("nowarn");
-option("redSB");
-
-//////// adjust num of trials  
-int trials = 100000000;
-//////////////////////////////////////////////////////////////////////////////// 
  
+ TOrderingOpts oopts;  
+  oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
 
-testSyz( rng, gens.idealG, trials);
+  oopts.randomOrd = randomStraightGlobalOrdering; // see randomRing
+ 
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
 
-// ulimit -v 1000000 ; ulimit -t 500
-// ./singular-spielwiese < input/test.syz.02 2>&1 | tee -a log/test.syz.02.log ;
-// export cont=1; while [ $cont -eq 1 ] ; do nice -19 ./singular-spielwiese < input/test.ysz.02 2>&1 | tee -a log/test.syz.02.log ; if [ $? -eq 123 ] ; then export cont=0; fi; done
+ //////////////////////  composing ring options  //////////////// 
+  TRandomRingOpts ropts;
+  ropts.minChar = 0;
+  ropts.maxChar = 200;
+  ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.maxVars = 2;
+  
+  ropts.minpolyGenParams = minpolyGenParams;
+  ropts.oopts   = oopts;     //rename to monomialOrderingOpts
+
+  //ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
+ 
+  ropts.ordString = randomGLWBlockOrdering; // rename to ordStringP or ordStringF
+ 
+  /////////////////////////////////////////////////////////////////////////////////////////
+
+  TRandomRingGens rgens = createRandomRingGens(ropts);  
+  
+ 
+TGroebnerTestFlags flags = defaultGroebnerTestFlags();
+
+def optionlist = list ("redSB", "redTail");
+
+int trials = 1000;
+
+testSyz( rgens.getIntegerRing, genTable.idealG, trials, optionlist, flags, logfile);
+ 

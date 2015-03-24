@@ -17,11 +17,11 @@ echo  = 0;
 //////// adjust random ideal generator params: 
 def genParams = defaultRandomConstructionParams();
 
-genParams.absMaxCoeff       = 15;
+genParams.absMaxCoeff       = 45;
 genParams.minVarFactorsPerMonomial = 0;
-genParams.maxVarFactorsPerMonomial = 2; // max degree
-genParams.maxTermsPerGen    = 2;
-genParams.maxGens           = 2;
+genParams.maxVarFactorsPerMonomial = 3; // max degree
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 3;
 
 def genTable = createRandomGeneratorsByParams( genParams  );
 
@@ -51,7 +51,7 @@ int trials = 100000000;
   ropts.minChar = 0;
   ropts.maxChar = 200;
   ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
-  ropts.maxVars = 3;
+  ropts.maxVars = 5;
   
   ropts.minpolyGenParams = minpolyGenParams;
   ropts.oopts   = oopts;     //rename to monomialOrderingOpts

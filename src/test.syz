@@ -9,57 +9,82 @@ LIB "randomIdeal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
  
-proc testSyz( rng, idealG, trials )
+proc testSyz( getRng, idealG, trials, optionlist, testflags, logfile )
 {
+    int warnIsSet = optionIsSet("warn");
+    option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
+    
+    def rng = getRng( );
     setring rng;
-    short  = 0;
-    int trial;
-    ideal cs,  I, J, gI, gJ, ggI, ggJ;
-    def syzI,syzgI;
+    option(warn);
+    int trial = 1;
     while( trial<trials )
     {   
 
-       if (defined(qrng)) {kill qrng; }
-       dbprint(1, "option(redSB);");
+       option(nowarn);  
+       kill rng;      
+       def rng = getRng( );
+       setring rng;
+      
+       ideal I, J, gI, gJ, ggI, ggJ; 
+       def syzI, syzgI;
+
+       if (testflags.optionflagTest)
+       {
+         if ( hasGlobalOrLocalOrdering(basering))
+         {
+            chooseRandomOptionsFromList(optionlist);
+         }
+       }
+       if (warnIsSet)
+       {
+         option(warn);
+       }
+      
+       write(":w "+logfile,emptystring);
+       monitor(logfile,"io");
+       write(":w "+logfile,emptystring);
        dbprint(1, "LIB \"primdec.lib\";");
        dbprint(1, "LIB \"wrappers.lib\";");
+       dbprint(1, "LIB \"bugs/test.syz\";");
        dbprint( 1, "ring rng = "  + string( basering)+";" );
+      
+       if ( not ("0" == string(minpoly) ))
+       {
+         dbprint( 1, "minpoly = " + string(minpoly) + ";");
+       }
+       dbprint( 1, "intvec op = "+string( option(get) )+";");     
+       dbprint( 1, " option(set, op) ;");
+       dbprint( 1, " option() ;");
+       dbprint( 1, " // option() ;" + option() );
+
+       
        dbprint( 1, "int trial = " + string( trial) + ";" );
        short = 0;
        I = idealG( );
        dbprint( 1, "system(\"random\", " + string( system("random") ) + ");" );
        dbprint( 1, "ideal I = " + string( I ) + ";" );
        
-       dbprint( 1, "       ideal gI =  std(I);" );
+       dbprint( 1, "ideal syzI = syz (I);");
+       syzI = syz (I);
+       dbprint(1, "ASSUME(0, idealsEqual(ideal(zero),	 transpose(matrix(syzI))*transpose(matrix(I)) ) );");
+       ASSUME(0, idealsEqual(ideal(0) , transpose(matrix(syzI))*transpose(matrix(I)) ) );
+       
+       dbprint( 1, "ideal gI =  std(I);" );
        gI =  std(I);
        //dbprint( 1, "//        gI = "+string(gI) );
-       dbprint( 1, "       ideal ggI =  std(gI);" );
-       ggI =  std(gI);
-       //dbprint( 1, "//        ggI = "+string(ggI)+";" );
    
 
        dbprint(1, "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
-       ASSUME(0, 0== size( std(reduce (I,gI ) ))  );
+       ASSUME( 0, 0== size( std(reduce (I,gI ) ))  );
 
-       ASSUME(0, size(gI)== size(ggI) );
-
-
-        dbprint(1,"ASSUME(0, idealsEqual(gI,ggI ));");
-       ASSUME(0, idealsEqual(gI,ggI ));
-
-
-      // ASSUME(0, idealRepresentationsEqual(gI,ggI ));
-      // ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));
-       syzI = syz (I);
+       dbprint( 1, "ideal syzgI = syz (gI);");
        syzgI = syz (gI);
-    
 
-      dbprint(1, "ASSUME(0, idealsEqual(ideal(zero),transpose(syzI)*transpose(I) ) );");
-      ASSUME(0, idealsEqual(ideal(0),transpose(syzI)*transpose(I) ) );
 
-       dbprint(1, "ASSUME(0, idealsEqual(ideal(zero),transpose(syzgI)*transpose(gI) ) );");
-      ASSUME(0, idealsEqual(ideal(0),transpose(syzgI)*transpose(gI) ) );
+       dbprint(1, "ASSUME(0, idealsEqual(ideal(zero), transpose(matrix(syzgI))*transpose(matrix(gI)) ) );");
+       ASSUME(0, idealsEqual(ideal(0), transpose(matrix(syzgI))*transpose(matrix(gI)) ) );
 
 
        trial = trial+1;
@@ -71,5 +96,5 @@ proc testSyz( rng, idealG, trials )
 
  
 
-	
+
 
