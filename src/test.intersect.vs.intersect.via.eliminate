@@ -51,7 +51,8 @@ EXAMPLE:  example intersect_via_eliminate;  shows an example"
 
   // introduce new variable called "t" 
   // hardcoded, but does not hurt, since there are no parameters. and 'x' is not in conflict with 't'
-  string tempstr = "ring pr2=" + charstr(BAS) + ",(x(1.."+  string(numVariables) + "), t), dp;"; 
+  string tempstr = "ring pr2=(" + charstr(BAS) + "),(x(1.."+  string(numVariables) + "), t), dp;"; 
+  //dbprint(1, "tempstr", tempstr);
   execute(tempstr);   
   
   if ( not bIsQring )
@@ -117,37 +118,85 @@ EXAMPLE:  example intersect_via_eliminate;  shows an example"
 }
 
 
-proc testIntersectVSintersectZ( rng, idealG, trials )
+proc testIntersectVSintersectZ( getRng, idealG, trials, testflags, optionlist, logfile )
 {
+    int warnIsSet = optionIsSet("warn");
+    option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
-    setring rng;
-
+      def rng = getRng( );
+      setring rng;
+      option(warn);
+      
+    short = 0;
     int trial;
+
     ideal cs,  I, J, Q;
     ring qrng;
+    
+    
     while( trial<trials )
     {   
+      option(nowarn);  
+      kill rng;      
+      def rng = getRng( );
+      setring rng;
+      ideal cs,  I, J, gI, gJ, ggI, ggJ, I_J, gI_gJ, e_I_J, e_gI_gJ;
+
+
+      if (testflags.optionflagTest)
+      {
+        if ( hasGlobalOrLocalOrdering(basering))
+        {
+           chooseRandomOptionsFromList(optionlist);
+        }
+      }
+      if (warnIsSet)
+      {
+        option(warn);
+      }
+      
+       write(":w "+logfile,emptystring);
+       monitor(logfile,"io");
+       write(":w "+logfile,emptystring);
+       dbprint(1, "LIB \"wrappers.lib\";");
+       dbprint(1, "LIB \"src/randomRing.lib\" ;");
+       dbprint(1, "LIB(\"bugs/test.intersect.vs.intersect.via.eliminate\");");
        
-       setring rng;
+      
+       dbprint( 1, "ring rng = "  + string( basering)+";" );
+       dbprint( 1, "short = 0 ;" );
+       
+       if ( not ("0" == string(minpoly) ))
+       {
+         dbprint( 1, "minpoly = " + string(minpoly) + ";");
+       }
        if (defined(qrng)) {kill qrng; }
-       if (defined(I)) {kill I; }
-       if (defined(J)) {kill J; }
        
-       ideal  I, J;
-       dbprint( 1, "ring rng =  "+string( basering)+";" );
-       dbprint( 1, "int trial= "+string( trial)+";" );
+       dbprint( 1, "// int trial= "+string( trial)+";" );
        I = idealG( );
        J = idealG( );
+       dbprint( 1, "system(\"random\", " + string( system("random") ) + ");" );
        dbprint( 1, "ideal I = "+string( I)+";" );
        dbprint( 1, "ideal J = "+string( J)+";" );
-       dbprint( 1, "ideal intersect_I_J = "+string(  intersect(I,J))+";" );
-       dbprint( 1, " ideal intersect_std_I_std_J = "+string(  intersect(std(I),std(J) ))+";" );
-       dbprint( 1, " ideal intersect_via_eliminate_I_J = "+ string( intersect_via_eliminate(I,J))  +";"  );
-       dbprint( 1, " intersect_via_eliminate_std_I_std_J = "+  string( intersect_via_eliminate(std(I),std(J)) ) +";"  );
-       dbprint( 1, "  ASSUME(0, idealsAreEqual( intersect(I,J), intersect_via_eliminate(I,J) ) );");
-       dbprint( 1, "  ASSUME(0, idealsAreEqual( intersect(std(I),std(J)), intersect_via_eliminate(std(I),std(J)) ) );");
-       ASSUME(0, idealsAreEqual( intersect(I,J), intersect_via_eliminate(I,J) ) );
-       ASSUME(0, idealsAreEqual( intersect(std(I),std(J)), intersect_via_eliminate(std(I),std(J)) ) );
+       dbprint( 1, "ideal gI = std(I);" );
+       dbprint( 1, "ideal gJ = std(J);" );       
+       gI = std(I);
+       gJ = std(J);
+
+       dbprint( 1, "ideal I_J =  intersect(I,J);" );
+       I_J =  intersect(I,J);
+       dbprint( 1, " ideal gI_gJ = intersect(gI,gJ);" );
+       gI_gJ = intersect(gI,gJ);
+       dbprint( 1, " ideal e_I_J =  intersect_via_eliminate(I,J);"  );
+       e_I_J =  intersect_via_eliminate(I,J);
+       dbprint( 1, " e_gI_gJ =  intersect_via_eliminate( gI, gJ);"  );
+       e_gI_gJ =  intersect_via_eliminate( gI, gJ);
+       dbprint( 1, "  ASSUME(0, idealsAreEqual(I_J    , e_I_J    ) );");
+       dbprint( 1, "  ASSUME(0, idealsAreEqual(I_J    , gI_gJ    ) );");
+       dbprint( 1, "  ASSUME(0, idealsAreEqual(gI_gJ  ,  e_gI_gJ ) );");
+       ASSUME(0, idealsAreEqual(I_J     , e_I_J    ) );
+       ASSUME(0, idealsAreEqual(I_J     , gI_gJ    ) );
+       ASSUME(0, idealsAreEqual(gI_gJ   , e_gI_gJ  ) );
        trial = trial+1;
     }
 
@@ -156,14 +205,7 @@ proc testIntersectVSintersectZ( rng, idealG, trials )
 }
 
 
-proc  testIntersectWrapper( cchar, ordering, numVars, genParams, trials )
-{
-    def rng = createRing( cchar,ordering, numVars ) ;
-
-    def idealG = idealGeneratorFromParams( genParams  );
-
-	testIntersectVSintersectZ( rng, idealG, trials);
-}
-
+ 
 	
+
 
