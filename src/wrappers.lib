@@ -1540,8 +1540,8 @@ proc radicalEHVX(ideal I )
 proc isPrime(ideal I)
 {
   dbprint( printlevel-voice, "isPrime()" );
-  dbprint( 1, "  basering;",  basering );
-  dbprint( 1, "  ringlist;",  ringlist(basering) );
+  dbprint( printlevel-voice, "  basering;",  basering );
+  dbprint( printlevel-voice, "  ringlist;",  ringlist(basering) );
   dbprint( printlevel-voice, " I = ", I );
   ASSUME( 0 , isCommutative( ) );
   ASSUME( 0 , hasGlobalOrdering( basering ) );
