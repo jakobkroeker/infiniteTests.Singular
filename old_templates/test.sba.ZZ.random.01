@@ -1,0 +1,53 @@
+
+option("nowarn");
+
+LIB("src/test.sba");
+
+LIB("src/automatedTests.lib");
+
+
+
+
+//////////////////////////////////////////////////////////
+//////// adjust verbosity
+printlevel = 2 ;
+TRACE = 0;
+echo  = 2;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+//genParams.absMaxCoeff       = 150;
+genParams.absMaxCoeff       = 10;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 2;
+
+def gens = createRandomGeneratorsByParams( genParams  );
+
+
+//////////////////////////////////////////////////////////
+ 
+def optionlist = list ("redSB", "redTail");
+
+proc getRandomRing(  )
+{
+
+   string str_rng = "ring rng = (integer),(x, y, z),";
+
+   string orderingString = randomBlockOrdering(randomOrdering, 3);
+
+   str_rng = str_rng + orderingString + ";";
+
+   execute(str_rng);
+
+   setring rng;
+
+   return (basering);
+}
+
+option("warn");
+
+testSBA( getRandomRing, gens, optionlist,  logfile);
+

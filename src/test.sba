@@ -9,17 +9,34 @@ LIB "randomIdeal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
  
-proc testSBA( rng, idealG, trials, logfile )
+proc testSBA( getRng, gens, optionlist,  logfile )
 {
+   int warnIsSet = optionIsSet("warn");
+   
+    option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
+    def rng = getRng();
     setring rng;
     short = 0;
+    option(warn);
     int trial;
-    ideal cs,  I, J, gI, sI, ggI, ssI;
-    while( trial<trials )
+    
+    while( 1 )
     {   
+      option(nowarn);  
+      kill rng;      
+      def rng = getRng();
+      setring rng;
+      short = 0;
+      ideal cs,  I,  gI, sI, ggI, ssI;
 
-       if (defined(qrng)) {kill qrng; }
+      chooseRandomOptionsFromList(optionlist);
+      if (warnIsSet)
+      {
+        option(warn);
+      }
+      
+       // if (defined(qrng)) {kill qrng; }
        write(":w "+logfile,emptystring);
        monitor(logfile,"io");
        write(":w "+logfile,emptystring);
@@ -27,53 +44,115 @@ proc testSBA( rng, idealG, trials, logfile )
        dbprint(1, "LIB \"primdec.lib\";");
        dbprint(1, "LIB \"wrappers.lib\";");
        dbprint( 1, "ring rng = "  + string( basering)+";" );
+       dbprint( 1, "intvec op = "+string( option(get) )+";");    
+       dbprint( 1, " option(set, op) ;");
+       dbprint( 1, " option() ;");
+       dbprint( 1, " // option() ;" + option() );
+       
        dbprint( 1, "int trial = " + string( trial) + ";" );
        short = 0;
-       I = idealG( );
+       I = gens.idealG( );
        dbprint( 1, "system(\"random\", " + string( system("random") ) + ");" );
        dbprint( 1, "ideal I = " + string( I ) + ";" );
        
-       dbprint( 1, "       ideal gI =  std(I);" );
-       gI =  std(I);
-       dbprint( 1, "       ideal ggI =  std(gI);" );
-       ggI =  std(gI);
+
 
        dbprint( 1, "       ideal sI =  sba(I);" );
 
        sI =  sba(I);
        dbprint( 1, "       ideal ssI =  sba(sI);" );
        ssI =  sba(sI);
+       
+       
+       dbprint( 1, "       ideal gI =  std(I);" );
+       gI =  std(I);
+       dbprint( 1, "       ideal ggI =  std(gI);" );
+       ggI =  std(gI);
 
+       dbprint(1, "ASSUME(0, 0== size( std(reduce (I,sI ) ))  );");
+       ASSUME(0, 0== size( std(reduce (I,sI ) ))  );
+       
+       
        dbprint(1, "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
        ASSUME(0, 0== size( std(reduce (I,gI ) ))  );
-        dbprint(1, "ASSUME(0, 0== size( std(reduce (I,sI ) ))  );");
-       ASSUME(0, 0== size( std(reduce (I,sI ) ))  );
-
-       dbprint(1,"ASSUME(0, size(sI)== size(ssI) );");
-       ASSUME(0, size(sI)== size(ssI) );
-       dbprint(1,"ASSUME(0, size(gI)== size(ggI) );");
-       ASSUME(0, size(gI)== size(ggI) );
 
 
-        dbprint(1,"ASSUME(0, idealsEqual(gI,ggI ));");
+       if ( hasGlobalOrdering(basering))
+       {
+           dbprint(1,"ASSUME(0, size(sI)== size(ssI) );");
+           ASSUME(0, size(sI)== size(ssI) );
+           
+           dbprint(1,"ASSUME(0, size(gI)== size(ggI) );");
+           ASSUME(0, size(gI)== size(ggI) );
+       }
+       
+       dbprint(1,"ASSUME(0, idealsAreEqual(gI,ggI ));");
+       ASSUME(0, idealsAreEqual(gI,ggI ));
+
+       dbprint(1,"ASSUME(0, idealsAreEqual(sI,ssI ));");
+       ASSUME(0, idealsAreEqual(sI,ssI ));
+
+       dbprint(1,"ASSUME(0, idealsEqual(gI,ggI ));");
        ASSUME(0, idealsEqual(gI,ggI ));
 
-        dbprint(1,"ASSUME(0, idealsEqual(sI,ssI ));");
+       dbprint(1,"ASSUME(0, idealsEqual(sI,ssI ));");
        ASSUME(0, idealsEqual(sI,ssI ));
 
 
-        dbprint(1,"ASSUME(0, idealsAreEqual(gI,ggI ));");
-       ASSUME(0, idealsAreEqual(gI,ggI ));
-
-        dbprint(1,"ASSUME(0, idealsAreEqual(sI,ssI ));");
-       ASSUME(0, idealsAreEqual(sI,ssI ));
-
-       dbprint(1,"ASSUME(0, idealRepresentationsEqual(gI,ggI ));");
-       ASSUME(0, idealRepresentationsEqual(gI,ggI ));
-       dbprint(1,"ASSUME(0, idealRepresentationsEqual(sI,ssI ));");
-       ASSUME(0, idealRepresentationsEqual(sI,ssI ));
 
 
+      if ( hasGlobalOrdering(basering))
+      {
+          if ( optionIsSet("redTail") )
+          {
+          
+            if (not idealRepresentationReducedTail(sI ) )
+            {
+               dbprint( 1, "//        sI = "+string(sI) );
+            }
+            if (not idealRepresentationReducedTail(ssI ) )
+            {
+               dbprint( 1, "//        ssI = "+string(ssI) +";");
+            }
+            
+            if (not idealRepresentationReducedTail(gI ) )
+            {
+               dbprint( 1, "//        gI = "+string(gI) );
+            }
+            if (not idealRepresentationReducedTail(ggI ) )
+            {
+               dbprint( 1, "//        ggI = "+string(ggI) +";");
+            }
+
+            
+           dbprint(1,"ASSUME(0, idealRepresentationReducedTail( sI ));");
+           ASSUME(0, idealRepresentationReducedTail( sI ));
+           dbprint(1,"ASSUME(0, idealRepresentationReducedTail( ssI ));");
+           ASSUME(0, idealRepresentationReducedTail( ssI ));
+           
+           dbprint(1,"ASSUME(0, idealRepresentationReducedTail( gI ));");
+           ASSUME(0, idealRepresentationReducedTail( gI ));
+           dbprint(1,"ASSUME(0, idealRepresentationReducedTail( ggI ));");
+           ASSUME(0, idealRepresentationReducedTail( ggI ));
+           
+
+          }
+          if ( optionIsSet("redSB") )
+          {
+          
+           dbprint(1,"ASSUME(0, idealRepresentationReduced( sI ));");
+           ASSUME(0, idealRepresentationReduced( ssI ));
+           dbprint(1,"ASSUME(0, idealRepresentationReduced( ssI ));");
+           ASSUME(0, idealRepresentationReduced( ssI ));
+           
+           dbprint(1,"ASSUME(0, idealRepresentationReduced( gI ));");
+           ASSUME(0, idealRepresentationReduced( gI ));
+           dbprint(1,"ASSUME(0, idealRepresentationReduced( ggI ));");
+           ASSUME(0, idealRepresentationReduced( ggI ));
+
+          }
+
+      }
 
        trial = trial+1;
     }

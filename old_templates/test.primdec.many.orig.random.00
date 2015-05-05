@@ -1,4 +1,4 @@
-
+///
 
 LIB("src/test.primdec.many.orig.mp");
 
@@ -24,42 +24,46 @@ genParams.bFractionsOn      = 1;
 
 def genTable = createRandomGeneratorsByParams( genParams  );
 
+ def optionlist = list ("redSB", "redTail");
+ 
+ ////////////////////////////////// random ring options   ////////////////////////////////
+  
+ // ordering settings
+  TWeightedOpts wopts;  
+  wopts.wmin = -10;
+  wopts.wmax = 5;
+  
+  // minpoly settings
+  TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
 
-// def genTable = getGenTable();
+  minpolyGenParams.absMaxCoeff       = 300;
+  minpolyGenParams.minVarFactorsPerMonomial = 0;
+  minpolyGenParams.maxVarFactorsPerMonomial = 3;
+  minpolyGenParams.maxTermsPerGen    = 4;
+  minpolyGenParams.bFractionsOn      = 0;
+ 
+  //////////////////////  composing ring options  //////////////// 
+  TRandomRingOpts ropts;
 
+  ropts.maxChar = 200;
+  ropts.doExt   = 2; //0:no; 1:yes; 2:randomly
+  ropts.maxVars = 5;
+  
+  ropts.minpolyGenParams = minpolyGenParams;
+  ropts.wopts   = wopts;     
+  ropts.randomOrd = chooseStraightGlobalOrdering;
+  ropts.ordString = randomGLWMixedOrdering; // depends on wopts
+ 
+  /////////////////////////////////////////////////////////////////////////////////////////
 
-
-//proc getRing( genTable )
-proc getRandomRing(  )
-{
-
-   int maxChar = 32003;
-
-   //int maxChar = 100;
-
-   int c =  randomChar( maxChar );
-
-   string str_rng_mp = "ring rng = (c),(xx, yy, zz, ww),";
-
-   string orderingString = randomBlockOrdering(randomGlobalOrdering, 4);
-
-   str_rng_mp = str_rng_mp + orderingString + ";";
-
-   execute(str_rng_mp);
-
-   setring rng;
-
-   option(redTail);
-
-   return (basering);
-}
+  TRandomRingGens rgens = createRandomRingGens(ropts);  
 
 
 option(warn);
 
 int trials = 10000000;
 
-testPrimdec( getRandomRing , genTable, trials, logfile);
+testPrimdec( rgens.getRing , genTable, trials, logfile);
 
 ///////////////////////////////////////////////////////////
 

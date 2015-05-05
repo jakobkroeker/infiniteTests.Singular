@@ -1,0 +1,701 @@
+//
+version=" ";
+category = "Automated tests";
+info="";
+
+// todo: rename to randomRing.lib
+
+// LIB "ellipticcovers.lib";  // get a redefining problem...
+
+// eigentlich gehoert dies alles hier noch zu RandomRing.lib
+
+static proc mod_init()
+{
+ 
+    if (not defined(TWeighttedOpts_def) )
+    {
+        int TWeighttedOpts_def = 0;
+        newstruct("TWeightedOpts",   " int wmin,   int wmax");   
+        newstruct("TRandomRingOpts", "int maxChar, int doExt, int maxVars, TWeightedOpts wopts, TIdealGeneratingParameters minpolyGenParams");
+        newstruct("TRandomRingGens", "proc randomOrd, proc getMinPolyStr, proc ordString, proc getChar, proc doExt, proc numVars, proc getRing");            
+    }
+}
+
+proc randomZeroOne()  {    return (random(0,1));  }  
+  
+proc chooseRandomOptionsFromList(list optionList)
+{
+   int i;
+   string cmd;
+
+   for (i=1;i<=size(optionList);i++)
+   {  
+      if (random(0,1))
+      {
+           cmd  ="option ("+ string(optionList[i]) +");";
+      }
+      else
+      {
+          cmd  ="option (no"+ string(optionList[i]) +");";
+      }
+      print(cmd);
+      execute(cmd);
+   }
+}
+
+proc getRandomMinpolyStr(characteristic, mpVarStr , genTable)
+{
+
+   def R=basering;
+   
+   string rngstr= "ring rng = "+string(characteristic)+","+mpVarStr+",dp;";
+   execute(rngstr);
+   setring rng;
+   poly p = genTable.polyG();
+   if (not (leadcoef(p) == 0)) {  p = p-lead(p)+lead(p)/leadcoef(p); }
+   //dbprint(1,"p=",p);
+   def l = factorize(p);
+  
+  poly mp;
+
+  while (mp==0)
+  {
+    while (size(l[1])<2)
+    {
+      p = genTable.polyG();
+      if (not (leadcoef(p) == 0)) { p = p-lead(p)+lead(p)/leadcoef(p);  }
+      //dbprint(1,"p=",p);
+      l = factorize(p);
+    }
+    if ( deg( l[1][2] )>1) 
+    {
+
+      mp = l[1][2];
+    }
+    else    {    mp=0;  l = list( list() );    }
+   }
+   string str_mp = "minpoly = "+string(mp ) +";";
+   setring R;
+   return (str_mp);
+}
+
+
+// add c++ implementation to kernel and interface to it
+
+proc unsortedPartitions(num)
+{
+    list parts;
+    intvec answer = num;
+    parts[ size(parts)+1 ] = answer;
+    int x,y;
+    intvec partpart, newpart;
+    list tmpPartition;
+
+    for (x=1 ; x < num; x++)
+    {   
+        tmpPartition = unsortedPartitions(num-x);
+
+        for (y=1; y <= size(tmpPartition); y++)
+        {
+             partpart = tmpPartition[y];
+             newpart = x, partpart;
+             // newpart = sort(newpart)[1];
+             //dbprint(1, newpart, sort(newpart));
+             parts[ size(parts)+1 ] = newpart;
+        }
+    }
+    return (parts);
+}
+
+proc sortedPartitions(num)
+{
+    list parts = partition(num);
+    parts = removeRedundantEntries(parts);
+    return (parts);
+}
+
+
+ 
+proc removeRedundantEntries(veclist)
+{
+     int i,j;
+    list result;
+
+    // result[size(veclist)] = 0;
+
+    i = 1;
+    // dbprint(1,"removeRedundantEntries");
+
+    while (i<=size(veclist) )
+    {
+        if (not (veclist[i] == intvec(0) ) )
+        {
+            for (j=i+1; j<=size(veclist); j++)
+            {
+                if ( veclist[i]== veclist[j] )
+                {
+                    veclist[j] =0;
+                }
+            }
+        }
+        i = i+1;
+    }
+    j = 1;
+
+    for ( i= 1 ; i <= size(veclist); i++ )
+    {
+        if (not (veclist[i]==intvec(0) ) )
+        {
+            result[j] = veclist[i];
+            j = j + 1;  
+        }
+    }
+    // dbprint(1,"removeRedundantEntries finished");
+
+    return( result );
+}
+
+
+proc listToStringList(l)
+{    
+    for ( i= 1 ; i <= size(l); i++ )
+    {
+        l[i]=string(l[i]);
+    }
+    return (l);
+}
+
+
+proc randomBlock(numVars)
+{
+    list part = unsortedPartitions(numVars);
+    return ( part[ random(1,size(part) ) ] );
+//    return (part);
+}
+
+
+proc randomChar(maxChar)
+{
+    ASSUME(0, maxChar>=0);
+    if (maxChar==0) { return (0); }
+
+    int zero = random(0,1);    
+    if ( (zero) ) { return (0); }
+
+    int preNextChar = random(0,maxChar);
+    return( prime(preNextChar) );
+}
+
+
+proc randomGlobalOrdering()
+{
+    list l = "lp","rp","dp","Dp";
+    return( l[random(1, size(l) ) ]);
+}
+
+
+proc straightBlockString(sord,blocksize)
+{
+  return(sord + "("+ string(blocksize) + ")");
+}
+
+
+
+proc randomBlockOrdering(randomOrd, numvars)
+{
+    string boType = randomOrd();
+    intvec block = randomBlock(numvars);
+
+    int zero = random(0,1);    
+    if ( (zero) ) { return (boType); }
+
+    int pos;
+    string result = "(";
+    for ( pos=1; pos <=size(block); pos++ )
+    {
+         result = result + straightBlockString(boType, block[pos]);
+         if  (pos< size(block) )
+         {
+            result = result + ", ";
+         }
+    }
+      result = result + ")";
+    return (result);
+}
+
+
+
+
+
+proc randomLocalOrdering()
+{
+    list l = "ls","rs","ds","Ds";
+    return( l[random(1, size(l) ) ]);
+}
+
+
+proc randomLocalWeights(wlen, wmin, wmax)
+{
+    ASSUME(0, wlen>0);
+
+    ASSUME(0, wmax>=wmin );
+    ASSUME(0, wmax>0 );
+    if (wmin==wmax)
+    {
+      ASSUME(0, wmin<>0);
+    }
+    int i;
+    int www;
+    
+    while (www<=0)   {   www =  random(wmin, wmax);  }
+      
+    intvec vv = www;
+    for (i = 2; i<=wlen; i++)
+    {
+       www =  random(wmin,wmax);
+       vv = vv,www;
+    }
+    return(vv);
+}
+
+proc randomLocalWeightsStr(wlen, wmin, wmax )
+{
+  return ( string(randomLocalWeights(wlen, wmin, wmax )) );
+}
+
+proc randomGlobalWeights(wlen, wmin, wmax )
+{
+    ASSUME(0, wmin>0 );
+    ASSUME(0, wmax>0 );
+    ASSUME(0, wmax>=wmin );
+    ASSUME(0, wlen>0);
+    
+    intvec vv = random(wmin,wmax);
+    int i;
+    for (i = 2; i<=wlen;i++)
+    {
+       vv = vv, random(wmin,wmax);
+    }
+    return(vv);
+}
+
+proc randomGlobalWeightsStr(wlen, wmin, wmax )
+{
+  return ( string(randomGlobalWeights(wlen, wmin, wmax )) );
+}
+
+proc chooseWeightedGlobalOrdering()
+{
+    list l = "wp","Wp";
+    return( l[random(1, size(l) ) ]);
+}
+
+
+proc chooseWeightedLocalOrdering()
+{
+    list l = "ws","Ws";
+    return( l[random(1, size(l) ) ]);
+}
+
+
+proc chooseWeightedOrdering()
+{
+    list l = "ws","Ws","wp","Wp";
+    return( l[random(1, size(l) ) ]);
+}
+
+proc  randomWeightedGlobalOrdering(numvars, wmin, wmax)
+{
+   string oo = chooseWeightedGlobalOrdering();
+   string wstr = string(randomGlobalWeights(numvars, wmin, wmax));
+   oo = oo+"("+wstr+")";
+   return (oo);
+}
+
+proc isStraightOrderingStr(word)
+{
+  return( word=="ls" || word=="rs" || word=="ds" || word=="Ds" || word=="lp" || word=="rp" || word=="dp" || word=="Dp");
+}
+
+proc isWeightedOrderingStr(word)
+{
+  return( word=="ws" || word=="Ws" || word=="wp" || word=="Wp" );
+}
+
+
+proc isStraightLocalOrderingStr(word)
+{
+  return( word=="ls" || word=="rs" || word=="ds" || word=="Ds" );
+}
+
+
+proc isLocalOrderingStr(word)
+{
+  return( word=="ls" || word=="rs" || word=="ds" || word=="Ds" || word=="Ws" || word=="ws" );
+}
+
+proc isStraightGlobalOrderingStr(word)
+{
+  return( word=="lp" || word=="rp" || word=="dp" || word=="Dp" );
+}
+
+
+proc isGlobalOrderingStr(word)
+{
+  return(  word=="lp" || word=="rp" || word=="dp" || word=="Dp" || word=="Wp" || word=="wp" );
+}
+
+
+proc isLocalWeightedOrderingStr(word)
+{
+  return(word=="ws" ||word=="Ws");
+}
+
+
+proc isGlobalWeightedOrderingStr(word)
+{
+  return(word=="wp" || word=="Wp");
+}
+
+
+proc randomWeights(word, wlen, wmin, wmax)
+{
+  if ( isLocalWeightedOrderingStr(word) )
+  {
+      return ( randomLocalWeightsStr (wlen, wmin, wmax) );
+  }
+  
+  if ( isGlobalWeightedOrderingStr(word) )
+  {
+      return ( randomGlobalWeightsStr (wlen, max(wmin,1), max(wmax,1)) );
+  }
+  ERROR("Unhandled weighted ordering");
+}
+
+proc  randomWeightedOrderingBlock(word, blocksize, wopts)
+{
+   string wstr = randomWeights(word, blocksize, wopts.wmin, wopts.wmax);
+   wstr = word+"("+wstr+")";
+   return (wstr);
+}
+
+proc randomGLWBlock(word, blocksize, wopts)
+{
+   if (isWeightedOrderingStr(word))
+   {
+      return( randomWeightedOrderingBlock(word, blocksize, wopts) );
+   }
+   if (isStraightOrderingStr(word))
+   {
+      return( straightBlockString(word,blocksize) );
+   }
+   ERROR("Unhandled word");
+}
+
+
+
+proc randomWeightedLocalOrdering(numvars, wmin, wmax)
+{
+   string oo = chooseWeightedLocalOrdering();
+   string wstr = randomLocalWeightsStr(numvars, wmin, wmax);
+   oo = oo+"("+wstr+")";
+   return (oo);
+}
+
+
+
+
+
+proc randomOrderingList()
+{
+  list l = "ls","rs","ds","Ds","lp","rp","dp","Dp";
+  return(l);
+}
+
+
+proc randomOrdering()
+{
+    list l = randomOrderingList();
+    return(l[random(1, size(l) ) ]);
+}
+
+proc chooseStraightOrdering()
+{
+    list l = randomOrderingList();
+    return(l[random(1, size(l) ) ]);
+}
+
+
+proc randomGLWOrderingList()
+{
+  list l = "ls","rs","ds","Ds","lp","rp","dp","Dp","ws","Ws","Wp","wp";
+  return(l);
+}
+
+proc chooseGLWOrdering()
+{
+    list l = randomGLWOrderingList();
+    return(l[random(1, size(l) ) ]);
+}
+
+
+proc globalOrderingStringList()
+{
+  list l = "lp","rp","dp","Dp","Wp","wp";
+  return(l);
+}
+
+proc chooseGlobalOrdering()
+{
+    list l = globalOrderingStringList();
+    return(l[random(1, size(l) ) ]);
+}
+
+proc globalStraightOrderingStringList()
+{
+  list l = "lp","rp","dp","Dp";
+  return(l);
+}
+
+proc chooseStraightGlobalOrdering()
+{
+    list l = globalStraightOrderingStringList();
+    return(l[random(1, size(l) ) ]);
+}
+
+
+proc randomGLWOrderingListNoWs()
+{
+  list l = "ls","rs","ds","Ds","lp","rp","dp","Dp","Wp","wp";
+  return(l);
+}
+
+
+proc chooseGLWOrderingNoWs()
+{
+    list l = randomGLWOrderingListNoWs();
+    return(l[random(1, size(l) ) ]);
+}
+
+
+
+
+
+static proc randomGLWBlockOrdering_i(wopts, numvars , mixed )
+{
+    string boType = wopts.randomOrd();
+    intvec block = randomBlock(numvars);
+
+    int pos;
+    string result = "(";
+    for ( pos=1; pos <=size(block); pos++ )
+    {
+         if (mixed) {    boType = wopts.randomOrd(); }
+         result = result + randomGLWBlock(boType, block[pos], wopts);
+         if  (pos< size(block) )
+         {
+            result = result + ", ";
+         }
+    }
+    result = result + ")";
+    return (result);
+}
+
+
+proc randomGLWMixedOrdering(wopts, numvars )
+{
+   return(randomGLWBlockOrdering_i(wopts, numvars , 1 ));
+}
+
+proc randomGLWBlockOrdering(wopts, numvars)
+{
+   return(randomGLWBlockOrdering_i(wopts, numvars , 0 ));
+}
+
+
+proc testRandomWeightedBlockOrdering()
+{
+   // LIB("src/automatedTests.lib");
+   TWeightedOpts wopts;  
+   wopts.randomOrd = chooseWeightedLocalOrdering;
+   wopts.wmin = -10;
+   wopts.wmax = 5;
+   int numvars = 5;
+   def result = randomGLWBlockOrdering(wopts,numvars);
+   
+   wopts.randomOrd = chooseGLWOrdering;
+   wopts.wmin = -10;
+   wopts.wmax = 5;
+   int numvars = 5;
+   def result = randomGLWBlockOrdering(wopts,numvars);
+   
+   
+   wopts.randomOrd = chooseGLWOrdering;
+   wopts.wmin = -10;
+   wopts.wmax = 5;
+   int numvars = 5;
+   def result = randomGLWMixedOrdering(wopts,numvars);
+   
+   
+}
+
+
+
+
+ proc createRandomCharGen(ropts)
+  {
+     string cmd = "proc getRandomChar()
+     {
+         return (randomChar( "+string(ropts.maxChar)+" ));
+     }";
+     execute(cmd);
+     return (getRandomChar);
+  }
+ 
+  proc createRandomVarNumGen(ropts)
+  {
+     string cmd = "proc getRandomVarNum()
+     {
+         return ( random(1, "+string(ropts.maxVars)+" ));
+     }";
+     execute(cmd);
+     return (getRandomVarNum);
+  }
+  
+  proc createRandomDoExtGen(ropts)
+  {
+  
+     string cmd  = "proc doExt()   
+     {
+       int doExt_ = random(0,1);      
+     
+       if ("+string(ropts.doExt)+"==1)    { doExt_ = 1;  }
+       if ("+string(ropts.doExt)+"==0)    { doExt_ = 0;  }
+       return(doExt_);
+     }
+   ";
+     execute(cmd);
+    return (doExt);
+ }
+ 
+ proc createOrdStringProc(ropts)
+ {
+     string ringOptsName = getRandomName(); 
+     string cmd = "def RandomRing::"+ringOptsName+";";
+     execute(cmd);
+
+     cmd = "RandomRing::"+ringOptsName+" = ropts;";
+     execute(cmd); 
+     
+     cmd = "proc ordString(numVars)
+     {
+         return(RandomRing::"+ringOptsName+".ordString(RandomRing::"+ringOptsName+".wopts, numVars ));
+     }
+     ";
+     execute(cmd);  
+     return (ordString);
+     
+ }
+ 
+ proc createMinPolyStrGen(ropts)
+ {
+     string genTableName = getRandomName(); 
+     string cmd = "def RandomRing::"+genTableName+";";
+     execute(cmd);
+
+     cmd = "RandomRing::"+genTableName+" = createRandomGeneratorsByParams( ropts.minpolyGenParams   );";
+     execute(cmd);  
+
+     cmd = "proc getRandomMinpolyStr(charval, pstr)
+     {
+        return( getRandomMinpolyStr(charval, pstr,RandomRing::"+genTableName+"));
+     }
+     ";
+     execute(cmd);
+     return(getRandomMinpolyStr);
+ }
+ 
+ proc createRandomRingGens(ropts)
+ {
+ 
+   rgens.randomOrd = ropts.randomOrd;   
+   rgens.ordString = createOrdStringProc(ropts);  
+   rgens.getChar = createRandomCharGen(ropts);
+   rgens.getMinPolyStr = createMinPolyStrGen(ropts);
+   rgens.numVars = createRandomVarNumGen(ropts);
+   rgens.doExt   = createRandomDoExtGen(ropts);
+   rgens.getRing = createRandomRingGen(rgens);
+   return(rgens);
+ }
+   
+ 
+ proc createRandomRingGen(rgens)
+ {
+ 
+     string ringGenTableName = getRandomName(); 
+     string cmd = "def RandomRing::"+ringGenTableName+";";
+     execute(cmd);
+
+     cmd = "RandomRing::"+ringGenTableName+" = rgens;";
+     execute(cmd);       
+ 
+    string cmd = "proc getRandomRing( )
+    {
+
+       int c =  RandomRing::"+ringGenTableName+".getChar();  
+        
+       int numVars =  RandomRing::"+ringGenTableName+".numVars();
+
+       string vstr = \"(x(1..\"+string(numVars)+\"))\";
+             
+       string str_rng = \"ring rng = (c),\"+vstr+\",\";  
+
+       int doExt = RandomRing::"+ringGenTableName+".doExt();
+          
+       if (doExt)    {    str_rng = \"ring rng = (c,vv),\"+vstr+\",\";    }
+       
+       string orderingString = RandomRing::"+ringGenTableName+".ordString(numVars);   
+       str_rng = str_rng +  orderingString+ \";\";
+       execute(str_rng);
+       setring rng;
+
+       if (doExt)
+       {
+          dbprint(1, \"// getRandomMinpolyStr\");
+          string str_mp = RandomRing::"+ringGenTableName+".getMinPolyStr(c, \"vv\" );
+          dbprint(1, \"// getRandomMinpolyStr\");
+          execute(str_mp);
+       }
+       return (basering);
+    }";
+    
+    execute(cmd);
+    return (getRandomRing);
+  
+  }
+
+   
+
+/*
+
+// 0 in 50 % cases
+
+
+
+// LIB("general.lib");
+// LIB("infiniteTests/src/automatedTests.lib");
+
+
+randomBlockOrdering(randomGlobalOrdering, 4);
+
+
+unsortedPartitions(4);
+
+
+def l2 = randomBlock(7);
+
+sort(l2);
+
+
+*/
+

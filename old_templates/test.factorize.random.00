@@ -1,0 +1,84 @@
+
+option("nowarn");
+
+LIB("ellipticcovers.lib");
+
+LIB("src/automatedTests.lib");
+
+LIB("randomIdeal.lib");
+
+LIB("src/test.factorize.lib");
+
+LIB("src/wrappers.lib");
+
+//////////////////////////////////////////////////////////
+//////// adjust verbosity
+printlevel = 2 ;
+TRACE = 0;
+echo  = 2;
+
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+//genParams.absMaxCoeff       = 150;
+genParams.absMaxCoeff       = 300;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 3;
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 3;
+
+def gens = createRandomGeneratorsByParams( genParams  );
+
+
+//////////////////////////////////////////////////////////
+ 
+// def optionlist = list ("redSB", "redTail");
+
+
+//proc getRing( genTable )
+proc getRandomRing( genTable )
+{
+
+   int maxChar = 32003;
+
+   //int maxChar = 100;
+
+   int c =  randomChar( maxChar );
+   
+   
+   int maxVars = 16;
+   
+   int numVars = random(1,maxVars);
+
+   string vstr = "(x(1.."+string(numVars)+"))";
+         
+   string str_rng = "ring rng = (c),"+vstr+",";  
+
+   int doExt = random(0,1);      
+   if (doExt)    {    str_rng = "ring rng = (c,vv),"+vstr+",";    }
+   
+   //string orderingString = randomBlockOrdering(randomGlobalOrdering, numVars);   
+   //str_rng = str_rng + orderingString + ";";
+   str_rng = str_rng + "dp" + ";";
+   execute(str_rng);
+   setring rng;
+
+   if (doExt)
+   {
+      dbprint(1, "// getRandomMinpolyStr");
+      string str_mp = getRandomMinpolyStr(c, "vv", genTable );
+      dbprint(1, "// getRandomMinpolyStr");
+      execute(str_mp);
+   }
+   option(redTail);
+   dbprint(1, "basering");
+   return (basering);
+}
+
+
+
+option("warn");
+
+testFactorize( getRandomRing, gens,  logfile);
+

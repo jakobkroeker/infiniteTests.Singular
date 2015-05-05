@@ -1,0 +1,109 @@
+/////////////////////
+version="version test.std";
+category="Commutative Algebra";
+info="
+";
+
+LIB "primdecint.lib";
+LIB "randomIdeal.lib";
+LIB "ringutils.lib";
+LIB "wrappers.lib";
+ 
+proc testRadical( getRng, gens, optionlist, trials, logfile )
+{
+    int warnIsSet = optionIsSet("warn");
+    option(nowarn);
+    if (defined(basering) ) {   def BAS=basering; }
+      def rng = getRandomRing(gens);
+      setring rng;
+      option(warn);
+      
+    short = 0;
+    int trial;
+
+    while( trial<trials )
+    {   
+      option(nowarn);  
+      kill rng;      
+      def rng = getRandomRing(gens);
+      setring rng;
+      ideal I, rSLI, rSLI2, rKLI, rKLI2, rEHVI, rEHVI2;
+
+      if ( hasGlobalOrdering(basering))
+      {
+         chooseRandomOptionsFromList(optionlist);
+      }
+      if (warnIsSet)
+      {
+        option(warn);
+      }
+      
+       write(":w "+logfile,emptystring);
+       monitor(logfile,"io");
+       write(":w "+logfile,emptystring);
+       dbprint(1, "LIB \"primdec.lib\";");
+       dbprint(1, "LIB \"wrappers.lib\";");
+       dbprint(1, "LIB \"src/automatedTests.lib\" ;");
+       dbprint( 1, "ring rng = "  + string( basering)+";" );
+       dbprint( 1, "short = 0 ;" );
+       dbprint( 1, "minpoly = " + string(minpoly) + ";");
+       dbprint( 1, "intvec op = "+string( option(get) )+";");           
+       dbprint( 1, " option(set, op) ;");
+       dbprint( 1, " option() ;");
+       dbprint( 1, " // option() ;" + option() );
+       dbprint( 1, "int trial = " + string( trial) + ";" );
+       short = 0;
+       I = gens.idealG( );
+       dbprint( 1, "system(\"random\", " + string( system("random") ) + ");" );
+       
+       dbprint( 1, "ideal I = " + string( I ) + ";" );
+       
+       dbprint( 1, "       ideal   rSLI =  radical(I,\"SL\");" );
+       rSLI =  radical(I,"SL");
+       dbprint( 1, "       ideal   rSLI2 =  radical(rSLI,\"SL\");" );
+       rSLI2 =  radical(rSLI,"SL");
+       
+       dbprint( 1, "       ideal rKLI = radical(I, \"KL\");" );
+       rKLI =  radical(I,"KL");
+       dbprint( 1, "       ideal rKLI2 = radical(rKLI, \"KL\");" );
+       rKLI2 =  radical(rKLI,"KL");
+
+       dbprint( 1, "  ASSUME(0, idealsAreEqual(rSLI, rSLI2));");
+       dbprint( 1, "  ASSUME(0, idealsAreEqual(rKLI, rKLI2));");
+       dbprint( 1, "  ASSUME(0, idealsAreEqual(rSLI, rKLI));");
+
+       
+       ASSUME(0, idealsAreEqual(rSLI, rSLI2));
+       ASSUME(0, idealsAreEqual(rKLI, rKLI2));
+       ASSUME(0, idealsAreEqual(rSLI, rKLI));
+       
+       if ( hasGlobalOrdering(basering) && (char(basering)==0 || char(basering)>100) )
+       {
+          dbprint( 1, "       idealrEHVI =  radicalEHV(I);" );
+          rEHVI = radicalEHV(I);
+         
+          dbprint( 1, "       idealrEHVI2 =  radicalEHV(rEHVI);" );
+          rEHVI2 = radicalEHV(rEHVI);
+         
+         
+          dbprint( 1, "  ASSUME(0, idealsAreEqual(rEHVI, rEHVI2));");
+          dbprint( 1, "  ASSUME(0, idealsAreEqual(rKLI, rEHVI));");
+          ASSUME(0, idealsAreEqual(rKLI, rEHVI));
+          ASSUME(0, idealsAreEqual(rEHVI, rEHVI2));
+       }
+       
+              
+
+
+
+       trial = trial+1;
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+
+ 
+
+	
+

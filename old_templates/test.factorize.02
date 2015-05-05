@@ -1,3 +1,0 @@
- LIB("bugs/test.factorize");
-
- testFactorizeWrapper("3", "dp");

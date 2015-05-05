@@ -884,7 +884,26 @@ static proc testGetRandomName()
    ASSUME(0, not hasProbablyMemleak_check("getRandomName()"));
 }
 
-
+// move to ring.lib
+proc getMinpolyDeg()
+{
+  def BAS = basering;
+  ring R = 0,xcs,dp;
+  
+  string cmd = "poly p = " + minpolyToVarStr(BAS,1) + ";";
+  execute(cmd);
+  int pdeg = deg(p);
+  setring BAS;
+  return (pdeg);
+}
+example
+{
+   // LIB("randomIdeal.lib");
+   ring rng = (0,a),x,dp;
+   minpoly = a^ 3-1;
+   getMinpolyDeg();
+}
+    
 
 proc createRandomExCoeffGenerator()
 "USAGE:    createRandomExCoeffGenerator();
@@ -905,7 +924,19 @@ EXAMPLE:  example createRandomExCoeffGenerator; shows an example
       ASSUME(0, baseringHasMinpoly() );
       ASSUME(0, minpolyProbablyConsistant() ); 
       dbprint(randomIdealDebug,\"// par(1) = \"+string(par(1)) +\";\");
-      def exponent = random(0, 77);
+ 
+      int hardcodedMaxExp = 77 ; // performance issue otherwise.
+      if (char(basering)>0 && char(basering)<200)
+      {
+         hardcodedMaxExp = max(hardcodedMaxExp, char(basering));
+      }      
+
+      if (char(basering)==0)
+      {
+         hardcodedMaxExp = min (hardcodedMaxExp,getMinpolyDeg() );
+         hardcodedMaxExp = max(hardcodedMaxExp,1);
+      }
+      def exponent = random(0, hardcodedMaxExp);
       def result = par(1)^exponent;
       dbprint(randomIdealDebug,\"// result^ \" +string(exponent)+\" = \"+string(result) );
       dbprint(randomIdealDebug, \"// got rCoeff \");
