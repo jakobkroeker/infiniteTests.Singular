@@ -39,9 +39,14 @@ echo $filename
 
 set +H
 
-mkdir -p /tmp/testingular/input/$filename/
+mkdir -p /tmp/testsingular/input/$filename/
 mkdir -p log/$filename/bugs
-. log/$filename/bugs/id_$idx.count
+if [ -e "log/$filename/bugs/id_$idx.count" ]
+then
+    . log/$filename/bugs/id_$idx.count
+fi
+
+
 
 
 export hid=`hostname |sed "s/[^0-9]//g"`
@@ -62,21 +67,24 @@ do
       sleep 300;
       continue;
     fi;
-    
+    export randomNum=$(od -N 6 -t uL -An /dev/urandom | tr -d " ") 
+    export randomNum=$( echo $randomNum" % 2^30" | bc ) # have to cut random num (on 32 bit machine only?)
+    echo $randomNum
     rm -f log/$filename/$filename.id_$idx.$count
     sleep 5
     echo "count: "$count;
     #echo 'def countstr="'$count'";' >input/$3.count; 
-    echo 'string logfile = "log/'$filename'/id_'$idx'.'$count'";'  >/tmp/testingular/input/$filename/$filename.in; 
+    touch log/$filename/id_$idx.$count
+    echo 'string logfile = "log/'$filename'/id_'$idx'.'$count'";'  >/tmp/testsingular/input/$filename/$filename.in; 
 
-    cat input/$filename >> /tmp/testingular/input/$filename/$filename.in; 
+    cat input/$filename >> /tmp/testsingular/input/$filename/$filename.in; 
 
     if [ $keepLog -eq 1 ] 
     then
-        set -o pipefail; timeout -s SIGKILL $6 $2 -v -r $(od -N 6 -t uL -An /dev/urandom | tr -d " ") < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee -a log/$filename/id_$idx.log;
+        set -o pipefail; timeout -s SIGKILL $6 $2 -v -r $randomNum /tmp/testsingular/input/$filename/$filename.in 2>&1 | tee -a log/$filename/id_$idx.log;
         status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
     else
-        set -o pipefail; timeout -s SIGKILL $6 $2 -v -r $(od -N 6 -t uL -An /dev/urandom | tr -d " ") < /tmp/testingular/input/$filename/$filename.in 2>&1 | tee log/$filename/id_$idx.log;
+        set -o pipefail; timeout -s SIGKILL $6 $2 -v -r $randomNum /tmp/testsingular/input/$filename/$filename.in 2>&1 | tee log/$filename/id_$idx.log;
         status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
     fi;
     if [ $status -eq 253 ] || [ $status -eq 252 ]
