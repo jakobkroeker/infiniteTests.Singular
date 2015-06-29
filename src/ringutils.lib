@@ -21,6 +21,7 @@ optionIsSet(); check if an option is set.
 LIB "stringutils.lib"; 
 LIB "listutils.lib";
 LIB "ring.lib";
+LIB "randomideal.lib";
 
 
 // newstruct("TGenerator","proc fkt,list  params");
