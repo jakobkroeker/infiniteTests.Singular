@@ -1100,18 +1100,18 @@ example
 
 
 
-// a test routine for IsSubset
+// a test routine for IsSubset / isSubModule
 static proc testIsSubset()
 {
     ring  r = 0,(x,y),dp;
     ideal j = x;
     ideal i = x, 0 , y;
-    ASSUME( 0, isSubset( i, std(j) ) == isSubset( std(i), std(j) ) );
+    ASSUME( 0, isSubModule( i, std(j) ) == isSubModule( std(i), std(j) ) );
   
     ring rng = 0,(x,y),dp;
     ideal J=x,y;
     ideal I=x;
-    ASSUME(0, 1 == isSubset(I, J) );
+    ASSUME(0, 1 == isSubModule(I, J) );
 
     ring s = integer,(x,y),dp;
     ideal mq=x^2 + y^2;
