@@ -47,7 +47,7 @@ EXAMPLE:  example extendList;
   for ( idx=1; idx <= sizeOfSecondList; idx++)
   {
        listReference[ size(listReference) + 1 ] = anotherListReference[ idx ];
-       dbprint(printlevel-voice,"listReference = ", listReference);
+       // dbprint(printlevel-voice,"extendList()::listReference = ", listReference);
   }
   return (listReference);
 }
