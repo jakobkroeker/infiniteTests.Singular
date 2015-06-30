@@ -19,8 +19,8 @@ def genParams = defaultRandomConstructionParams();
 genParams.absMaxCoeff       = 15;
 genParams.minVarFactorsPerMonomial = 0;
 genParams.maxVarFactorsPerMonomial = 3; // max degree
-genParams.maxTermsPerGen    = 3;
-genParams.maxGens           = 3;
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 2;
 
 def gens = createRandomGeneratorsByParams( genParams  );
 
@@ -69,5 +69,5 @@ TGroebnerTestFlags flags = defaultGroebnerTestFlags();
 
 option("warn");
 
-testGroebner( getRandomRing, gens, optionlist, trials, flags, logfile);
+testPureGroebner( getRandomRing, gens, optionlist, trials, flags, logfile);
 
