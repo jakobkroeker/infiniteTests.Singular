@@ -863,7 +863,7 @@ EXAMPLE:  example getRandomName; shows an example
   {
       rname = rname  + alphabet[random(1,size(alphabet))] ;
   }
-   while (  defined(`rname`) ||  defined(`"RandomIdeal::"+rname`)  ) 
+   while (  defined(`rname`) ||  defined(`"Randomideal::"+rname`)  ) 
    {
          rname = rname  + alphabet[random(1,size(alphabet))] ;
    }
@@ -1621,35 +1621,35 @@ EXAMPLE:  example createPureRandomCoeffGenerator; shows an example
      // int pAbsMaxCoeff, bExcludeZero, bFractionsOn; pAbsMaxCoeff=10; bExcludeZero=1; bFractionsOn=0;
      string randomComplexCoeffGeneratorName = getRandomName();  
      //dbprint(randomIdealDebug, "randomComplexCoeffGeneratorName",randomComplexCoeffGeneratorName);
-     string cmd = "def RandomIdeal::"+randomComplexCoeffGeneratorName+";";
+     string cmd = "def Randomideal::"+randomComplexCoeffGeneratorName+";";
      execute(cmd);
-     cmd = "RandomIdeal::"+randomComplexCoeffGeneratorName+" = createRandomComplexCoeffGenerator(pAbsMaxCoeff, bExcludeZero  );";
+     cmd = "Randomideal::"+randomComplexCoeffGeneratorName+" = createRandomComplexCoeffGenerator(pAbsMaxCoeff, bExcludeZero  );";
      execute(cmd);
      //dbprint(randomIdealDebug, "preExport");
-     execute("export(RandomIdeal::"+randomComplexCoeffGeneratorName+");");
-     //execute("dbprint(randomIdealDebug, \"randomComplexCoeffGeneratorName\",  RandomIdeal::"+randomComplexCoeffGeneratorName+");");
+     execute("export(Randomideal::"+randomComplexCoeffGeneratorName+");");
+     //execute("dbprint(randomIdealDebug, \"randomComplexCoeffGeneratorName\",  Randomideal::"+randomComplexCoeffGeneratorName+");");
 
      string RandomQCoeffGeneratorName = getRandomName();
-     cmd = "def RandomIdeal::"+RandomQCoeffGeneratorName+";";
+     cmd = "def Randomideal::"+RandomQCoeffGeneratorName+";";
      execute(cmd);
-     cmd = "RandomIdeal::"+RandomQCoeffGeneratorName+" = createRandomQCoeffGenerator(pAbsMaxCoeff, bExcludeZero ,bFractionsOn);";
+     cmd = "Randomideal::"+RandomQCoeffGeneratorName+" = createRandomQCoeffGenerator(pAbsMaxCoeff, bExcludeZero ,bFractionsOn);";
      execute(cmd);
-     execute("export(RandomIdeal::"+RandomQCoeffGeneratorName+");");
+     execute("export(Randomideal::"+RandomQCoeffGeneratorName+");");
 
 
      string RandomZCoeffGeneratorName = getRandomName();  
-     cmd = "def RandomIdeal::"+RandomZCoeffGeneratorName+";";
+     cmd = "def Randomideal::"+RandomZCoeffGeneratorName+";";
      execute(cmd);
-     cmd = "RandomIdeal::"+RandomZCoeffGeneratorName+" = createRandomZCoeffGenerator(pAbsMaxCoeff, bExcludeZero );";
+     cmd = "Randomideal::"+RandomZCoeffGeneratorName+" = createRandomZCoeffGenerator(pAbsMaxCoeff, bExcludeZero );";
      execute(cmd);
-     execute("export(RandomIdeal::"+RandomZCoeffGeneratorName+");");
+     execute("export(Randomideal::"+RandomZCoeffGeneratorName+");");
 
      string RandomExCoeffGeneratorName = getRandomName();
-     cmd = "def RandomIdeal::"+RandomExCoeffGeneratorName+";";
+     cmd = "def Randomideal::"+RandomExCoeffGeneratorName+";";
      execute(cmd);
-     cmd = "RandomIdeal::"+RandomExCoeffGeneratorName+" = createRandomExCoeffGenerator(  );";
+     cmd = "Randomideal::"+RandomExCoeffGeneratorName+" = createRandomExCoeffGenerator(  );";
      execute(cmd);
-     execute("export(RandomIdeal::"+RandomExCoeffGeneratorName+");");
+     execute("export(Randomideal::"+RandomExCoeffGeneratorName+");");
 
      cmd = "proc rCoeff(    )
      {
@@ -1659,27 +1659,27 @@ EXAMPLE:  example createPureRandomCoeffGenerator; shows an example
         {
             if ( baseringHasComplexCoeffRing() )
             {
-                  rCoefGen = RandomIdeal::" + randomComplexCoeffGeneratorName + ";
+                  rCoefGen = Randomideal::" + randomComplexCoeffGeneratorName + ";
             }
             else 
             {
                 if ( hasFieldCoefficient(basering) )
                 {
-                    rCoefGen =  RandomIdeal::" + RandomQCoeffGeneratorName + ";
+                    rCoefGen =  Randomideal::" + RandomQCoeffGeneratorName + ";
                 }
                 else
                 {
-                    rCoefGen = RandomIdeal::" + RandomZCoeffGeneratorName + ";
+                    rCoefGen = Randomideal::" + RandomZCoeffGeneratorName + ";
                 }
            }
         }
         else
         {
-            rCoefGen = RandomIdeal::" + RandomZCoeffGeneratorName + ";
+            rCoefGen = Randomideal::" + RandomZCoeffGeneratorName + ";
         }
         if ( baseringHasMinpoly() )
         {
-           proc rExCoefGen = RandomIdeal::" + RandomExCoeffGeneratorName + ";
+           proc rExCoefGen = Randomideal::" + RandomExCoeffGeneratorName + ";
            if (char(basering)>0)
            {
               return( rExCoefGen() );
@@ -2024,7 +2024,7 @@ EXAMPLE:  example createFullRandomCoeffGenerator; shows an example
      proc randomTerm(    )
      {
         ASSUME(0, defined(basering) );
-        number fullCoeff = RandomIdeal::"+randomPureCoeffGenName+"(  )* RandomIdeal::"+randomParamCoeffGenName+"(  );
+        number fullCoeff = Randomideal::"+randomPureCoeffGenName+"(  )* Randomideal::"+randomParamCoeffGenName+"(  );
         return(fullCoeff);
     }";
 
@@ -2321,11 +2321,11 @@ EXAMPLE:  example createRandomMonomialMatrixGenerator; shows an example
 
      string randomMonGeneratorName = getRandomName();  
      //dbprint(randomIdealDebug, "randomComplexCoeffGeneratorName",randomComplexCoeffGeneratorName);
-     string cmd = "def RandomIdeal::"+randomMonGeneratorName+";";
+     string cmd = "def Randomideal::"+randomMonGeneratorName+";";
      execute(cmd);
-     cmd = "RandomIdeal::"+randomMonGeneratorName+" = createRandomMonomialGenerator(pMinNumVariableFactors, pMaxNumVariableFactors  );";
+     cmd = "Randomideal::"+randomMonGeneratorName+" = createRandomMonomialGenerator(pMinNumVariableFactors, pMaxNumVariableFactors  );";
      execute(cmd);
-     execute("export(RandomIdeal::"+randomMonGeneratorName+");");
+     execute("export(Randomideal::"+randomMonGeneratorName+");");
 
      string cmd = "proc rMonomialMat(    )
      {
@@ -2336,7 +2336,7 @@ EXAMPLE:  example createRandomMonomialMatrixGenerator; shows an example
         {
             for (j=1;j<="+string(cols)+";j++)
             {
-               mat42349523463454534553267404[i,j] = RandomIdeal::"+randomMonGeneratorName+";
+               mat42349523463454534553267404[i,j] = Randomideal::"+randomMonGeneratorName+";
             }
         }
         return(mat42349523463454534553267404);
@@ -2400,8 +2400,8 @@ EXAMPLE:  example createRandomTermGenerator; shows an example
      {
         dbprint(randomIdealDebug, \"// get randomTerm \");
         ASSUME(0, defined(basering) );
-        number coeff = RandomIdeal::"+randomCoeffGenName+"(  );       
-        poly tmpMonomial = coeff*RandomIdeal::"+randomMonomialGenName+"(  );
+        number coeff = Randomideal::"+randomCoeffGenName+"(  );       
+        poly tmpMonomial = coeff*Randomideal::"+randomMonomialGenName+"(  );
         dbprint(randomIdealDebug, \"// got randomTerm \");
         return(tmpMonomial);
     }";
@@ -2579,7 +2579,7 @@ EXAMPLE:  example createRandomPolyGenerator; shows an example
 
         while ( monomialcount <= termMonomials  )
         {
-            term = RandomIdeal::"+randomTermGeneratorName+"( );
+            term = Randomideal::"+randomTermGeneratorName+"( );
             if (not (monomialExistsInPoly(pol,term))) // ensure that we not eliminate existing terms.
             {
                 pol = pol + term;
@@ -2742,7 +2742,7 @@ EXAMPLE:  example createRandomIdealGenerator; shows an example
 
          for (generatorId = numGens; generatorId >= 1; generatorId--)
          {
-            rndIdeal[generatorId] =RandomIdeal::"+randomPolyGeneratorName+"(); ;
+            rndIdeal[generatorId] =Randomideal::"+randomPolyGeneratorName+"(); ;
          }  
          return (rndIdeal);
      }
@@ -2887,12 +2887,12 @@ EXAMPLE:  example defaultRandomFactories; shows an example
 "
 {
    TRandomFactories factoryTable;
-   factoryTable.coeffFactory = RandomIdeal::randomCoeffGeneratorFactory;
-   factoryTable.monomFactory = RandomIdeal::randomMonomialGeneratorFactory;
-   factoryTable.termFactory  = RandomIdeal::randomTermGeneratorFactory;
-   factoryTable.polyFactory  = RandomIdeal::randomPolyGeneratorFactory;
-   factoryTable.idealFactory = RandomIdeal::randomIdealGeneratorFactory;
-   factoryTable.checkParamConsistancy = RandomIdeal::checkTIdealGeneratingParametersConsistency;
+   factoryTable.coeffFactory = Randomideal::randomCoeffGeneratorFactory;
+   factoryTable.monomFactory = Randomideal::randomMonomialGeneratorFactory;
+   factoryTable.termFactory  = Randomideal::randomTermGeneratorFactory;
+   factoryTable.polyFactory  = Randomideal::randomPolyGeneratorFactory;
+   factoryTable.idealFactory = Randomideal::randomIdealGeneratorFactory;
+   factoryTable.checkParamConsistancy = Randomideal::checkTIdealGeneratingParametersConsistency;
    return(factoryTable);
 }
 example
@@ -2973,8 +2973,8 @@ proc createRandomGeneratorsByParams(def params)
 {
    TRandomGenerators genTable;
    TRandomFactories factoryTable = defaultRandomFactories();
-   genTable.varG = RandomIdeal::randomVariable;
-   genTable.parG = RandomIdeal::randomParameter;
+   genTable.varG = Randomideal::randomVariable;
+   genTable.parG = Randomideal::randomParameter;
    genTable.coeffG = factoryTable.coeffFactory( params, factoryTable );
    genTable.monomG = factoryTable.monomFactory( params, factoryTable );
    genTable.termG  = factoryTable.termFactory ( params, factoryTable );
