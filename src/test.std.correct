@@ -5,7 +5,7 @@ info="
 ";
 
 LIB "primdecint.lib";
-LIB "randomIdeal.lib";
+LIB "randomideal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
  
@@ -29,6 +29,198 @@ proc defaultGroebnerTestFlags()
   flags.testIntersect = 0;
   return (flags);
 }
+
+
+proc testPureGroebner( getRng, gens, optionlist, trials, testflags, logfile )
+{
+
+    int nothing =1;
+    int warnIsSet = optionIsSet("warn");
+    option(nowarn);
+    if (defined(basering) ) {   def BAS=basering; }
+      def rng = getRng( );
+      setring rng;
+      option(warn);
+      
+    short = 0;
+    int trial;
+
+    while( 1 )
+    {   
+      option(nowarn);  
+      kill rng;      
+      def rng = getRng( );
+      setring rng;
+      ideal cs,  I, J, gI, gJ, ggI, ggJ;
+
+
+      if (testflags.optionflagTest)
+      {
+        if ( hasGlobalOrLocalOrdering(basering))
+        {
+           chooseRandomOptionsFromList(optionlist);
+        }
+      }
+      if (warnIsSet)
+      {
+        option(warn);
+      }
+      
+      
+       if (defined(qrng)) {kill qrng; }
+       monitor(logfile,"io");
+       write(":w "+logfile,emptystring);
+       write(":w "+logfile,emptystring);
+       monitor(logfile,"io");
+       // write(":w "+logfile,emptystring);
+      
+       dbprint(1, "LIB \"wrappers.lib\";");
+       dbprint(1, "LIB \"src/randomRing.lib\" ;");
+       dbprint( 1, "ring rng = "  + string( basering)+";" );
+       dbprint( 1, "short = 0 ;" );
+       
+       if ( not ("0" == string(minpoly) ))
+       {
+         dbprint( 1, "minpoly = " + string(minpoly) + ";");
+       }
+       dbprint( 1, "intvec op = "+string( option(get) )+";");           
+       dbprint( 1, " option(set, op) ;");
+       dbprint( 1, " option() ;");
+       dbprint( 1, " // option() ;" + option() );
+       dbprint( 1, "int trial = " + string( trial) + ";" );
+       short = 0;
+       I = gens.idealG( );
+       dbprint( 1, "system(\"random\", " + string( system("random") ) + ");" );
+       dbprint( 1, "ideal I = " + string( I ) + ";" );
+       dbprint( 1, "  dbprint( 1, \"ideal I = \" + string( I ) + \";\" );" );
+       
+       dbprint( 1, "       ideal gI =  std(I);" );
+       gI =  std(I);
+       //dbprint( 1, "//        gI = "+string(gI) );
+     
+
+  
+     
+       
+       if (testflags.reduceTest)
+       {
+            dbprint(1, "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
+            ASSUME(0, 0== size( std(reduce (I,gI ) ))  );
+       }
+       
+        if (testflags.equalTest)
+        {
+
+           dbprint(1,"ASSUME(0, idealsAreEqual(I,gI ));");
+           ASSUME(0, idealsAreEqual(I,gI ));          
+           
+           dbprint(1,"ASSUME(0, idealsEqual(I,gI ));");
+           ASSUME(0, idealsEqual(I,gI ));
+       }
+       //if ( hasGlobalOrdering(basering))
+       //{
+
+       //}
+       
+       if (testflags.repeatApplication)
+       { 
+           dbprint( 1, "       ideal ggI =  std(gI);" );
+           ggI =  std(gI);
+           //dbprint( 1, "//        ggI = "+string(ggI) +";");
+                  
+   
+          if (testflags.equalTest)
+          {
+             dbprint(1,"ASSUME(0, idealsAreEqual(gI,ggI ));");
+             ASSUME(0, idealsAreEqual(gI,ggI ));
+ 
+             
+             
+             dbprint(1,"ASSUME(0, idealsEqual(gI,ggI ));");
+             ASSUME(0, idealsEqual(gI,ggI ));
+
+ 
+          }
+      }
+
+     if (not testflags.optionflagTest)
+     {
+        continue;
+     }
+      if ( hasGlobalOrdering(basering) or hasLocalOrdering(basering) )
+      {
+  
+          if ( optionIsSet("redSB") )
+          {
+               
+                if (not idealRepresentationReducedTail(gI ) )
+                {
+                   dbprint( 1, "//        gI = "+string(gI) );
+                }
+               
+
+               dbprint(1,"ASSUME(0, idealRepresentationReducedTail( gI ));");
+               ASSUME(0, idealRepresentationReducedTail( gI ));
+               
+
+
+               dbprint(1,"ASSUME(0, idealRepresentationReduced( gI ));");
+               ASSUME(0, idealRepresentationReduced( gI ));
+               
+               
+               if (testflags.repeatApplication)
+               { 
+       
+                   dbprint(1,"ASSUME(0, size(gI)== size(ggI) );");
+                   ASSUME(0, size(gI)== size(ggI) );
+
+                  if (not idealRepresentationReducedTail(ggI ) )
+                  {
+                     dbprint( 1, "//        ggI = "+string(ggI) +";");
+                  }
+                  
+                  
+                 dbprint(1,"ASSUME(0, idealRepresentationReduced( ggI ));");
+                 ASSUME(0, idealRepresentationReduced( ggI ));
+               
+                
+                  dbprint(1,"ASSUME(0, idealRepresentationReducedTail( ggI ));");
+                  ASSUME(0, idealRepresentationReducedTail( ggI ));
+             }
+             
+         
+
+          }
+
+      }
+     /* dbprint(1, "//start sync");
+     while (nothing < 1000000)
+     {
+         nothing = nothing+1;
+     }
+     dbprint(1, "//end sync");
+
+     nothing = 1;
+     dbprint(1, "//finished sync");
+
+     while (nothing < 1000000)
+     {
+         nothing = nothing+1;
+     }
+     */
+  
+     nothing = 1;
+
+       write(":w "+logfile,emptystring);
+       //monitor(logfile,"io");
+
+       trial = trial+1;
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+
 
 proc testGroebner( getRng, gens, optionlist, trials, testflags, logfile )
 {
