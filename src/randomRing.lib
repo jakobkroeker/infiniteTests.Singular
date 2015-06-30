@@ -12,9 +12,9 @@ info="";
 static proc mod_init()
 {
 
-    if (not defined(RandomIdeal) )
+    if (not defined(Randomideal) )
     {
-      LIB "randomIdeal.lib";
+      LIB "randomideal.lib";
     }
     if (not defined(TWeighttedOpts_def) )
     {
