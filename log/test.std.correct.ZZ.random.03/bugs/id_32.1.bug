@@ -1,0 +1,26 @@
+
+LIB "primdec.lib";
+LIB "wrappers.lib";
+LIB "src/randomRing.lib" ;
+ring rng = (integer),(x(1),x(2)),(ls(2),C);
+short = 0 ;
+intvec op = 67108866,16787537;
+ option(set, op) ;
+ option() ;
+ // option() ;//options: redSB intStrategy redefine loadLib usage prompt warn
+int trial = 155;
+system("random", 286591012);
+ideal I = 10*x(2)^2-7*x(1)^3,5*x(2)^2+x(1)*x(2)^2+6*x(1)^3;
+       ideal gI =  std(I);
+ASSUME(0, 0== size( std(reduce (I,gI ) ))  );
+ASSUME(0, idealsAreEqual(I,gI ));
+ASSUME(0, idealsEqual(I,gI ));
+       ideal ggI =  std(gI);
+ASSUME(0, idealsAreEqual(gI,ggI ));
+ASSUME(0, idealsEqual(gI,ggI ));
+// idealRepresentationReducedTail :  I[1]5*x(2)^2+x(1)*x(2)^2+6*x(1)^3
+//  idealRepresentationReducedTail: lead(I[2])x(1)*x(2)^2
+//        gI = 5*x(2)^2+x(1)*x(2)^2+6*x(1)^3,x(1)*x(2)^2+x(1)^2*x(2)^2-38*x(1)^3+6*x(1)^4,95*x(1)^3+7*x(1)^4
+ASSUME(0, idealRepresentationReducedTail( gI ));
+// idealRepresentationReducedTail :  I[1]5*x(2)^2+x(1)*x(2)^2+6*x(1)^3
+//  idealRepresentationReducedTail: lead(I[2])x(1)*x(2)^2
