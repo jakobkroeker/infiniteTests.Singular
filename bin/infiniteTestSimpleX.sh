@@ -18,7 +18,7 @@ ignoreOverflow=$5
 
 basicTimeout=$8
 killTimeout=$(($basicTimeout +30))
-extTimeout=$((3 * $8))
+extTimeout=$((10 * $8))
 extkillTimeout=$(($extTimeout +30))
 
 considerTimeout=$6
@@ -50,6 +50,12 @@ export count=0;
 
 filename="${3##*/}"
 echo $filename
+
+fullinput=$3
+if [ ! -e "log/$filename/bugs/id_$idx.count" ]
+then
+    fullinput="input/"$3
+fi;
 
 set +H
 
@@ -101,7 +107,7 @@ do
     touch log/$filename/id_$idx.$count
     echo 'string logfile = "log/'$filename'/id_'$idx'.'$count'";'  >/tmp/testsingular/input/$filename/$filename.in; 
 
-    cat input/$filename >> /tmp/testsingular/input/$filename/$filename.in; 
+    cat $fullinput >> /tmp/testsingular/input/$filename/$filename.in; 
 
     if [ $keepLog -eq 1 ] 
     then
@@ -139,7 +145,7 @@ do
         status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
     fi; 
 
-    if [ ( $status -eq 14 ] [ $checkOutOfMem -eq 0 ] ) || ( [ $status -eq 137 ] && [ $considerTimeout -eq 0 ] )  || ( [ $status -eq 124 ] && [ $considerTimeout -eq 0 ] ) || [ $status -eq 0 ] || ( [ $overflow -eq 1 ] && [ $ignoreOverflow -eq 1 ] )
+    if  ( [ $status -eq 14 ] && [ $checkOutOfMem -eq 0 ] ) || ( [ $status -eq 137 ] && [ $considerTimeout -eq 0 ] )  || ( [ $status -eq 124 ] && [ $considerTimeout -eq 0 ] ) || [ $status -eq 0 ] || ( [ $overflow -eq 1 ] && [ $ignoreOverflow -eq 1 ] )
     then
         # export count=$(($count )); 
         echo "doNothing ";echo "doNothing ">> log/$filename/id_$idx.log;
