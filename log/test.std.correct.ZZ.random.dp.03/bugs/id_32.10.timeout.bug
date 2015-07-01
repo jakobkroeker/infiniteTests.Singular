@@ -1,0 +1,15 @@
+
+LIB "wrappers.lib";
+LIB "src/randomRing.lib" ;
+ring rng = (integer),(x(1),x(2),x(3)),(dp(3),C);
+short = 0 ;
+intvec op = 67108994,16787537;
+ option(set, op) ;
+ option() ;
+ // option() ;//options: redSB redThrough intStrategy redefine loadLib usage prompt warn
+int trial = 753;
+system("random", 237061741);
+ideal I = 2*x(1)^2*x(2)+5*x(2)^3,9*x(1)*x(3)^2+18,7*x(1)^2*x(3)-x(1)^2-20*x(2)*x(3);
+  dbprint( 1, "ideal I = " + string( I ) + ";" );
+       ideal gI =  std(I);
+quit;
