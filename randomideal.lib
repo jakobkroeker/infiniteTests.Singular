@@ -2577,7 +2577,7 @@ EXAMPLE:  example createRandomPolyGenerator; shows an example
         // cannot check size(term)>=termMonomials, since it may be impossible to reach that number.
         //dbprint(randomIdealDebug, \" deg(term) \" ,deg(term) );
 
-        while ( monomialcount <= termMonomials  )
+        while ( monomialcount < termMonomials  )
         {
             term = Randomideal::"+randomTermGeneratorName+"( );
             if (not (monomialExistsInPoly(pol,term))) // ensure that we not eliminate existing terms.
