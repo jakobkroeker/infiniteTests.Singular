@@ -3,7 +3,7 @@ category="Commutative Algebra";
 info="
 ";
 
-LIB "randomIdeal.lib";LIB "primdec.lib";LIB "ringutils.lib";LIB "wrappers.lib";LIB "ehv.lib";
+LIB "randomideal.lib";LIB "primdec.lib";LIB "ringutils.lib";LIB "wrappers.lib";LIB "ehv.lib";
 
 
 //proc wDecompE (I)         {    return ( Primdec::decompE(I) );     }

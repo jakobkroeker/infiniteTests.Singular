@@ -4,7 +4,10 @@ category="Commutative Algebra";
 info="
 ";
 
-LIB "primdec.lib";LIB "ringutils.lib";LIB "wrappers.lib";LIB "ehv.lib";
+LIB "wrappers.lib";
+LIB "ringutils.lib";
+LIB "primdec.lib";
+LIB "ehv.lib";
 
 
 proc adjustAssumeLevel()
@@ -124,6 +127,7 @@ proc testPrimdecZeroDim( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTe
 
 proc testPrimaryDecomp(ideal I)
 {
+        if (defined(PL))  {kill PL; }
         list PL;
         int i;
         
@@ -160,7 +164,7 @@ proc testPrimaryDecomp(ideal I)
 
 proc testMinAssDecomp(ideal I)
 {
-         
+            if (defined(ML))  {kill ML; }
             list ML;
             int i;
             def minAss1,minAss1e;
@@ -242,47 +246,52 @@ proc testPrimdec( getRng, genTable, trials, logfile )
 
       export(rng);
        //dbprint(1, "// get random ideal ");
-       I = genTable.idealG(  );    
-       //dbprint(1, "// got random ideal ");
+      trial = 0;
+      //while (trial<trials)
+      //{
 
-       if (not isZero(I) && not idealsAreEqual( ideal(1), I ) )
-       {
+           I = genTable.idealG(  );    
+           //dbprint(1, "// got random ideal ");
 
-           write(":w "+logfile,emptystring);
-           monitor(logfile,"io");
-           write(":w "+logfile,emptystring); // empty logfile twice  - otherwise it seems not to work
-           dbprint(1, "////////////////////////////////////////////////////////////////////////////////////////");
-           dbprint(1, "def assumeLevel = "+string( assumeLevel ) + ";" );
-           dbprint(1, "//  voice = "+string( voice ) + ";" );
-           dbprint(1, "system(\"random\","+string( system("random") ) + ");" );
-           dbprint(1, "//random: "+ string( system("random") )  );
-           dbprint(1, "LIB(\"bugs/test.primdec.many.orig\");");
-           dbprint(1, "intvec op = "+string( option(get) )+";");
-           dbprint(1, "ring rng = "+string(basering)+";");
-           dbprint(1, "minpoly = "+string(minpoly)+";");
-           dbprint(1, "ideal I = "+string(I)+";");
-           dbprint(1, "bigint trial = "+string(trial)+";");
-           dbprint(1, "    def minAss1,minAss1e;");
-
-           dbprint(1, "list  PL,ML;");
-           
-           PDfirst = random(0,1);
-           if (PDfirst)
-           {
-               testPrimaryDecomp(I);
-               testMinAssDecomp(I);
-           }
-           else
+           if (not isZero(I) && not idealsAreEqual( ideal(1), I ) )
            {
 
-               testMinAssDecomp(I);
-               testPrimaryDecomp(I);
-           }
- 
+               write(":w "+logfile,emptystring);
+               monitor(logfile,"io");
+               write(":w "+logfile,emptystring); // empty logfile twice  - otherwise it seems not to work
+               dbprint(1, "////////////////////////////////////////////////////////////////////////////////////////");
+               dbprint(1, "def assumeLevel = "+string( assumeLevel ) + ";" );
+               dbprint(1, "//  voice = "+string( voice ) + ";" );
+               dbprint(1, "system(\"random\","+string( system("random") ) + ");" );
+               dbprint(1, "//random: "+ string( system("random") )  );
+               dbprint(1, "LIB(\"bugs/test.primdec.many.orig.mp\");");
+               dbprint(1, "intvec op = "+string( option(get) )+";");
+               dbprint(1, "ring rng = "+string(basering)+";");
+               dbprint(1, "minpoly = "+string(minpoly)+";");
+               dbprint(1, "ideal I = "+string(I)+";");
+               dbprint(1, "bigint trial = "+string(trial)+";");
+               dbprint(1, "    def minAss1,minAss1e;");
 
-            trial++;
-       }
-      
+               dbprint(1, "list  PL,ML;");
+               
+               PDfirst = random(0,1);
+               if (PDfirst)
+               {
+                   testPrimaryDecomp(I);
+                   testMinAssDecomp(I);
+               }
+               else
+               {
+
+                   testMinAssDecomp(I);
+                   testPrimaryDecomp(I);
+               }
+     
+
+                trial++;
+           }
+        //}
+          
     }
 
 
