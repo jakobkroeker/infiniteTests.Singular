@@ -16,11 +16,11 @@ echo  = 0;
 //////// adjust random ideal generator params: 
 def genParams = defaultRandomConstructionParams();
 
-genParams.absMaxCoeff       = 25;
+genParams.absMaxCoeff       = 45;
 genParams.minVarFactorsPerMonomial = 0;
 genParams.maxVarFactorsPerMonomial = 3; // max degree
-genParams.maxTermsPerGen    = 2;
-genParams.maxGens           = 2;
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 3;
 
 def genTable = createRandomGeneratorsByParams( genParams  );
 
@@ -50,7 +50,8 @@ int trials = 100000000;
  //////////////////////  composing ring options  //////////////// 
   TRandomRingOpts ropts;
   ropts.minChar = 0;
-  ropts.maxChar = 200;
+  // ropts.maxChar = 200;
+  ropts.maxChar = 0;
   ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
   ropts.quotientIdeal = 0; // 0: no, 1: yes.
   ropts.maxVars = 3;
@@ -73,6 +74,6 @@ TGroebnerTestFlags flags = defaultGroebnerTestFlags();
 def optionlist = list ("redSB", "redTail");
 
 
-testQuotientOverZZ( rgens.getIntegerRing, genTable.idealG, trials, flags, optionlist, logfile);
+testQuotientOverZZ( rgens.getIntegerRing, genTable, trials, flags, optionlist, logfile);
 
  
