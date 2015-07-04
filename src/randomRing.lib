@@ -21,9 +21,9 @@ static proc mod_init()
 
         int TWeighttedOpts_def = 0;
         newstruct("TOrderingOpts",   " int minWeight,   int maxWeight, proc randomOrd");   
-        newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int minChar, int maxChar, int doExt, int maxVars,  TOrderingOpts oopts, proc ordString");
+        newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, TIdealGeneratingParameters quotientIdealParams,  int minChar, int maxChar, int doExt, int quotientIdeal, int maxVars,  TOrderingOpts oopts, proc ordString");
         //newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int maxChar, int doExt, int maxVars");
-        newstruct("TRandomRingGens", "proc randomOrd, proc getMinPolyStr, proc ordString, proc getChar, proc doExt, proc numVars, proc getRing, proc getIntegerRing");            
+        newstruct("TRandomRingGens", "proc randomOrd, proc getMinPolyStr, proc quotientIdeal, proc ordString, proc getChar, proc doExt, proc numVars, proc getRing, proc getIntegerRing");            
     }
 }
 
@@ -632,7 +632,7 @@ proc testRandomWeightedBlockOrdering()
      
      cmd = "proc ordString(numVars)
      {
-         dbprint(1, \"ordstrname \",RandomRing::"+ringOptsName+".ordString);
+         dbprint(1, \"//ordstrname \",RandomRing::"+ringOptsName+".ordString);
          return(RandomRing::"+ringOptsName+".ordString(RandomRing::"+ringOptsName+".oopts, numVars ));
      }
      ";
@@ -660,6 +660,62 @@ proc testRandomWeightedBlockOrdering()
      execute(cmd);
      return(getRandomMinpolyStr);
  }
+
+ proc createQuotientIdealGen(ropts)
+ { 
+     string cmd ;
+     if ( not ropts.quotientIdeal)
+     {
+         cmd = "proc getRandomQuotientIdeal()
+         {
+            return( ideal(0) );
+         }
+         ";
+         execute(cmd);
+         return(getRandomQuotientIdeal);
+
+     }
+
+     string genTableName = getRandomName(); 
+     dbprint(1, "//createQuotientIdealGen::genTableName ", genTableName);
+
+     cmd = "def RandomRing::"+genTableName+";";
+     execute(cmd);
+     cmd ="export("+genTableName+");";
+     execute(cmd);
+     
+     cmd = "RandomRing::"+genTableName+" = createRandomGeneratorsByParams( ropts.quotientIdealParams   );";
+     execute(cmd);  
+
+     cmd = "proc getRandomQuotientIdeal()
+     {
+
+        //execute(\" RandomRing::"+genTableName+".idealG() ;\");
+
+
+        if ( random(0,1) )    
+        {
+           //dbprint(1, \"//no qring\" );  
+           return (ideal(0)); 
+        }     
+        ideal result =     std(RandomRing::"+genTableName+".idealG()) ;
+        while ( idealsEqual(result,ideal(1)) )
+        {
+             result =     std( RandomRing::"+genTableName+".idealG() ) ;
+        }
+        return( result );
+     }
+     ";
+     //dbprint(1, "//here");
+
+     //dbprint(1, "//cmd",cmd);
+     execute(cmd);
+
+     //execute("dbprint(1, \"//cmd\",getRandomQuotientIdeal);");
+
+     return(getRandomQuotientIdeal);
+ }
+
  
  proc createRandomRingGens(ropts)
  {
@@ -668,6 +724,7 @@ proc testRandomWeightedBlockOrdering()
    rgens.ordString = createOrdStringProc(ropts);  
    rgens.getChar = createRandomCharGen(ropts);
    rgens.getMinPolyStr = createMinPolyStrGen(ropts);
+   rgens.quotientIdeal = createQuotientIdealGen(ropts);
    rgens.numVars = createRandomVarNumGen(ropts);
    rgens.doExt   = createRandomDoExtGen(ropts);
    rgens.getRing = createRandomRingGen(rgens);
@@ -695,7 +752,13 @@ proc testRandomWeightedBlockOrdering()
         
        int numVars =  RandomRing::"+ringGenTableName+".numVars();
 
-       string vstr = \"(x(1..\"+string(numVars)+\"))\";
+        string vstr = \"(x(1..\"+string(numVars)+\"))\";
+       if (numVars==1)       {            vstr = \"x\";       }
+       if (numVars==2)      {            vstr = \"(x,y)\";       }
+       if (numVars==3)       {            vstr = \"(x,y,z)\";       }
+       if (numVars==4)       {       vstr = \"(x,y,z,u)\";      }      
+       if (numVars==5)       {       vstr = \"(x,y,z, u,v)\";      }
+       if (numVars==6)       {       vstr = \"(x,y,z, u,v,w)\";      }
        
        if (c==0)
        {            
@@ -712,7 +775,14 @@ proc testRandomWeightedBlockOrdering()
        str_rng = str_rng +  orderingString+ \";\";
        execute(str_rng);
        setring rng;
-       
+       short = 0;
+
+       ideal QQQ = RandomRing::"+ringGenTableName+".quotientIdeal();
+       qring rngQ = QQQ;
+
+
+       setring rngQ;
+       short = 0;
        return (basering);
     }";
     
@@ -743,6 +813,13 @@ proc testRandomWeightedBlockOrdering()
        int numVars =  RandomRing::"+ringGenTableName+".numVars();
 
        string vstr = \"(x(1..\"+string(numVars)+\"))\";
+       if (numVars==1)       {            vstr = \"x\";       }
+       if (numVars==2)      {            vstr = \"(x,y)\";       }
+       if (numVars==3)       {            vstr = \"(x,y,z)\";       }
+       if (numVars==4)       {       vstr = \"(x,y,z,u)\";      }      
+       if (numVars==5)       {       vstr = \"(x,y,z, u,v)\";      }
+       if (numVars==6)       {       vstr = \"(x,y,z, u,v,w)\";      }
+     
              
        string str_rng = \"ring rng = (c),\"+vstr+\",\";  
 
@@ -754,7 +831,7 @@ proc testRandomWeightedBlockOrdering()
        str_rng = str_rng +  orderingString+ \";\";
        execute(str_rng);
        setring rng;
-
+       short = 0;
        if (doExt)
        {
           string str_mp = RandomRing::"+ringGenTableName+".getMinPolyStr(c, \"vv\" );
