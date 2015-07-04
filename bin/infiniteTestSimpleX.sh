@@ -52,10 +52,19 @@ filename="${3##*/}"
 echo $filename
 
 fullinput=$3
-if [ ! -e "log/$filename/bugs/id_$idx.count" ]
+if [ ! -e "$fullinput" ]
 then
     fullinput="input/"$3
 fi;
+
+if [ ! -e "$fullinput" ]
+then
+    echo "input file does not exist";
+    exit;
+fi;
+
+
+echo $fullinput
 
 set +H
 
@@ -125,10 +134,10 @@ do
     echo "show output file after sync" 
     cat log/$filename/id_$idx.$count;
 
-    sleep 30; # wait for disc sync...
+    sleep 5; # wait for disc sync...
     echo "show output file after sleep" 
     cat log/$filename/id_$idx.$count;
-    sleep 10;  
+    sleep 3;  
     if [ $status -eq 253 ] || [ $status -eq 252 ]
     then
        overflow=1;
@@ -151,6 +160,8 @@ do
         echo "doNothing ";echo "doNothing ">> log/$filename/id_$idx.log;
     else 
         echo "raiseCount ";echo "raiseCount ">> log/$filename/id_$idx.log;
+        echo "quit;" >> log/$filename/id_$idx.$count;
+
         if [ $status -eq 14 ]
         then 
             mv log/$filename/id_$idx.$count log/$filename/bugs/id_$idx.$count.outofmem.bug;
