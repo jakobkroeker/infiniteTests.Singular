@@ -5,7 +5,7 @@ info="
 ";
 
 LIB "primdecint.lib";
-LIB "randomIdeal.lib";
+LIB "randomideal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
  
@@ -42,9 +42,10 @@ proc testSyz( getRng, idealG, trials, optionlist, testflags, logfile )
          option(warn);
        }
       
-       write(":w "+logfile,emptystring);
        monitor(logfile,"io");
        write(":w "+logfile,emptystring);
+       write(":w "+logfile,emptystring);
+       monitor(logfile,"io");
        dbprint(1, "LIB \"primdec.lib\";");
        dbprint(1, "LIB \"wrappers.lib\";");
        dbprint(1, "LIB \"bugs/test.syz\";");
@@ -54,6 +55,13 @@ proc testSyz( getRng, idealG, trials, optionlist, testflags, logfile )
        {
          dbprint( 1, "minpoly = " + string(minpoly) + ";");
        }
+
+       if (isQuotientRing(rng))
+       {
+         dbprint( 1, "ideal  QQQ = "  + string( ideal(basering))+";" );
+         dbprint( 1, "qring QR = QQQ;" );
+       }
+
        dbprint( 1, "intvec op = "+string( option(get) )+";");     
        dbprint( 1, " option(set, op) ;");
        dbprint( 1, " option() ;");
@@ -66,9 +74,9 @@ proc testSyz( getRng, idealG, trials, optionlist, testflags, logfile )
        dbprint( 1, "system(\"random\", " + string( system("random") ) + ");" );
        dbprint( 1, "ideal I = " + string( I ) + ";" );
        
-       dbprint( 1, "ideal syzI = syz (I);");
+       dbprint( 1, "def syzI = syz (I);");
        syzI = syz (I);
-       dbprint(1, "ASSUME(0, idealsEqual(ideal(zero),	 transpose(matrix(syzI))*transpose(matrix(I)) ) );");
+       dbprint(1, "ASSUME(0, idealsEqual(ideal(0),	 transpose(matrix(syzI))*transpose(matrix(I)) ) );");
        ASSUME(0, idealsEqual(ideal(0) , transpose(matrix(syzI))*transpose(matrix(I)) ) );
        
        dbprint( 1, "ideal gI =  std(I);" );
@@ -79,11 +87,11 @@ proc testSyz( getRng, idealG, trials, optionlist, testflags, logfile )
        dbprint(1, "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
        ASSUME( 0, 0== size( std(reduce (I,gI ) ))  );
 
-       dbprint( 1, "ideal syzgI = syz (gI);");
+       dbprint( 1, "def syzgI = syz (gI);");
        syzgI = syz (gI);
 
 
-       dbprint(1, "ASSUME(0, idealsEqual(ideal(zero), transpose(matrix(syzgI))*transpose(matrix(gI)) ) );");
+       dbprint(1, "ASSUME(0, idealsEqual(ideal(0), transpose(matrix(syzgI))*transpose(matrix(gI)) ) );");
        ASSUME(0, idealsEqual(ideal(0), transpose(matrix(syzgI))*transpose(matrix(gI)) ) );
 
 
