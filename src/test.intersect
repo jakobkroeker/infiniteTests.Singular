@@ -5,7 +5,7 @@ info="
 ";
 
 LIB "primdecint.lib";
-LIB "randomIdeal.lib";
+LIB "randomideal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
 
@@ -61,7 +61,7 @@ EXAMPLE:  example intersect_via_eliminate;  shows an example"
   }
   else 
   {
-     ideal   q = imap(BAS,q);
+     ideal   q = std(imap(BAS,q));
      qring r2 = q;
   }
 
@@ -108,6 +108,7 @@ EXAMPLE:  example intersect_via_eliminate;  shows an example"
 
   for(k=1; k <= nGens(result1); k++)
   {
+     //ASSUME(0, (leadcoef(result1[k]) >0));
      if(leadcoef(result1[k]) < 0)
      {
         //ERROR("intersect_via_eliminate::Warning: negative leadcoef occured");
@@ -140,7 +141,7 @@ proc testIntersectVSintersectZ( getRng, idealG, trials, testflags, optionlist, l
       kill rng;      
       def rng = getRng( );
       setring rng;
-      ideal cs,  I, J, gI, gJ, ggI, ggJ, I_J, gI_gJ, e_I_J, e_gI_gJ;
+      ideal cs,  I, J, gI, gJ, ggI, ggJ, I_J, gI_gJ, e_I_J, e_gI_gJ, z_I_J;
 
 
       if (testflags.optionflagTest)
@@ -160,7 +161,7 @@ proc testIntersectVSintersectZ( getRng, idealG, trials, testflags, optionlist, l
        write(":w "+logfile,emptystring);
        dbprint(1, "LIB \"wrappers.lib\";");
        dbprint(1, "LIB \"src/randomRing.lib\" ;");
-       dbprint(1, "LIB(\"bugs/test.intersect.vs.intersect.via.eliminate\");");
+       dbprint(1, "LIB(\"bugs/test.intersect\");");
        
       
        dbprint( 1, "ring rng = "  + string( basering)+";" );
@@ -170,6 +171,16 @@ proc testIntersectVSintersectZ( getRng, idealG, trials, testflags, optionlist, l
        {
          dbprint( 1, "minpoly = " + string(minpoly) + ";");
        }
+       if (isQuotientRing(rng))
+       {
+         dbprint( 1, "ideal  QQQ = "  + string( ideal(basering))+";" );
+         dbprint( 1, "qring QR = QQQ;" );
+       }
+       dbprint( 1, "intvec op = "+string( option(get) )+";");     
+       dbprint( 1, " option(set, op) ;");
+       dbprint( 1, " option() ;");
+       dbprint( 1, " // option() ;" + option() );
+
        if (defined(qrng)) {kill qrng; }
        
        dbprint( 1, "// int trial= "+string( trial)+";" );
@@ -185,18 +196,48 @@ proc testIntersectVSintersectZ( getRng, idealG, trials, testflags, optionlist, l
 
        dbprint( 1, "ideal I_J =  intersect(I,J);" );
        I_J =  intersect(I,J);
+       dbprint( 1, "ASSUME(0, isSubModule(I_J, I));" );
+       dbprint( 1, "ASSUME(0, isSubModule(I_J, J));" );
+       ASSUME(0, isSubModule(I_J, I));
+       ASSUME(0, isSubModule(I_J, J));
+
+
+       dbprint( 1, "ASSUME(0, idealsAreEqual(I_J     , intersect(I_J,I_J)   ) );" );
+       dbprint( 1, "ASSUME(0, idealsAreEqual(I_J     , intersect(I_J,  J)   ) );" );
+       dbprint( 1, "ASSUME(0, idealsAreEqual(I_J     , intersect(I_J,  gI)   ) );" );
+       dbprint( 1, "ASSUME(0, idealsAreEqual(I_J     , intersect(I_J,  I+gJ)   ) );" );
+       ASSUME(0, idealsAreEqual(I_J     , intersect(I_J,I_J)   ) );
+       ASSUME(0, idealsAreEqual(I_J     , intersect(I_J,J)   ) );
+       ASSUME(0, idealsAreEqual(I_J     , intersect(I_J,gI)   ) );
+       ASSUME(0, idealsAreEqual(I_J     , intersect(I_J,I+gJ)   ) );
+
+
+       if ((char(rng)==0) && (not (isQuotientRing(basering)) ))
+       {
+           dbprint( 1, "ideal z_I_J =  intersectZ(I,J);" );
+           z_I_J = intersectZ(I,J);
+           dbprint( 1, "  ASSUME(0, idealsAreEqual(I_J    , z_I_J    ) );");
+           ASSUME(0, idealsAreEqual(I_J     , z_I_J    ) );
+       }
        dbprint( 1, " ideal gI_gJ = intersect(gI,gJ);" );
        gI_gJ = intersect(gI,gJ);
-       dbprint( 1, " ideal e_I_J =  intersect_via_eliminate(I,J);"  );
-       e_I_J =  intersect_via_eliminate(I,J);
-       dbprint( 1, " e_gI_gJ =  intersect_via_eliminate( gI, gJ);"  );
-       e_gI_gJ =  intersect_via_eliminate( gI, gJ);
-       dbprint( 1, "  ASSUME(0, idealsAreEqual(I_J    , e_I_J    ) );");
        dbprint( 1, "  ASSUME(0, idealsAreEqual(I_J    , gI_gJ    ) );");
-       dbprint( 1, "  ASSUME(0, idealsAreEqual(gI_gJ  ,  e_gI_gJ ) );");
-       ASSUME(0, idealsAreEqual(I_J     , e_I_J    ) );
        ASSUME(0, idealsAreEqual(I_J     , gI_gJ    ) );
-       ASSUME(0, idealsAreEqual(gI_gJ   , e_gI_gJ  ) );
+
+       if (hasGlobalOrdering(basering)  )
+       {
+           dbprint( 1, " ideal e_I_J =  intersect_via_eliminate(I,J);"  );
+           e_I_J =  intersect_via_eliminate(I,J);
+           dbprint( 1, " e_gI_gJ =  intersect_via_eliminate( gI, gJ);"  );
+           e_gI_gJ =  intersect_via_eliminate( gI, gJ);
+           dbprint( 1, "  ASSUME(0, idealsAreEqual(I_J    , e_I_J    ) );");     
+           dbprint( 1, "  ASSUME(0, idealsAreEqual(gI_gJ  ,  e_gI_gJ ) );");
+
+           ASSUME(0, idealsAreEqual(I_J     , e_I_J    ) );
+           
+           ASSUME(0, idealsAreEqual(gI_gJ   , e_gI_gJ  ) );
+       }
+
        trial = trial+1;
     }
 
