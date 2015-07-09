@@ -31,6 +31,17 @@ proc defaultGroebnerTestFlags()
 }
 
 
+proc testLeadCoeffsNotNegative(gI)
+{
+
+        for(k=1; k <= ncols(gI); k++)
+        {
+             ASSUME(0, (leadcoef(gI[k]) >= 0));
+        }
+}
+
+
+
 proc testPureGroebner( getRng, gens, optionlist, trials, testflags, logfile )
 {
 
@@ -99,7 +110,11 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, logfile )
        //dbprint( 1, "//        gI = "+string(gI) );
      
 
-  
+      if (hasIntegerCoefficientRing(basering))
+      {
+          dbprint( 1, "    testLeadCoeffsNotNegative(gI);" );
+          testLeadCoeffsNotNegative(gI);
+      }
      
        
        if (testflags.reduceTest)
@@ -127,7 +142,11 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, logfile )
            dbprint( 1, "       ideal ggI =  std(gI);" );
            ggI =  std(gI);
            //dbprint( 1, "//        ggI = "+string(ggI) +";");
-                  
+          if (hasIntegerCoefficientRing(basering))
+          {
+              dbprint( 1, " testLeadCoeffsNotNegative(ggI);" );
+              testLeadCoeffsNotNegative(ggI);
+          }
    
           if (testflags.equalTest)
           {
@@ -291,7 +310,13 @@ proc testGroebner( getRng, gens, optionlist, trials, testflags, logfile )
 
        gJ =  std(J);
        //dbprint( 1, "//        gJ = "+string(gJ)+";" );
-     
+          if (hasIntegerCoefficientRing(basering))
+          {
+              dbprint( 1, " testLeadCoeffsNotNegative(gI);" );
+              dbprint( 1, "    testLeadCoeffsNotNegative(gJ);" );
+              testLeadCoeffsNotNegative(gI);
+              testLeadCoeffsNotNegative(gJ);
+          }
        
        if (testflags.reduceTest)
        {
@@ -529,6 +554,20 @@ proc testGroebnerAppend( getRng, gens, optionlist, trials, testflags, logfile )
        Ip = I+p;
        gIp  = std(Ip);
        gI_p = std(gI,p);
+
+          if (hasIntegerCoefficientRing(basering))
+          {
+              dbprint( 1, " testLeadCoeffsNotNegative(gI);" );
+              dbprint( 1, "    testLeadCoeffsNotNegative(gIp);" );
+              dbprint( 1, "    testLeadCoeffsNotNegative(gIJ);" );
+              dbprint( 1, "    testLeadCoeffsNotNegative(gI_p);" );
+
+              testLeadCoeffsNotNegative(gI);
+              testLeadCoeffsNotNegative(gIp);
+              testLeadCoeffsNotNegative(gIJ);
+              testLeadCoeffsNotNegative(gI_p);
+          }
+
 
        if (testflags.reduceTest)
        {
