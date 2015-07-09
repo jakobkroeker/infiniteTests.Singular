@@ -1,0 +1,95 @@
+
+option(nowarn);
+
+LIB("randomideal.lib");
+LIB("wrappers.lib");
+LIB("normal.lib");
+LIB("src/randomRing.lib");
+LIB("bugs/test.normalP.lib");
+
+
+//monitor("log/test.normal.00","io");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+     
+
+genParams.absMaxCoeff       = 124;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 6;
+genParams.maxTermsPerGen    = 6;
+genParams.maxGens           = 3;
+
+
+
+
+
+
+//////// adjust num of trials  
+int trials = 100000000;
+//////////////////////////////////////////////////////////////////////////////// 
+ def optionlist = list ("redSB", "redTail");
+ 
+ 
+ 
+
+ TOrderingOpts oopts;  
+   oopts.randomOrd = chooseGLWOrdering; // see randomRing
+
+    // oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
+    // oopts.randomOrd = randomStraightGlobalOrdering; // see randomRing
+    oopts.randomOrd = reverseDegreeGlobalOrdering;
+ 
+    oopts.minWeight = -10; //rename to minWeight
+    oopts.maxWeight = 5; //rename to maxWeight
+
+
+ TRandomRingOpts ropts;
+   ropts.minChar = 2;
+   ropts.maxChar = 100;
+   ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+   ropts.quotientIdeal = 0; // 0: no, 1: yes.
+   ropts.maxVars = 3;
+  
+   ropts.minpolyGenParams = genParams;
+
+   ropts.quotientIdealParams = genParams;
+
+   ropts.oopts   = oopts;     //rename to monomialOrderingOpts
+
+   // ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
+ 
+   ropts.ordString = randomGLWOrdering; // rename to ordStringP or ordStringF
+
+
+option(warn);
+
+proc run()
+{
+ 
+    def gens = createRandomGeneratorsByParams( genParams  );
+
+    TRandomRingGens rgens = createRandomRingGens(ropts);  
+
+  dbprint(1, "// genParams.absMaxCoeff = "+string(genParams.absMaxCoeff));
+  dbprint(1, "// genParams.maxVarFactorsPerMonomial = "+string(genParams.maxVarFactorsPerMonomial));
+  dbprint(1, "// genParams.maxTermsPerGen = "+string(genParams.maxTermsPerGen));
+  dbprint(1, "// genParams.maxGens = "+string(genParams.maxGens));
+  dbprint(1, "// ropts.maxVars = "+string(ropts.maxVars));
+
+
+
+   // testNormalP( getRandomRing, gens, optionlist, trials, logfile);
+
+     testNormalP( rgens.getRing, gens, optionlist, trials, logfile);
+
+
+}
