@@ -640,7 +640,7 @@ proc testRandomWeightedBlockOrdering()
      
      cmd = "proc ordString(numVars)
      {
-          dbprint(1, \"//ordstrname \",RandomRing::"+ringOptsName+".ordString);
+         // dbprint(1, \"//ordstrname \",RandomRing::"+ringOptsName+".ordString);
          return(RandomRing::"+ringOptsName+".ordString(RandomRing::"+ringOptsName+".oopts, numVars ));
      }
      ";
