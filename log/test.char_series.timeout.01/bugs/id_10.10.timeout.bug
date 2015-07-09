@@ -1,0 +1,9 @@
+
+LIB("primdec.lib");
+LIB("randomideal.lib");
+ring rng = (0),(x,y,z),(lp(3),C);
+bigint trial = 270;
+ideal I = -26/25*x^2*z+9/43*x*y*z^2-39/17*y^2*z^3-26/41*z^3,-25/14*x^2*y*z-8/21*x^2*z^3-31/12*x*y^3-9/43*y^2;
+ideal cs = char_series(I);
+quit;
+quit;
