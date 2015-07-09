@@ -1,9 +1,7 @@
 
 LIB("bugs/randomRing.lib");
-LIB("bugs/test.intersect.vs.intersect.via.eliminate");
+LIB("bugs/test.intersect");
 LIB("bugs/test.std.correct");
-//monitor("log/test.intersect.vs.intersect.via.eliminate.00","io");
-
 
 
 //////////////////////////////////////////////////////////////////////////////// 
@@ -17,11 +15,11 @@ echo  = 0;
 //////// adjust random ideal generator params: 
 def genParams = defaultRandomConstructionParams();
 
-genParams.absMaxCoeff       = 45;
+genParams.absMaxCoeff       = 25;
 genParams.minVarFactorsPerMonomial = 0;
-genParams.maxVarFactorsPerMonomial = 4; // max degree
-genParams.maxTermsPerGen    = 1;
-genParams.maxGens           = 3;
+genParams.maxVarFactorsPerMonomial = 3; // max degree
+genParams.maxTermsPerGen    = 2;
+genParams.maxGens           = 2;
 
 def genTable = createRandomGeneratorsByParams( genParams  );
 
@@ -74,6 +72,6 @@ TGroebnerTestFlags flags = defaultGroebnerTestFlags();
 def optionlist = list ("redSB", "redTail");
 
 
-testIntersectVSintersectZ( rgens.getIntegerRing, genTable.idealG, trials, flags, optionlist, logfile);
+testIntersect( rgens.getIntegerRing, genTable.idealG, trials, flags, optionlist, logfile);
 
  

@@ -1,8 +1,7 @@
 
 LIB("bugs/randomRing.lib");
-LIB("bugs/test.intersect.vs.intersect.via.eliminate");
+LIB("bugs/test.intersect");
 LIB("bugs/test.std.correct");
-//monitor("log/test.intersect.vs.intersect.via.eliminate.00","io");
 
 
 
@@ -70,6 +69,6 @@ TGroebnerTestFlags flags = defaultGroebnerTestFlags();
 def optionlist = list ("redSB", "redTail");
 
 
-testIntersectVSintersectZ( rgens.getIntegerRing, genTable.idealG, trials, flags, optionlist, logfile);
+testIntersect( rgens.getIntegerRing, genTable.idealG, trials, flags, optionlist, logfile);
 
  

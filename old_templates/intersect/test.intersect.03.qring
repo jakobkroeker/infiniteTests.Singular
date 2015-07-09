@@ -72,6 +72,6 @@ TGroebnerTestFlags flags = defaultGroebnerTestFlags();
 def optionlist = list ("redSB", "redTail");
 
 
-testIntersectVSintersectZ( rgens.getIntegerRing, genTable.idealG, trials, flags, optionlist, logfile);
+testIntersect( rgens.getIntegerRing, genTable.idealG, trials, flags, optionlist, logfile);
 
  
