@@ -20,7 +20,7 @@ genParams.absMaxCoeff       = 45;
 genParams.minVarFactorsPerMonomial = 0;
 genParams.maxVarFactorsPerMonomial = 7; // max degree
 genParams.maxTermsPerGen    = 1;
-genParams.maxGens           = 3;
+genParams.maxGens           = 4;
 
 def gens = createRandomGeneratorsByParams( genParams  );
 
@@ -43,7 +43,7 @@ def optionlist = list ("redSB", "redTail");
 proc getRandomRing(  )
 {
 
-    int maxVars = 4;
+    int maxVars = 3;
    
    int numVars = random(1,maxVars);
 
