@@ -27,6 +27,8 @@ proc testNormalP( getRandomRing, gens, optionlist, trials, logfile);
     def testResult;
     int printlevelOffset = 3 ; // required, since otherwise normal() prints dbinfo because it increases printlevel
 
+    link l=":w "+logfile;
+
     while( trial<trials )
     {   
         option(nowarn);       
@@ -48,9 +50,14 @@ proc testNormalP( getRandomRing, gens, optionlist, trials, logfile);
        if  ( idealsAreEqual(ideal(1), J)   )    {     continue;    }
  
        
-       write(":w "+logfile,emptystring);
+       monitor ("") ;
+       l=":w "+logfile;
+       open(l);
+       write(l,"");
+       write(l,"");
+
+       close(l);        
        monitor(logfile,"io");
-       write(":w "+logfile,emptystring);
 
        dbprint( 1, " intvec testResult; ");
        dbprint( 1, " intvec v=1,1,1;");
@@ -98,7 +105,7 @@ proc testNormalP( getRandomRing, gens, optionlist, trials, logfile);
                trial = trial+1;
                dbprint(1, "trial = "+string(trial)+";");
 
-               dbprint(1, "normalResult = normalP(component);");
+               dbprint(1, "normalResult = normalP(component, \"withRing\");");
                normalResult = normalP(component,"withRing");
                dbprint(1, " testResult = norTest(component, normalResult);");
                testResult = norTest(component, normalResult);
@@ -107,6 +114,7 @@ proc testNormalP( getRandomRing, gens, optionlist, trials, logfile);
                        
            }
        }
+       monitor ("") ;
     }
 
 

@@ -4,38 +4,61 @@ category="Commutative Algebra";
 info="
 ";
 
-
 LIB "primdec.lib";
 LIB "ehv.lib";
-LIB "randomIdeal.lib";
+LIB "randomideal.lib";
  
 
-proc testCharSeries( rng, idealG, trials, filename )
+proc testCharSeries( getRng, idealG, trials, filename )
 {
- 
+    int warnIsSet = optionIsSet("warn");
     if (defined(basering) ) {   def BAS=basering; }
-    setring rng;
 
+    def rng = getRng( );
+    setring rng;
+    option(warn);
+      
+    short = 0;
 
     bigint trial;
-    ideal cs,  I;
+    link l=":w "+filename;
+    l;
 
     while( trial<trials )
-    {   
+    {  
+
+       option(nowarn);  
+       kill rng;      
+       def rng = getRng( );
+       setring rng;
+       ideal cs,  I;
+
+      if (warnIsSet)
+      {
+        option(warn);
+      }
+
        //dbprint( 1, "basering: ", basering );
-       write(":w "+filename,"LIB(\"primdec.lib\");");
-       write(":a "+filename,"LIB(\"ehv.lib\");");
-       write(":a "+filename,"LIB(\"randomIdeal.lib\");");
-       write(":a "+filename,"ring rng = "+string(basering)+";");
-       write(":a "+filename,"bigint trial = "+string(trial)+";");
+       monitor ("") ;
+       l=":w "+filename;
+       open(l);
+       write(l,"");
+       write(l,"");
+       close(l);        
+       monitor(filename,"io");
+       dbprint(1, "LIB(\"primdec.lib\");");
+       dbprint(1,"LIB(\"randomideal.lib\");");
+       dbprint(1,"ring rng = "+string(basering)+";");
+       dbprint(1,"bigint trial = "+string(trial)+";");
        ///dbprint( 1, "trial: ", trial );
        I = idealG( );
-       //dbprint( 1, "I = ", I );
-       write(":a "+filename,"ideal I= "+string(I)+";");
-       write(":a "+filename,"ideal cs = char_series(I);");
+       dbprint( 1, "ideal I = "+string( I )+";");
+       dbprint( 1,"ideal cs = char_series(I);");
        cs = char_series(I);
+     
+       monitor ("") ;
        trial = trial+1;
-       ASSUME(0, 0);
+       //ASSUME(0, 0);
     }
 
     if ( defined(BAS) ) {  setring BAS; }

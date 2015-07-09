@@ -14,6 +14,8 @@ proc adjustAssumeLevel()
 {
     if (not (defined(assumeLevel) ) ) 
     {
+       dbprint(1, "       def Top::assumeLevel = 3;");
+       dbprint(1, " export (Top::assumeLevel);");
        def Top::assumeLevel = 3;
        export (Top::assumeLevel);
     }
@@ -21,8 +23,9 @@ proc adjustAssumeLevel()
     {
        if (assumeLevel==0)
        { 
-          assumeLevel = 3;
+            assumeLevel = 3;
        }
+       dbprint(1, "  assumeLevel = "+string(assumeLevel)+";");
     }
 }
 
@@ -203,7 +206,10 @@ proc testMinAssDecomp(ideal I)
 
 proc testPrimdec( getRng, genTable, trials, logfile )
 {
-    print ("testPrimdec");
+    print ("// testPrimdec");
+
+    link l=":w "+logfile;
+
     adjustAssumeLevel();
     if (defined(basering) ) {   def BAS=basering; }
 
@@ -256,11 +262,18 @@ proc testPrimdec( getRng, genTable, trials, logfile )
            if (not isZero(I) && not idealsAreEqual( ideal(1), I ) )
            {
 
-               write(":w "+logfile,emptystring);
+               monitor ("") ;
+               l=":w "+logfile;
+               open(l);
+               write(l,"");
+               // write(":w "+logfile,emptystring);
+               write(l,"");
+
+               close(l);        
                monitor(logfile,"io");
-               write(":w "+logfile,emptystring); // empty logfile twice  - otherwise it seems not to work
+
                dbprint(1, "////////////////////////////////////////////////////////////////////////////////////////");
-               dbprint(1, "def assumeLevel = "+string( assumeLevel ) + ";" );
+               dbprint(1, "if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = "+string( assumeLevel ) + ";  " );
                dbprint(1, "//  voice = "+string( voice ) + ";" );
                dbprint(1, "system(\"random\","+string( system("random") ) + ");" );
                dbprint(1, "//random: "+ string( system("random") )  );
@@ -289,6 +302,8 @@ proc testPrimdec( getRng, genTable, trials, logfile )
      
 
                 trial++;
+
+                monitor ("") ;
            }
         //}
           
