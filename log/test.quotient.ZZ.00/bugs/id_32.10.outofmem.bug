@@ -1,0 +1,23 @@
+
+////////////////////////////////////////////////////////////////////////////////////////
+def assumeLevel = 3;
+ // voice = 2;
+system("random",1216127596);
+//random: 1216127596
+LIB("bugs/test.quotient.ZZ");
+ring rng = (integer),(x(1),x(2),x(3)),(lp(1),lp(1),lp(1),C);
+intvec op = 100663296,10321;
+ option(set, op) ;
+ option() ;
+ // option() ;//options: redTail intStrategy redefine loadLib usage prompt
+ ideal quotient_JI,quotient_JK, quotient_J_IK,  quotientZ_JI, quotient_gJgI, quotientZWrapper_gJgI, I, J, gI, gJ, K, gK;
+ I = -4*x(3);
+ J = x(1)*x(3)+14,10*x(1)*x(2)-3*x(3)^3,12*x(1)^2+8*x(2)^2;
+ K = 4*x(2)^2*x(3)-9*x(2)^2,-13*x(1)*x(2)+6;
+bigint trial = 16;
+ quotientZ_JI = quotientZWrapper(J,I);
+// ASSUME(0, quotientPropertySatisfied( J,I , quotientZ_JI ,gens.idealG, 300 ) );
+quotient_JI = quotient(J,I); 
+ quotient_JK = quotient(J,K); 
+  quotient_J_IK = quotient(J,I+K);   
+quit;

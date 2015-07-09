@@ -20,7 +20,7 @@ def genParams = defaultRandomConstructionParams();
 genParams.absMaxCoeff       = 45;
 genParams.minVarFactorsPerMonomial = 0;
 genParams.maxVarFactorsPerMonomial = 4; // max degree
-genParams.maxTermsPerGen    = 3;
+genParams.maxTermsPerGen    = 1;
 genParams.maxGens           = 3;
 
 def genTable = createRandomGeneratorsByParams( genParams  );
@@ -39,9 +39,11 @@ int trials = 100000000;
 //////////////////////////////////////////////////////////////////////////////// 
 
   TOrderingOpts oopts;  
-  oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
+  oopts.randomOrd = chooseGLWOrdering; // see randomRing
 
-  oopts.randomOrd = randomStraightGlobalOrdering; // see randomRing
+  // oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
+
+   oopts.randomOrd = randomStraightGlobalOrdering; // see randomRing
  
   oopts.minWeight = -10; //rename to minWeight
   oopts.maxWeight = 5; //rename to maxWeight
@@ -51,14 +53,16 @@ int trials = 100000000;
   ropts.minChar = 0;
   ropts.maxChar = 200;
   ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
-  ropts.maxVars = 5;
+  ropts.quotientIdeal = 0; // 0: no, 1: yes.
+  ropts.maxVars = 3;
   
+  ropts.quotientIdealParams = genParams;
   ropts.minpolyGenParams = minpolyGenParams;
   ropts.oopts   = oopts;     //rename to monomialOrderingOpts
 
-  //ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
+  // ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
  
-  ropts.ordString = randomGLWBlockOrdering; // rename to ordStringP or ordStringF
+   ropts.ordString = randomGLWBlockOrdering; // rename to ordStringP or ordStringF
  
   /////////////////////////////////////////////////////////////////////////////////////////
 

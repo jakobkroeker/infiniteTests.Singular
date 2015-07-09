@@ -5,7 +5,7 @@ option("nowarn");
 LIB("bugs/randomRing.lib");
 LIB("bugs/test.syz");
 LIB("bugs/test.std.correct");
-// monitor("log/test.syz.02","io");
+ 
 
 
 
@@ -50,6 +50,8 @@ def genTable = createRandomGeneratorsByParams( genParams  );
   ropts.minChar = 0;
   ropts.maxChar = 200;
   ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.quotientIdeal   = 0; //0:no; 1:yes; 2:randomly
+  ropts.quotientIdealParams = genParams;
   ropts.maxVars = 2;
   
   ropts.minpolyGenParams = minpolyGenParams;
