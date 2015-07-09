@@ -1,0 +1,64 @@
+#!/bin/bash
+# $1 = binary
+# $2 = input file
+# $3 = timeout
+# $4 = rounds
+
+singularBinary=$1
+inputFile=$2
+currentTimeout=$3
+rounds=$4
+
+echo "singularBinary "$singularBinary
+echo "inputFile "$inputFile
+echo "currentTimeout "$currentTimeout
+echo "rounds "$rounds
+inputFileName=${inputFile##*/}
+inputPath=${inputFile%/*}
+echo "inputPath"  $inputPath
+echo "inputFileName"  $inputFileName
+
+
+# duplicate code
+timeoutstr=$currentTimeout"sec"
+if [ $currentTimeout -gt 3600 ]
+then 
+    timeoutstr=$(($currentTimeout/3600))"hours"
+fi;
+if [ $currentTimeout -gt 86400 ]
+then 
+    timeoutstr=$(($currentTimeout/86400))"days"
+fi;
+
+while [ $rounds -gt 0 ] ; 
+do
+    timeoutstr=$currentTimeout"sec"
+    if [ $currentTimeout -gt 3600 ]
+    then 
+        timeoutstr=$(($currentTimeout/3600))"hours"
+    fi;
+    if [ $currentTimeout -gt 86400 ]
+    then 
+        timeoutstr=$(($currentTimeout/86400))"days"
+    fi;
+
+  
+   set -o pipefail; timeout --kill-after=5 $currentTimeout  $singularBinary  -v -r $randomNum $inputFile 2>&1 ;
+   status=$?; echo "status="$status;
+
+   if [ $status -eq 0 ] 
+   then 
+        echo "timeoutstr "$timeoutstr
+        newFileName=${inputFileName%%.timeout*}"."$timeoutstr".finished"
+        mv $inputFile $inputPath/$newFileName
+        exit
+   fi;
+   currentTimeout=$(($currentTimeout*10))
+   rounds=$(($rounds-1))
+done
+echo "timeoutstr "$timeoutstr
+
+newFileName=${inputFileName%%.timeout*}"."$timeoutstr".timeout.bug"
+mv $inputFile $inputPath/$newFileName
+
+
