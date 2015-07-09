@@ -1,0 +1,7 @@
+#!/bin/bash
+ export count=6
+arr["degSub"]=1
+arr["termSub"]=1
+arr["genSub"]=1
+arr["varSub"]=1
+arr["coeffSub"]=2
