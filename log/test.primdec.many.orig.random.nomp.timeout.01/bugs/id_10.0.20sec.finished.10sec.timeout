@@ -1,0 +1,25 @@
+
+////////////////////////////////////////////////////////////////////////////////////////
+if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = 3;  
+//  voice = 2;
+system("random",289430937);
+//random: 289430937
+LIB("bugs/test.primdec.many.orig.mp");
+intvec op = 0,16787537;
+ring rng = (53),(x,y,z,u),(lp(1),lp(1),lp(1),lp(1),C);
+minpoly = 0;
+ideal I = -18*x*y^2*u+y*z^2-21,5*y^2*u^2-9*y*z*u^2+16*y,21*x*u+26*z*u^3+14*u;
+bigint trial = 0;
+    def minAss1,minAss1e;
+list  PL,ML;
+  ML[1] = minAssGTZGTZ(I);
+  ML[2] = minAssGTZ(I);
+ASSUME(0, minAssDecompAreEquivalent(ML[1],ML[2]));
+  ML[3] = minAssGTZFacSTD(I);
+ASSUME(0, minAssDecompAreEquivalent(ML[2],ML[3]));
+minAss1  = minAss(I);
+  PL[1] = primdecGTZkeepKomp(I);
+ASSUME(0, testPrimary( PL[1] , I ) );
+  PL[2] = primdecSYNoOptimalOrdering(I);
+quit;
+quit;
