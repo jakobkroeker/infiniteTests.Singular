@@ -1,0 +1,99 @@
+
+LIB("bugs/randomRing.lib");
+LIB("bugs/test.char_series");
+
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+
+
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
+
+/*
+genParams.absMaxCoeff       = 45;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 4; // max degree
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 3;
+*/
+
+genParams.absMaxCoeff       = 145;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 6; // max degree
+genParams.maxTermsPerGen    = 6;
+genParams.maxGens           = 6;
+
+
+
+
+   // minpoly settings
+  TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
+
+  minpolyGenParams.absMaxCoeff       = 300;
+  minpolyGenParams.minVarFactorsPerMonomial = 0;
+  minpolyGenParams.maxVarFactorsPerMonomial = 4;
+  minpolyGenParams.maxTermsPerGen    = 3;
+  minpolyGenParams.bFractionsOn      = 0;
+  
+//////// adjust num of trials  
+int trials = 100000;
+//////////////////////////////////////////////////////////////////////////////// 
+
+  TOrderingOpts oopts;  
+  oopts.randomOrd = chooseGLWOrdering; // see randomRing
+
+  // oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
+
+   oopts.randomOrd = randomStraightGlobalOrdering; // see randomRing
+ 
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
+
+ //////////////////////  composing ring options  //////////////// 
+  TRandomRingOpts ropts;
+  ropts.minChar = 0;
+  ropts.maxChar = 200;
+  ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.quotientIdeal = 0; // 0: no, 1: yes.
+  ropts.maxVars = 5;
+  
+
+  ropts.minpolyGenParams = minpolyGenParams;
+  ropts.oopts   = oopts;     //rename to monomialOrderingOpts
+
+  // ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
+ 
+   ropts.ordString = randomGLWBlockOrdering; // rename to ordStringP or ordStringF
+ 
+  /////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+proc run()
+{
+
+  def genTable = createRandomGeneratorsByParams( genParams  );
+
+  ropts.quotientIdealParams = genParams;
+
+  TRandomRingGens rgens = createRandomRingGens(ropts);  
+
+  dbprint(1, "// genParams.absMaxCoeff = "+string(genParams.absMaxCoeff));
+  dbprint(1, "// genParams.maxVarFactorsPerMonomial = "+string(genParams.maxVarFactorsPerMonomial));
+  dbprint(1, "// genParams.maxTermsPerGen = "+string(genParams.maxTermsPerGen));
+  dbprint(1, "// genParams.maxGens = "+string(genParams.maxGens));
+  dbprint(1, "// ropts.maxVars = "+string(ropts.maxVars));
+
+  ERROR("// bla");
+
+  testCharSeries( rgens.getRing, genTable.idealG, trials, logfile);  
+
+}
+
+
