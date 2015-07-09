@@ -210,11 +210,15 @@ proc randomStraightGlobalOrdering()
     return( l[random(1, size(l) ) ]);
 }
 
+proc reverseDegreeGlobalOrdering()
+{
+    return("dp");
+}
 
 proc straightBlockString(sord,blocksize)
 { 
 
-  dbprint(1, "// sord : "+ sord);
+  // dbprint(1, "// sord : "+ sord);
   return(sord + "("+ string(blocksize) + ")");
 }
 
@@ -406,7 +410,7 @@ proc  randomWeightedOrderingBlock(word, blocksize, oopts)
 
 proc randomGLWBlock(word, blocksize, oopts)
 {
-   dbprint(1, " //// word: "+word);
+   // dbprint(1, " //// word: "+word);
    if (isWeightedOrderingStr(word))
    {
       return( randomWeightedOrderingBlock(word, blocksize, oopts) );
@@ -516,12 +520,16 @@ static proc randomGLWBlockOrdering_i(oopts, numvars , mixed )
     string result = "(";
     for ( pos=1; pos <=size(block); pos++ )
     {
-         dbprint(1, "// ");
-         dbprint(1, "// pos : " + string(result));
-         if (mixed) { dbprint(1, "//mixed");   boType = oopts.randomOrd(); }
-         dbprint(1, "// boType : " + boType);
+         //dbprint(1, "// ");
+         //dbprint(1, "// pos : " + string(result));
+         if (mixed) 
+         { 
+          // dbprint(1, "//mixed"); 
+          boType = oopts.randomOrd(); 
+         }
+         //dbprint(1, "// boType : " + boType);
          result = result + randomGLWBlock(boType, block[pos], oopts);
-         dbprint(1, "// result : " + result);
+         //dbprint(1, "// result : " + result);
          if  (pos< size(block) )
          {
             result = result + ", ";
@@ -632,7 +640,7 @@ proc testRandomWeightedBlockOrdering()
      
      cmd = "proc ordString(numVars)
      {
-         dbprint(1, \"//ordstrname \",RandomRing::"+ringOptsName+".ordString);
+          dbprint(1, \"//ordstrname \",RandomRing::"+ringOptsName+".ordString);
          return(RandomRing::"+ringOptsName+".ordString(RandomRing::"+ringOptsName+".oopts, numVars ));
      }
      ";
@@ -677,7 +685,7 @@ proc testRandomWeightedBlockOrdering()
      }
 
      string genTableName = getRandomName(); 
-     dbprint(1, "//createQuotientIdealGen::genTableName ", genTableName);
+     // dbprint(1, "//createQuotientIdealGen::genTableName ", genTableName);
 
      cmd = "def RandomRing::"+genTableName+";";
      execute(cmd);
@@ -845,7 +853,15 @@ proc testRandomWeightedBlockOrdering()
   
 }
 
-   
+proc minimizeVars(TRandomRingOpts ropts,  int subtrahend)
+{
+    dbprint(1, " // ropts"+ string(ropts));
+     dbprint(1, " // subtrahend"+ string(subtrahend));
+    ropts.maxVars = max(1,  ropts.maxVars-subtrahend);
+    return(ropts);
+}
+
+proc minimizeVarsS( subtrahend) {     ropts = minimizeVars(ropts, subtrahend); }
 
 /*
 

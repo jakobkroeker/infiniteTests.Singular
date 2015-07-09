@@ -3042,5 +3042,65 @@ example
 }
 
 
+proc minimizeMonomialDeg(TIdealGeneratingParameters genParams,  int subtrahend)
+{
+    genParams.maxVarFactorsPerMonomial= max (genParams.minVarFactorsPerMonomial,genParams.maxVarFactorsPerMonomial-subtrahend);
+    return(genParams);
+}
+
+proc minimizeTermNumber(TIdealGeneratingParameters genParams,  int subtrahend)
+{
+    genParams.maxTermsPerGen=  max(1, genParams.maxTermsPerGen-subtrahend);
+    return(genParams);
+}
+
+proc minimizeAbsMaxCoeff(TIdealGeneratingParameters genParams,  int numberOfApplications)
+{
+   
+    while (numberOfApplications>0)
+    {
+        if (genParams.absMaxCoeff>20)
+        {
+            genParams.absMaxCoeff= (genParams.absMaxCoeff*2) div 3 ;
+        }
+        else
+        {
+             if (genParams.absMaxCoeff>1) 
+             {
+                    genParams.absMaxCoeff = genParams.absMaxCoeff-1;
+             }
+        }
+        numberOfApplications = numberOfApplications-1;
+    }
+
+    return(genParams);
+}
+
+proc minimizeGens(TIdealGeneratingParameters genParams, int subtrahend)
+{
+     genParams.maxGens= max(1,  genParams.maxGens-subtrahend);
+     return(genParams);
+}
+
+
+
+
+
+// shortcut
+
+// decrease, not minimize!!!
+
+proc minimizeMonomialDegS( subtrahend) {     genParams = minimizeMonomialDeg(genParams, subtrahend); }
+
+proc minimizeTermNumberS( subtrahend) {     genParams = minimizeTermNumber(genParams, subtrahend); }
+
+proc minimizeGensS( subtrahend) {     genParams = minimizeGens(genParams, subtrahend); }
+
+proc minimizeAbsMaxCoeffS( subtrahend) {     genParams = minimizeAbsMaxCoeff(genParams, subtrahend); }
+
+
+
+
+
 
 
