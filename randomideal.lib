@@ -118,10 +118,17 @@ static proc mod_init()
       int TRandomFactories_def=0;
       newstruct("TRandomFactories", 
                 "def coeffFactory,                  def monomFactory,                 def termFactory,                 def polyFactory,                 def idealFactory,                 def checkParamConsistancy ");
+    }
 
+    if (not defined(TIdealInfo_def) )
+    {
+      int TIdealInfo_def=0;
+      newstruct("TIdealInfo", 
+                "int numGens, int maxTerms, int maxDeg, int numVars, def maxAbsCoeff ");
 
     }
 }
+
 
 
 proc checkTIdealGeneratingParametersConsistency(TIdealGeneratingParameters params)
@@ -3039,6 +3046,52 @@ example
 
     // generate a random coefficient:
     generatorTable.coeffG();
+}
+
+proc maxTerms(ideal I)
+{
+   int pos;
+   int maxTermNum=0;
+   for (pos=1;pos<=ncols(I);pos++)
+   {
+        maxTermNum = max(maxTermNum, size(I[pos]));
+   }
+   return (maxTermNum);
+}
+proc maxAbsCoeff(ideal I)
+{
+   int genidx,termidx;
+   def maxAbsCoeff=number(0);
+   for (genidx=1;genidx<=ncols(I);genidx++)
+   {
+       for (termidx=1; termidx <= size(I[genidx]);termidx++)
+       {
+            maxAbsCoeff = max(maxAbsCoeff, leadcoef( I[genidx][termidx]) );
+       }
+   }
+   return (maxAbsCoeff);
+}
+
+
+proc getIdealInfo(ideal I)
+{
+  TIdealInfo idealInfo;
+  idealInfo.numGens = ncols(I);
+  idealInfo.maxTerms = maxTerms(I);
+  idealInfo.maxDeg = deg(I);
+  idealInfo.numVars = size(variables(I));
+  idealInfo.maxAbsCoeff = maxAbsCoeff(I);
+  return(idealInfo);
+}
+
+proc printIdealInfo(TIdealInfo idealInfo)
+{
+    dbprint(1, "// numVars     = "+string(idealInfo.numVars)+";");
+    dbprint(1, "// maxAbsCoeff = "+string(idealInfo.maxAbsCoeff)+";");
+    dbprint(1, "// maxDeg      = "+string(idealInfo.maxDeg)+";");
+    dbprint(1, "// maxTerms    = "+string(idealInfo.maxTerms)+";");
+    dbprint(1, "// numGens     = "+string(idealInfo.numGens)+";");
+    return();
 }
 
 
