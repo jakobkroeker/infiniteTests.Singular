@@ -8,12 +8,15 @@
 # $7 = check for out of mem
 # $8 = minimize
 # $9 = tmelimit
-# ${10} = memory limit
-# ${11} = max num bugs
-# ${12} = idx 
+# ${10} = maxMinimizeTime in hours
+# ${11} = memory limit
+# ${12} = max num bugs
+# ${13} = idx 
 # set memlimit e.g.:  ulimit -v 1000000 ; 
 $1;
 runornot=$?
+
+export singularBinary=$2
     
 ignoreOverflow=$5
 
@@ -29,33 +32,35 @@ checkOutOfMem=$7
 minimize=$8
 
 
-maxMinimizeTime=$((3600*5))
-#maxMinimizeTime=1
+maxMinimizeTime=$((3600*${10}))
 
 elapsedMinimizeTime=0
 
 
-echo "binary:   "$2
+echo "binary:   "$singularBinary
 echo "testing   "$3
 echo "ignoreOverflow   "$ignoreOverflow
 echo "considerTimeout  "$considerTimeout
 echo "checkOutOfMem    "$checkOutOfMem
 echo "minimize    "$minimize
+echo "maxMinimizeTime    "$maxMinimizeTime"  sec"
+
 
 keepLog=$4
 #echo "keepLog:"$keepLog
 if [ $keepLog -eq 1 ] ; then  echo "keep log " ; fi;
 if [ $keepLog -eq 0 ] ; then  echo " do not keep log " ; fi;
-echo "timeout:  "$9" sec"
-echo "memlimit: "${10}" kb"
-echo "maxBugs : "${11}" "
-maxBugs=$((${11} + 0));
+echo "timeout:  "basicTimeout" sec"
+export memlimit=${11}
+echo "memlimit: "$memlimit" kb"
+maxBugs=$((${12} + 0));
+echo "maxBugs : "$maxBugs" "
 export rnd=$RANDOM
-export idx=${12}
+export idx=${13}
 echo "idx : "$idx" "
 
 
-ulimit -v ${10}
+ulimit -v $memlimit
 export count=0;
 
 #export degSub=0;
@@ -178,7 +183,6 @@ do
     rm -f log/$filename/$filename.id_$idx.$count
     sleep 3
     echo "count: "$count;
-    #echo 'def countstr="'$count'";' >input/$3.count; 
     touch log/$filename/id_$idx.$count
     echo 'string logfile = "log/'$filename'/id_'$idx'.'$count'";'  >/tmp/testsingular/input/$filename/$filename.$idx.in; 
 
@@ -195,11 +199,11 @@ do
 
     if [ $keepLog -eq 1 ] 
     then
-        #set -o pipefail; timeout -s SIGKILL $basicTimeout $2 -v -r $randomNum /tmp/testsingular/input/$filename/$filename.$idx.in 2>&1 | tee -a log/$filename/id_$idx.log;
-        set -o pipefail; timeout --kill-after=5 $basicTimeout  $2  -v -r $randomNum /tmp/testsingular/input/$filename/$filename.$idx.in 2>&1 | tee -a log/$filename/id_$idx.log;
+        #set -o pipefail; timeout -s SIGKILL $basicTimeout $singularBinary -v -r $randomNum /tmp/testsingular/input/$filename/$filename.$idx.in 2>&1 | tee -a log/$filename/id_$idx.log;
+        set -o pipefail; timeout --kill-after=5 $basicTimeout  $singularBinary  -v -r $randomNum /tmp/testsingular/input/$filename/$filename.$idx.in 2>&1 | tee -a log/$filename/id_$idx.log;
         status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
     else
-        set -o pipefail; timeout --kill-after=5 $basicTimeout  $2 -v -r $randomNum /tmp/testsingular/input/$filename/$filename.$idx.in 2>&1 | tee log/$filename/id_$idx.log;
+        set -o pipefail; timeout --kill-after=5 $basicTimeout  $singularBinary -v -r $randomNum /tmp/testsingular/input/$filename/$filename.$idx.in 2>&1 | tee log/$filename/id_$idx.log;
         status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
     fi;   
     echo "show output file ******************************************" 
@@ -251,7 +255,7 @@ do
         echo "quit;" >> log/$filename/id_$idx.$count;
 
         sleep 2;
-        set -o pipefail; timeout --kill-after=5 $extTimeout  $2 -v -r $randomNum log/$filename/id_$idx.$count 2>&1 | tee log/$filename/id_$idx.log;
+        set -o pipefail; timeout --kill-after=5 $extTimeout  $singularBinary -v -r $randomNum log/$filename/id_$idx.$count 2>&1 | tee log/$filename/id_$idx.log;
         status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
     fi; 
 
@@ -313,7 +317,7 @@ do
     fi; 
 done
 echo "done"
-echo $1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" "${12}
+echo $1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${11}" "${12}" "${13}
 #timeout:     124
 #out of mem:  14
 
