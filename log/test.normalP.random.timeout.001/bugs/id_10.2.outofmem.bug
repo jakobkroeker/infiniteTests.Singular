@@ -1,0 +1,27 @@
+
+ intvec testResult; 
+ intvec v=1,1,1;
+int voiceLvl = 2;
+LIB("normal.lib");
+LIB("src/wrappers.lib");
+LIB("src/randomRing.lib");
+ring rng = (97),(x(1),x(2),x(3)),(dp(3),C);
+short = 0 ;
+minpoly = 0;
+intvec op = 128,16787537;
+ option(set, op) ;
+ option() ;
+//options: redThrough redefine loadLib usage prompt warn
+int trial ;
+ideal J =-12*x(1)^2*x(3)+10*x(2)*x(3)^2-11*x(2);
+def L = primdecGTZ(J);
+ASSUME(0, testPrimary(L,J) ); 
+ideal component;
+list normalResult;
+component   = L[1][2];
+//options: redThrough redefine loadLib usage prompt warn
+ ASSUME(0, isPrime(component) );
+trial = 8;
+normalResult = normalP(component, "withRing");
+quit;
+quit;
