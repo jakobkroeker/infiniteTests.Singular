@@ -1,0 +1,33 @@
+./bin/infiniteTestSimpleX.sh bin/alwaysrun.sh /home/jkroeker/lipmanresolve-SignatureSB-test/Singular-spielwiese/BUILD/Singular/Singular input/stdZZ/test.std.correct.ZZ.random.08 1 1 0 0 0 300  5 2000000 5 13
+
+
+./log/test.primdec.many.orig.random.01/bugs/id_10.13.timeout.bug
+./log/test.primdec.many.orig.random.00/bugs/id_10.0.timeout.bug
+./log/test.primdec.many.orig.random.nomp.00/bugs/id_10.12.primdecSYNoOptimalOrdering.vog.timeout.bug
+./log/test.primdec.many.orig.random.nomp.00/bugs/id_10.13.primdecSYNoOptimalOrdering.vog.timeout.bug
+./log/test.intersect.vs.intersect.via.eliminate.03.timeout/bugs/id_32.3.timeout.bug
+./log/test.intersect.vs.intersect.via.eliminate.03.timeout/bugs/id_32.2.timeout.bug
+./log/test.intersect.vs.intersect.via.eliminate.03.timeout/bugs/id_32.1.timeout.bug
+./log/test.intersect.vs.intersect.via.eliminate.03.timeout/bugs/id_32.4.timeout.bug
+./log/test.primdec.many.orig.random.nomp.timeout.00/bugs/id_10.0.primdecSY.timeout.bug
+./log/test.primdec.many.orig.random.nomp.timeout.00/bugs/id_10.1.minAssDecompAreEquivalent.vogon.timeout.bug
+
+./bin/checkTimeout /home/jkroeker/lipmanresolve-SignatureSB-test/Singular-spielwiese/BUILD/Singular/Singular
+
+
+
+./bin/infiniteTestSimpleX.sh bin/alwaysrun.sh /home/jkroeker/lipmanresolve-test/Singular-spielwiese/BUILD/Singular/Singular input/primdec/test.minAssChar.nomp.timeout.02 1 1 1 1 1 300  15 2000000 19 13
+
+
+./bin/infiniteTestSimpleX.sh bin/alwaysrun.sh /home/jkroeker/lipmanresolve-test/Singular-spielwiese/BUILD/Singular/Singular input/primdec/test.primdecGTZ.nomp.timeout.02 1 1 1 1 1 300  15 2000000 19 13
+
+./bin/infiniteTestSimpleX.sh bin/alwaysrun.sh /home/jkroeker/lipmanresolve-test/Singular-spielwiese/BUILD/Singular/Singular input/primdec/test.minAssGTZ.nomp.timeout.02 1 1 1 1 1 300  15 2000000 19 13
+
+
+./bin/infiniteTestSimpleX.sh bin/alwaysrun.sh /home/jkroeker/lipmanresolve-test/Singular-spielwiese/BUILD/Singular/Singular input/primdec/test.primdecSY.nomp.timeout.02 1 1 1 1 1 300  15 2000000 19 13
+
+./bin/infiniteTestSimpleX.sh bin/alwaysrun.sh /home/jkroeker/lipmanresolve-test/Singular-spielwiese/BUILD/Singular/Singular input/charseries/test.char_series.timeout.01 1 1 1 1 1 300  15 2000000 19 13
+
+
+
+
