@@ -1,0 +1,17 @@
+
+////////////////////////////////////////////////////////////////////////////////////////
+def assumeLevel = 3;
+//  voice = 2;
+system("random",1059795267);
+//random: 1059795267
+LIB("bugs/test.primdec.many.orig.mp.timeout");
+intvec op = 67108864,16787537;
+ring rng = (0),(x,y,z),(dp(2),lp(1),C);
+minpoly = 0;
+ideal I = 10*x*y^3+78*x^2*z-6*y^2*z,-13*x^2*z+99*y*z+94*y,x*y*z-59*x-63*y;
+bigint trial = 0;
+    def minAss1,minAss1e;
+list  PL,ML;
+  PL[1] = primdecSY(I);
+quit;
+quit;
