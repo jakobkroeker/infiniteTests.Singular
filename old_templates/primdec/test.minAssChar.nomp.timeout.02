@@ -1,0 +1,84 @@
+///
+
+option(nowarn);
+
+LIB "src/test.primdec.mp.timeout";
+
+LIB "src/randomRing.lib";
+
+LIB "ellipticcovers.lib";
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+def assumeLevel=3;
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 300;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 6;
+genParams.maxTermsPerGen    = 6;
+genParams.maxGens           = 6;
+genParams.bFractionsOn      = 0;
+
+
+
+ def optionlist = list ("redSB", "redTail");
+ 
+ ////////////////////////////////// random ring options   ////////////////////////////////
+  
+ // ordering settings
+  TOrderingOpts oopts;  
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
+  oopts.randomOrd = chooseStraightGlobalOrdering; //rename to ordStringP
+  
+  // minpoly settings
+  TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
+
+  minpolyGenParams.absMaxCoeff       = 300;
+  minpolyGenParams.minVarFactorsPerMonomial = 0;
+  minpolyGenParams.maxVarFactorsPerMonomial = 3;
+  minpolyGenParams.maxTermsPerGen    = 4;
+  minpolyGenParams.bFractionsOn      = 0;
+ 
+  //////////////////////  composing ring options  //////////////// 
+  TRandomRingOpts ropts;
+  ropts.minChar = 0;
+  ropts.maxChar = 200;
+  ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.maxVars = 6;
+  
+  ropts.minpolyGenParams = minpolyGenParams;
+  ropts.oopts   = oopts;     //rename to monomialOrderingOpts
+
+  ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
+ 
+  /////////////////////////////////////////////////////////////////////////////////////////
+
+  TRandomRingGens rgens = createRandomRingGens(ropts);  
+
+  // def R = rgens.getRing(); setring R;
+
+option(warn);
+
+int trialsPerRing = 10;
+
+proc run()
+{
+    def genTable = createRandomGeneratorsByParams( genParams  );
+    testPrimdec( rgens.getRing , genTable, trialsPerRing, "minAssChar", logfile);
+}
+
+///////////////////////////////////////////////////////////
+
+// ./bin/infiniteTestX.sh ../singular-spielwiese test.primdec.many.orig.random_mp.00 randomsetup/ring/char_0__vars_3__ordering__lp__redSB_redTail randomsetup/genTable/maxCoeff_50__degree_0-3__maxTerms_2__maxGens_3__FractionsOff 30 1000000 1
+
+// /bin/infiniteTestSimpleX.sh bin/alwaysrun.sh /home/jakob/newwork/Projects/lipmanresolve/infiniteTests/../Singular-spielwiese/BUILD/Singular/Singular input/primdec/test.primdec.many.orig.random.nomp.timeout.01  0 0 1 1 1 50 2  1000000 16 12
+
+
