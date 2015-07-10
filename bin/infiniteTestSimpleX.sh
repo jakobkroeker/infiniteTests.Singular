@@ -214,10 +214,10 @@ do
     echo "show output file after sync+++++++++++++++++++++++++++++++++++"
     cat log/$filename/id_$idx.$count;
 
-     sleep 15; # wait for disc sync...
+    # sleep 15; # wait for disc sync...
     echo "show output file after sleep ----------------------------------" 
     cat log/$filename/id_$idx.$count;
-     sleep 20;  
+    # sleep 20;  
     diff log/$filename/id_$idx.$count /tmp/testsingular/input/$filename/$filename.$idx.output;
     diffstatus=$?;
     if [ $diffstatus -ne 0 ]
