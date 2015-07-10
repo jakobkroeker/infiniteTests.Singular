@@ -765,8 +765,8 @@ proc testRandomWeightedBlockOrdering()
        if (numVars==2)      {            vstr = \"(x,y)\";       }
        if (numVars==3)       {            vstr = \"(x,y,z)\";       }
        if (numVars==4)       {       vstr = \"(x,y,z,s)\";      }      
-       if (numVars==5)       {       vstr = \"(x,y,z, s,v)\";      }
-       if (numVars==6)       {       vstr = \"(x,y,z, s,v,w)\";      }
+       if (numVars==5)       {       vstr = \"(x,y,z, s,vv)\";      }
+       if (numVars==6)       {       vstr = \"(x,y,z, s,vv,ww)\";      }
        
        if (c==0)
        {            
@@ -824,9 +824,9 @@ proc testRandomWeightedBlockOrdering()
        if (numVars==1)       {            vstr = \"x\";       }
        if (numVars==2)      {            vstr = \"(x,y)\";       }
        if (numVars==3)       {            vstr = \"(x,y,z)\";       }
-       if (numVars==4)       {       vstr = \"(x,y,z,v)\";      }      
-       if (numVars==5)       {       vstr = \"(x,y,z, v,w)\";      }
-       if (numVars==6)       {       vstr = \"(x,y,z, s,v,w)\";      }
+       if (numVars==4)       {       vstr = \"(x,y,z,vv)\";      }      
+       if (numVars==5)       {       vstr = \"(x,y,z, vv,ww)\";      }
+       if (numVars==6)       {       vstr = \"(x,y,z, s,vv,ww)\";      }
      
              
        string str_rng = \"ring rng = (c),\"+vstr+\",\";  
