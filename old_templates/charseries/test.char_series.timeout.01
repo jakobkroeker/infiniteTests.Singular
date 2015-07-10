@@ -90,8 +90,6 @@ proc run()
   dbprint(1, "// genParams.maxGens = "+string(genParams.maxGens));
   dbprint(1, "// ropts.maxVars = "+string(ropts.maxVars));
 
-  ERROR("// bla");
-
   testCharSeries( rgens.getRing, genTable.idealG, trials, logfile);  
 
 }
