@@ -33,7 +33,7 @@ proc defaultGroebnerTestFlags()
 
 proc testLeadCoeffsNotNegative(gI)
 {
-
+    int k;
         for(k=1; k <= ncols(gI); k++)
         {
              ASSUME(0, (leadcoef(gI[k]) >= 0));
@@ -87,6 +87,7 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, logfile )
       
        dbprint(1, "LIB \"wrappers.lib\";");
        dbprint(1, "LIB \"src/randomRing.lib\" ;");
+       dbprint(1, "LIB \"bugs/test.std.correct\" ;");
        dbprint( 1, "ring rng = "  + string( basering)+";" );
        dbprint( 1, "short = 0 ;" );
        
@@ -127,10 +128,18 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, logfile )
         {
 
            dbprint(1,"ASSUME(0, idealsAreEqual(I,gI ));");
-           ASSUME(0, idealsAreEqual(I,gI ));          
+           ASSUME(0, idealsAreEqual(I,gI ));  
+
+           /*
+
+              if ( hasGlobalOrdering(basering) or hasLocalOrdering(basering) )
+              {        
            
-           dbprint(1,"ASSUME(0, idealsEqual(I,gI ));");
-           ASSUME(0, idealsEqual(I,gI ));
+                   dbprint(1,"ASSUME(0, idealsEqual(I,gI ));");
+                   ASSUME(0, idealsEqual(I,gI ));
+              }
+           */
+
        }
        //if ( hasGlobalOrdering(basering))
        //{
@@ -153,11 +162,15 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, logfile )
              dbprint(1,"ASSUME(0, idealsAreEqual(gI,ggI ));");
              ASSUME(0, idealsAreEqual(gI,ggI ));
  
-             
-             
-             dbprint(1,"ASSUME(0, idealsEqual(gI,ggI ));");
-             ASSUME(0, idealsEqual(gI,ggI ));
+             /*
+              if ( hasGlobalOrdering(basering) or hasLocalOrdering(basering) )
+              {
+                     dbprint(1,"ASSUME(0, idealsEqual(gI,ggI ));");
+                     ASSUME(0, idealsEqual(gI,ggI ));
+              }
 
+              */
+ 
  
           }
       }
@@ -166,7 +179,8 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, logfile )
      {
         continue;
      }
-      if ( hasGlobalOrdering(basering) or hasLocalOrdering(basering) )
+      // if ( hasGlobalOrdering(basering) or hasLocalOrdering(basering) )
+      if ( hasGlobalOrdering(basering)  )
       {
   
           if ( optionIsSet("redSB") )
@@ -282,6 +296,7 @@ proc testGroebner( getRng, gens, optionlist, trials, testflags, logfile )
        dbprint(1, "LIB \"primdec.lib\";");
        dbprint(1, "LIB \"wrappers.lib\";");
        dbprint(1, "LIB \"src/randomRing.lib\" ;");
+       dbprint(1, "LIB \"bugs/test.std.correct\" ;");
        dbprint( 1, "ring rng = "  + string( basering)+";" );
        dbprint( 1, "short = 0 ;" );
        
