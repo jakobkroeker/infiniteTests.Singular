@@ -61,7 +61,7 @@ int trials = 100000;
   ropts.maxChar = 200;
   ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
   ropts.quotientIdeal = 0; // 0: no, 1: yes.
-  ropts.maxVars = 5;
+  ropts.maxVars = 4;
   
 
   ropts.minpolyGenParams = minpolyGenParams;
