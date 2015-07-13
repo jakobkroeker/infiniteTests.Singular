@@ -1,0 +1,16 @@
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = 3;  
+//  voice = 3;
+system("random",1940694459);
+//random: 1940694459
+LIB("bugs/test.primdec.mp.timeout");
+intvec op = 67108864,16787537;
+ring rng = (0),(x,y,z),(lp(3),C);
+minpoly = 0;
+ideal I = 217*x^4*y^2*z-246*x*y^4*z^2+280*x*y^3*z^2+21*x*y*z-110*z^2-16,-72*x^4*y^2*z+224*y;
+bigint trial = 0;
+def result= minAssChar(I);
+quit;
+quit;
