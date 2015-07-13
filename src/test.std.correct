@@ -60,6 +60,9 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, logfile )
     {   
       option(nowarn);  
       kill rng;      
+
+      dbprint(1, " // getRng() ;");
+
       def rng = getRng( );
       setring rng;
       ideal cs,  I, J, gI, gJ, ggI, ggJ;
@@ -150,7 +153,7 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, logfile )
        { 
            dbprint( 1, "       ideal ggI =  std(gI);" );
            ggI =  std(gI);
-           //dbprint( 1, "//        ggI = "+string(ggI) +";");
+          dbprint( 1, "//  hasIntegerCoefficientRing(basering); ");
           if (hasIntegerCoefficientRing(basering))
           {
               dbprint( 1, " testLeadCoeffsNotNegative(ggI);" );
@@ -180,12 +183,14 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, logfile )
         continue;
      }
       // if ( hasGlobalOrdering(basering) or hasLocalOrdering(basering) )
+      dbprint(1,"  // hasGlobalOrdering(basering);");
       if ( hasGlobalOrdering(basering)  )
       {
   
           if ( optionIsSet("redSB") )
           {
                
+                dbprint(1,"  // idealRepresentationReducedTail(gI);");
                 if (not idealRepresentationReducedTail(gI ) )
                 {
                    dbprint( 1, "//        gI = "+string(gI) );
@@ -207,6 +212,7 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, logfile )
                    dbprint(1,"ASSUME(0, size(gI)== size(ggI) );");
                    ASSUME(0, size(gI)== size(ggI) );
 
+                  dbprint(1,"  // idealRepresentationReducedTail(ggI);");
                   if (not idealRepresentationReducedTail(ggI ) )
                   {
                      dbprint( 1, "//        ggI = "+string(ggI) +";");
