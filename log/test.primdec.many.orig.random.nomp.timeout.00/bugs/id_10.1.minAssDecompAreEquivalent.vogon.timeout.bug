@@ -1,0 +1,19 @@
+
+////////////////////////////////////////////////////////////////////////////////////////
+def assumeLevel = 3;
+//  voice = 2;
+system("random",1201521351);
+//random: 1201521351
+LIB("bugs/test.primdec.many.orig.mp.timeout");
+intvec op = 67108864,16787537;
+ring rng = (0),(x,y,z),(rp(3),C);
+minpoly = 0;
+ideal I = -21*x*y^2*z-22*y-16*x^2,51*y^2*z^2-86*x*y*z+40*x^2*y,-16*x^2*y^2+45;
+bigint trial = 0;
+    def minAss1,minAss1e;
+list  PL,ML;
+  ML[1] = minAssGTZ(I);
+  ML[2] = minAssGTZGTZ(I);
+ASSUME(0, minAssDecompAreEquivalent(ML[1],ML[2]));
+quit;
+quit;

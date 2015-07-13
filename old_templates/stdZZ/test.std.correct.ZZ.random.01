@@ -10,64 +10,69 @@ LIB("src/randomRing.lib");
 
 //////////////////////////////////////////////////////////////////////////////// 
 //////// adjust verbosity
-printlevel = 2 ;
+printlevel = 0 ;
 TRACE = 0;
-echo  = 2;
+echo  = 0;
 
 //////// adjust random ideal generator params: 
 def genParams = defaultRandomConstructionParams();
 
-//genParams.absMaxCoeff       = 150;
-genParams.absMaxCoeff       = 10;
+genParams.absMaxCoeff       = 150;
+//genParams.absMaxCoeff       = 10;
 genParams.minVarFactorsPerMonomial = 0;
 genParams.maxVarFactorsPerMonomial = 3;
 genParams.maxTermsPerGen    = 2;
 genParams.maxGens           = 2;
 
-def gens = createRandomGeneratorsByParams( genParams  );
-
+//////////////////////////////////////////////////////////////////////////////// 
+ 
   TOrderingOpts oopts;  
-  oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
+  oopts.randomOrd = chooseGLWOrdering; // see randomRing
 
- oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
+  // oopts.randomOrd = randomStraightGlobalOrdering; // see randomRing
+
+   oopts.randomOrd = chooseGLWOrderingNoWs; // see randomRing
  
   oopts.minWeight = -10; //rename to minWeight
   oopts.maxWeight = 5; //rename to maxWeight
 
 
-//////// adjust num of trials  
-int trials = 100000000;
-//////////////////////////////////////////////////////////////////////////////// 
+ //////////////////////  composing ring options  //////////////// 
+  TRandomRingOpts ropts;
+  ropts.minChar = 0;
+  ropts.maxChar = 200;
+  ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.quotientIdeal = 0; // 0: no, 1: yes.
+  ropts.maxVars = 4;
+  
  
+  ropts.oopts   = oopts;     //rename to monomialOrderingOpts
+
+  // ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
+ 
+   ropts.ordString = randomGLWBlockOrdering; // rename to ordStringP or ordStringF
+ 
+  /////////////////////////////////////////////////////////////////////////////////////////
+
+
 def optionlist = list ("redSB", "redTail");
 
-proc getRandomRing(  )
-{
-
-  int maxVars = 4;
-   
-   int numVars = random(1,maxVars);
-
-   string vstr = "(x(1.."+string(numVars)+"))";
-         
-   string str_rng = "ring rng = integer,"+vstr+",";  
-
-   string orderingString = randomGLWBlockOrdering(oopts, numVars);   
-
-   str_rng = str_rng + orderingString + ";";
-
-   execute(str_rng);
-
-   setring rng;
-
-   return (basering);
-}
 
 option("warn");
+
+int trials = 10000;
 
 TGroebnerTestFlags flags = defaultGroebnerTestFlags();
+  
 
 option("warn");
 
-testGroebner( getRandomRing, gens, optionlist, trials, flags, logfile);
+proc run()
+{
+       def gens = createRandomGeneratorsByParams( genParams  );
+       ropts.quotientIdealParams = genParams;
+       TRandomRingGens rgens = createRandomRingGens(ropts);  
+
+       testPureGroebner( rgens.getIntegerRing, gens, optionlist, trials, flags, logfile);
+}
 

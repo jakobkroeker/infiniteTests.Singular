@@ -119,7 +119,7 @@ EXAMPLE:  example intersect_via_eliminate;  shows an example"
 }
 
 
-proc testIntersectVSintersectZ( getRng, idealG, trials, testflags, optionlist, logfile )
+proc testIntersect( getRng, idealG, trials, testflags, optionlist, logfile )
 {
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
@@ -127,6 +127,9 @@ proc testIntersectVSintersectZ( getRng, idealG, trials, testflags, optionlist, l
       def rng = getRng( );
       setring rng;
       option(warn);
+
+     link l=":w "+logfile;
+
       
     short = 0;
     int trial;
@@ -156,9 +159,13 @@ proc testIntersectVSintersectZ( getRng, idealG, trials, testflags, optionlist, l
         option(warn);
       }
       
-       write(":w "+logfile,emptystring);
+        monitor ("") ;
+       l=":w "+logfile;
+       open(l);
+       write(l,"");
+       write(l,"");
+       close(l);        
        monitor(logfile,"io");
-       write(":w "+logfile,emptystring);
        dbprint(1, "LIB \"wrappers.lib\";");
        dbprint(1, "LIB \"src/randomRing.lib\" ;");
        dbprint(1, "LIB(\"bugs/test.intersect\");");
@@ -237,7 +244,7 @@ proc testIntersectVSintersectZ( getRng, idealG, trials, testflags, optionlist, l
            
            ASSUME(0, idealsAreEqual(gI_gJ   , e_gI_gJ  ) );
        }
-
+       monitor("");
        trial = trial+1;
     }
 

@@ -1,0 +1,17 @@
+
+////////////////////////////////////////////////////////////////////////////////////////
+if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = 3;  
+//  voice = 2;
+system("random",2059713639);
+//random: 2059713639
+LIB("bugs/test.primdec.many.orig.mp");
+intvec op = 67108864,16787537;
+ring rng = (0,vv),(x,y,z),(lp(1),lp(1),lp(1),C);
+minpoly = (vv^2+8*vv+142);
+ideal I = -45*x*y+237*y^2,79*x*y^2+(-202*vv)*y*z^2-220*y*z,(105*vv)*x^2*y^2+(952*vv+16898)*y*z^2+237;
+bigint trial = 0;
+    def minAss1,minAss1e;
+list  PL,ML;
+  PL[1] = primdecSY(I);
+quit;
+quit;

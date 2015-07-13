@@ -1,0 +1,14 @@
+
+LIB "primdec.lib";
+LIB "wrappers.lib";
+LIB "bugs/test.syz";
+ring rng = (integer),(x(1),x(2)),(lp(2),C);
+intvec op = 67108866,10321;
+ option(set, op) ;
+ option() ;
+ // option() ;//options: redSB intStrategy redefine loadLib usage prompt
+int trial = 746;
+system("random", 48789535);
+ideal I = -13*x(1)^2*x(2)^2-12*x(1)*x(2)^3+18,9*x(1)^4-2*x(1)^2+22*x(2)^2;
+def syzI = syz (I);
+quit;

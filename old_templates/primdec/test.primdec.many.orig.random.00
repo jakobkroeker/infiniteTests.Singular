@@ -67,9 +67,9 @@ def genTable = createRandomGeneratorsByParams( genParams  );
 
 option(warn);
 
-int trials = 10000000;
+int trialsPerRing = 10;
 
-testPrimdec( rgens.getRing , genTable, trials, logfile);
+testPrimdec( rgens.getRing , genTable, trialsPerRing, logfile);
 
 ///////////////////////////////////////////////////////////
 

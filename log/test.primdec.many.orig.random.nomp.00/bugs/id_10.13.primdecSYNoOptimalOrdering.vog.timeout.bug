@@ -1,0 +1,19 @@
+
+////////////////////////////////////////////////////////////////////////////////////////
+def assumeLevel = 3;
+//  voice = 2;
+system("random",1248893679);
+//random: 1248893679
+LIB("bugs/test.primdec.many.orig.mp");
+intvec op = 0,16787537;
+ring rng = (157),(x,y,z),(lp(1),rp(2),C);
+minpoly = 0;
+ideal I = 33*x*y^2+2*z^3-20,36*x*z^2+30*z+28;
+bigint trial = 0;
+    def minAss1,minAss1e;
+list  PL,ML;
+  PL[1] = primdecGTZ(I);
+ASSUME(0, testPrimary( PL[1] , I ) );
+  PL[2] = primdecSYNoOptimalOrdering(I);
+quit;
+quit;

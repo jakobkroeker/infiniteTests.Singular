@@ -1,0 +1,13 @@
+
+LIB "wrappers.lib";
+LIB "src/randomRing.lib" ;
+LIB("bugs/test.intersect");
+ring rng = (integer),(x(1),x(2),x(3)),(rp(3),C);
+short = 0 ;
+// int trial= 135;
+system("random", 1669700959);
+ideal I = 8*x(3)^2-3*x(1)*x(3),-15*x(2)+13*x(1)^2;
+ideal J = -4*x(1)*x(2)+15*x(2),5*x(3)^2+12*x(2)^2;
+ideal gI = std(I);
+ideal gJ = std(J);
+ideal I_J =  intersect(I,J);
