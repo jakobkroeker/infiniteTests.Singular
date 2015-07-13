@@ -3062,11 +3062,13 @@ proc maxAbsCoeff(ideal I)
 {
    int genidx,termidx;
    def maxAbsCoeff=number(0);
+   def lc ;
    for (genidx=1;genidx<=ncols(I);genidx++)
    {
        for (termidx=1; termidx <= size(I[genidx]);termidx++)
        {
-            maxAbsCoeff = max(maxAbsCoeff, leadcoef( I[genidx][termidx]) );
+            lc = leadcoef( I[genidx][termidx]);
+            maxAbsCoeff = max(maxAbsCoeff, max(denominator(lc), numerator(lc)) );
        }
    }
    return (maxAbsCoeff);
