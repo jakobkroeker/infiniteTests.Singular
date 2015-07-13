@@ -52,7 +52,7 @@ genParams.bFractionsOn      = 0;
   ropts.minChar = 0;
   ropts.maxChar = 200;
   ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
-  ropts.maxVars = 6;
+  ropts.maxVars = 5;
   
   ropts.minpolyGenParams = minpolyGenParams;
   ropts.oopts   = oopts;     //rename to monomialOrderingOpts
