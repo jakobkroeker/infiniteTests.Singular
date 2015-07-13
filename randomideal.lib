@@ -3084,8 +3084,9 @@ proc getIdealInfo(ideal I)
   return(idealInfo);
 }
 
-proc printIdealInfo(TIdealInfo idealInfo)
+proc printIdealInfo(ideal I)
 {
+    TIdealInfo idealInfo = getIdealInfo(I);
     dbprint(1, "// numVars     = "+string(idealInfo.numVars)+";");
     dbprint(1, "// maxAbsCoeff = "+string(idealInfo.maxAbsCoeff)+";");
     dbprint(1, "// maxDeg      = "+string(idealInfo.maxDeg)+";");

@@ -193,6 +193,8 @@ proc testPrimdec( getRng, genTable, trials, procName, logfile )
                dbprint(1, "ring rng = "+string(basering)+";");
                dbprint(1, "minpoly = "+string(minpoly)+";");
                dbprint(1, "ideal I = "+string(I)+";");
+               dbprint(1, "printIdealInfo( I ) ;");
+               printIdealInfo(I);
                dbprint(1, "bigint trial = "+string(trial)+";");
 
                dbprint(1, "def result= "+procName+"(I);");              

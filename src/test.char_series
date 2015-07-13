@@ -53,6 +53,8 @@ proc testCharSeries( getRng, idealG, trials, filename )
        ///dbprint( 1, "trial: ", trial );
        I = idealG( );
        dbprint( 1, "ideal I = "+string( I )+";");
+       dbprint(1, "printIdealInfo( I ) ;");
+       printIdealInfo(I);
        dbprint( 1,"ideal cs = char_series(I);");
        cs = char_series(I);
      
