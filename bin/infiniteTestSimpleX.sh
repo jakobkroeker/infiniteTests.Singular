@@ -160,6 +160,7 @@ do
        echo "minimize"
        if [ $elapsedMinimizeTime -gt $maxMinimizeTime ]
        then
+            export elapsedMinimizeTime=0
             export minPos=0;
             if [ $randomMinimizeNum -eq -1 ]
             then
