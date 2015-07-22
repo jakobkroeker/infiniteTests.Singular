@@ -824,9 +824,9 @@ proc testRandomWeightedBlockOrdering()
        if (numVars==1)       {            vstr = \"x\";       }
        if (numVars==2)      {            vstr = \"(x,y)\";       }
        if (numVars==3)       {            vstr = \"(x,y,z)\";       }
-       if (numVars==4)       {       vstr = \"(x,y,z,vv)\";      }      
-       if (numVars==5)       {       vstr = \"(x,y,z, vv,ww)\";      }
-       if (numVars==6)       {       vstr = \"(x,y,z, ss,vv,ww)\";      }
+       if (numVars==4)       {       vstr = \"(x,y,z,u)\";      }      
+       if (numVars==5)       {       vstr = \"(x,y,z, e,u)\";      }
+       if (numVars==6)       {       vstr = \"(x,y,z, u,e,ww)\";      }
      
              
        string str_rng = \"ring rng = (c),\"+vstr+\",\";  
