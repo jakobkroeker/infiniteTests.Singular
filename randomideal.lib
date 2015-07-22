@@ -3068,7 +3068,7 @@ proc maxAbsCoeff(ideal I)
        for (termidx=1; termidx <= size(I[genidx]);termidx++)
        {
             lc = leadcoef( I[genidx][termidx]);
-            maxAbsCoeff = max(maxAbsCoeff, max(denominator(lc), numerator(lc)) );
+            maxAbsCoeff = max(maxAbsCoeff, max(absValue(denominator(lc)), absValue(numerator(lc))) );
        }
    }
    return (maxAbsCoeff);
