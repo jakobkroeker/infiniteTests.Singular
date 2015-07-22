@@ -162,9 +162,11 @@ do
        then
             export elapsedMinimizeTime=0
             export minPos=0;
+            echo "randomMinimizeNum="$randomMinimizeNum
             if [ $randomMinimizeNum -eq -1 ]
             then
               export randomMinimizeNum=$( echo $randomNum" % "${#arr[@]} | bc ) 
+              echo "updated randomMinimizeNum="$randomMinimizeNum
             fi;
             for key in ${!arr[@]}; do
                 if [ $minPos -eq $randomMinimizeNum ]
@@ -173,7 +175,7 @@ do
                 fi; 
                 export minPos=$(($minPos + 1)); 
             done;
-         
+            export randomMinimizeNum=-1
        fi;
     fi;
 
