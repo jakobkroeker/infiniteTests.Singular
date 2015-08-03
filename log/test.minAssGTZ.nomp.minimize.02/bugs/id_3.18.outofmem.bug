@@ -1,0 +1,22 @@
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = 3;  
+//  voice = 3;
+system("random",1831122405);
+//random: 1831122405
+LIB("bugs/test.primdec.mp.timeout");
+intvec op = 67108864,16787537;
+ring rng = (0),(x,y,z),(rp(2),lp(1),C);
+minpoly = 0;
+ideal I = 4*x*y+10*x^4-15,22*x*y^2*z+22*x^2*z-2;
+printIdealInfo( I ) ;
+// numVars     = 3;
+// maxAbsCoeff = 22;
+// maxDeg      = 4;
+// maxTerms    = 3;
+// numGens     = 2;
+bigint trial = 0;
+def result= minAssGTZ(I);
+quit;
+quit;
