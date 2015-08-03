@@ -40,11 +40,11 @@ proc testCharSeries( getRng, idealG, trials, filename )
 
        //dbprint( 1, "basering: ", basering );
        monitor ("") ;
-       l=":w "+filename;
+       //l=":w "+filename;
        open(l);
        write(l,"");
-       write(l,"");
-       close(l);        
+       close(l);       
+       open(l); 
        monitor(filename,"io");
        dbprint(1, "LIB(\"primdec.lib\");");
        dbprint(1,"LIB(\"randomideal.lib\");");
@@ -57,7 +57,7 @@ proc testCharSeries( getRng, idealG, trials, filename )
        printIdealInfo(I);
        dbprint( 1,"ideal cs = char_series(I);");
        cs = char_series(I);
-     
+       close(l);
        monitor ("") ;
        trial = trial+1;
        //ASSUME(0, 0);
