@@ -21,7 +21,7 @@ static proc mod_init()
 
         int TWeighttedOpts_def = 0;
         newstruct("TOrderingOpts",   " int minWeight,   int maxWeight, proc randomOrd");   
-        newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, TIdealGeneratingParameters quotientIdealParams,  int minChar, int maxChar, int doExt, int quotientIdeal, int maxVars,  TOrderingOpts oopts, proc ordString");
+        newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, TIdealGeneratingParameters quotientIdealParams,  int minChar, int maxChar, int doExt, int quotientIdeal, int minVars, int maxVars,  TOrderingOpts oopts, proc ordString");
         //newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int maxChar, int doExt, int maxVars");
         newstruct("TRandomRingGens", "proc randomOrd, proc getMinPolyStr, proc quotientIdeal, proc ordString, proc getChar, proc doExt, proc numVars, proc getRing, proc getIntegerRing");            
     }
@@ -604,9 +604,10 @@ proc testRandomWeightedBlockOrdering()
  
   proc createRandomVarNumGen(ropts)
   {
+     ASSUME(0, ropts.minVars>0);
      string cmd = "proc getRandomVarNum()
      {
-         return ( random(1, "+string(ropts.maxVars)+" ));
+         return ( random("+string(ropts.minVars)+", "+string(ropts.maxVars)+" ));
      }";
      execute(cmd);
      return (getRandomVarNum);
@@ -855,9 +856,10 @@ proc testRandomWeightedBlockOrdering()
 
 proc minimizeVars(TRandomRingOpts ropts,  int subtrahend)
 {
+    ASSUME(0, ropts.minVars>0);
     dbprint(1, " // ropts"+ string(ropts));
      dbprint(1, " // subtrahend"+ string(subtrahend));
-    ropts.maxVars = max(1,  ropts.maxVars-subtrahend);
+    ropts.maxVars = max(ropts.minVars,  ropts.maxVars-subtrahend);
     return(ropts);
 }
 
