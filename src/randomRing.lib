@@ -27,6 +27,8 @@ static proc mod_init()
     }
 }
 
+
+
 proc randomZeroOne()  {    return (random(0,1));  }  
   
 proc chooseRandomOptionsFromList(list optionList)
@@ -864,6 +866,36 @@ proc minimizeVars(TRandomRingOpts ropts,  int subtrahend)
 }
 
 proc minimizeVarsS( subtrahend) {     ropts = minimizeVars(ropts, subtrahend); }
+
+
+proc defaultOrderingOpts()
+{
+   TOrderingOpts ordOpts;
+
+   ordOpts.minWeight = 1;
+   ordOpts.maxWeight = 1;
+   ordOpts.randomOrd = chooseStraightGlobalOrdering;
+   return(ordOpts);
+}
+
+proc defaultRandomRingOpts()
+{
+  TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
+
+  TRandomRingOpts ropts;
+  ropts.minChar = 0;
+  ropts.maxChar = 200;
+  ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.minVars = 1;
+  ropts.maxVars = 3;
+  
+  ropts.minpolyGenParams = minpolyGenParams;
+  ropts.oopts   = defaultOrderingOpts();     //rename to monomialOrderingOpts
+
+   ropts.ordString = randomGLWOrdering; // rename to ordStringP or ordStringF
+}
+
+
 
 /*
 

@@ -1771,3 +1771,14 @@ proc hasGlobalOrLocalOrdering(rng)
 	return(0);
 }
 
+proc hasRedundantComponents(list primdecResult)
+{
+    def reducedPrimdecResult=removeRedundantComponents(primdecResult);
+    if ( size(reducedPrimdecResult)< size(primdecResult)) 
+    {
+        return (1);
+    }
+    return (0);
+}
+
+

@@ -152,7 +152,10 @@ proc testPrimaryDecomp(ideal I)
               
          dbprint(1, "ASSUME(0, testPrimary( PL[1] , I ) );");
          ASSUME(0, testPrimary( PL[i] , I ) );
-        
+
+         dbprint(1, "ASSUME(0, not hasRedundantComponents(PL[1]));");        
+         ASSUME(0, not hasRedundantComponents(PL[1]));
+
          for (i=2;i<=size(perm);i++)
          { 
                dbprint(1, "  PL["+string(i)+"] = "+perm[i][1]+"(I);");               
@@ -161,6 +164,8 @@ proc testPrimaryDecomp(ideal I)
                ASSUME(0, testPrimary( PL[i] , I ) );
                dbprint(1, "ASSUME(0, primDecsAreEquivalent(PL["+string(i-1)+"],PL["+string(i)+"]));");
                ASSUME(0, primDecsAreEquivalent(  PL[i-1],  PL[i]  )   );
+               dbprint(1, "ASSUME(0, not hasRedundantComponents(PL[i]));");
+               ASSUME(0, not hasRedundantComponents(PL[i]));
          }
 }
 

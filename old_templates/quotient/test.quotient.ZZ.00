@@ -48,12 +48,13 @@ int trials = 100000000;
   oopts.maxWeight = 5; //rename to maxWeight
 
  //////////////////////  composing ring options  //////////////// 
-  TRandomRingOpts ropts;
+  TRandomRingOpts ropts = defaultRandomRingOpts();
   ropts.minChar = 0;
   // ropts.maxChar = 200;
   ropts.maxChar = 0;
   ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
   ropts.quotientIdeal = 0; // 0: no, 1: yes.
+  ropts.minVars = 1;
   ropts.maxVars = 3;
   
   ropts.quotientIdealParams = genParams;

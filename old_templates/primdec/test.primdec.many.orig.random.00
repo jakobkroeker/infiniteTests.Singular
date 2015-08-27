@@ -52,6 +52,7 @@ def genTable = createRandomGeneratorsByParams( genParams  );
   ropts.minChar = 0;
   ropts.maxChar = 200;
   ropts.doExt   = 2; //0:no; 1:yes; 2:randomly
+  ropts.minVars = 1;
   ropts.maxVars = 5;
   
   ropts.minpolyGenParams = minpolyGenParams;
