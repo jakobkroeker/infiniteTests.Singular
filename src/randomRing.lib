@@ -892,7 +892,8 @@ proc defaultRandomRingOpts()
   ropts.minpolyGenParams = minpolyGenParams;
   ropts.oopts   = defaultOrderingOpts();     //rename to monomialOrderingOpts
 
-   ropts.ordString = randomGLWOrdering; // rename to ordStringP or ordStringF
+  ropts.ordString = randomGLWOrdering; // rename to ordStringP or ordStringF
+  return(ropts);
 }
 
 
