@@ -1,0 +1,148 @@
+/////////////////////
+version="version test.std";
+category="Commutative Algebra";
+info="
+";
+
+LIB "hnoether.lib";
+LIB "randomideal.lib";
+LIB "ringutils.lib";
+LIB "wrappers.lib";
+ 
+ 
+static proc mod_init()
+{
+    if (not defined(TGroebnerTestFlag_def) )
+    {
+        int TGroebnerTestFlag_def = 0;
+        newstruct("TGroebnerTestFlags",   " int reduceTest, int repeatApplication,  int equalTest, int optionflagTest, int testIntersect");   
+    }
+}
+
+ 
+
+proc hasNegativeEntry(M)
+{
+    int col,row;
+    for(col=1;col<=ncols(M);col++)
+    {
+        for(row=1;row<=nrows(M);row++)
+        {
+            if (M[row,col]<0) 
+            {
+                return(1);
+            }
+        }
+    }
+    return (0);
+}
+
+proc invariantHasNegEntry(invar)
+{
+    if (hasNegativeEntry(invar[size(invar)][1]))
+    {
+       return(1);
+    }
+    if (hasNegativeEntry(invar[size(invar)][2]))
+    {
+       return(1);
+    }
+    
+     return(0);
+}
+
+
+proc testInvariants( getRng, gens, optionlist, trials, logfile )
+{
+
+    int nothing =1;
+    int warnIsSet = optionIsSet("warn");
+    option(nowarn);
+    if (defined(basering) ) {   def BAS=basering; }
+    def rng = getRng( );
+    setring rng;
+    option(warn);
+      
+    short = 0;
+    int trial;
+
+    while( 1 )
+    {   
+      option(nowarn);  
+      kill rng;      
+
+      dbprint(1, " // getRng() ;");
+
+      def rng = getRng( );
+      setring rng;
+      poly f=0;
+      if (defined(invars)) {kill invars;}
+      list invars;
+
+      // chooseRandomOptionsFromList(optionlist);
+
+      if (warnIsSet)
+      {
+        option(warn);
+      }
+      
+      
+       if (defined(qrng)) {kill qrng; }
+       monitor(logfile,"io");
+       write(":w "+logfile,emptystring);
+       write(":w "+logfile,emptystring);
+       monitor(logfile,"io");
+       // write(":w "+logfile,emptystring);
+
+       dbprint(1, "LIB \"hnoether.lib\";");      
+       dbprint(1, "LIB \"wrappers.lib\";");
+       dbprint(1, "LIB \"src/randomRing.lib\" ;");
+       dbprint(1, "LIB \"src/tests/test.hnoether\" ;");
+       dbprint( 1, "ring rng = "  + string( basering)+";" );
+       dbprint( 1, "short = 0 ;" );
+       
+       if ( not ("0" == string(minpoly) ))
+       {
+         dbprint( 1, "minpoly = " + string(minpoly) + ";");
+       }
+       dbprint( 1, "intvec op = "+string( option(get) )+";");           
+       dbprint( 1, " option(set, op) ;");
+       dbprint( 1, " option() ;");
+       dbprint( 1, " // option() ;" + option() );
+       dbprint( 1, "int trial = " + string( trial) + ";" );
+       short = 0;
+  
+       while (f==0)
+       {
+            f = squarefree( gens.polyG( ) );
+
+            if ( deg(f)>1 )
+            {
+               dbprint(1, "// ok");            
+            }
+            else    {    f=0;      dbprint(1, "// not ok");      }
+       }
+
+       dbprint( 1, "system(\"random\", " + string( system("random") ) + ");" );
+       dbprint( 1, "poly f  = " + string( f ) + ";" );
+       dbprint( 1, "  dbprint( 1, \"poly f = \" + string( f ) + \";\" );" );
+
+       invars = invariants(f);
+       if (size(invars)>0)
+       {
+           dbprint( 1, "      ASSUME(0, 0==invariantHasNegEntry(invariants(f)));" );
+           ASSUME(0,  0==invariantHasNegEntry(invariants(f)));
+       }
+ 
+       write(":w "+logfile,emptystring);
+       //monitor(logfile,"io");
+
+       trial = trial+1;
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+
+ 
+
