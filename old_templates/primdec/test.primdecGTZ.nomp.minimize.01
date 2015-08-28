@@ -2,7 +2,7 @@
 
 option(nowarn);
 
-LIB "src/test.primdec.mp.timeout";
+LIB "src/test/test.primdec.mp.timeout";
 
 LIB "src/randomRing.lib";
 

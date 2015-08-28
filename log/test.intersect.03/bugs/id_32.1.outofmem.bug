@@ -1,7 +1,7 @@
 
 LIB "wrappers.lib";
 LIB "src/randomRing.lib" ;
-LIB("bugs/test.intersect");
+LIB("src/tests/test.intersect");
 ring rng = (integer),(x(1),x(2),x(3)),(lp(1),Dp(2),C);
 short = 0 ;
 // int trial= 1199;

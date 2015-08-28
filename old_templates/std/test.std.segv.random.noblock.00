@@ -1,5 +1,5 @@
 
-LIB("bugs/test.std.correct");
+LIB("src/tests/test.std.correct");
 
 LIB("src/randomRing.lib");
 //monitor("log/test.std.correct.00","io");

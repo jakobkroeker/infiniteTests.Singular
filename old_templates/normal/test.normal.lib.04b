@@ -1,5 +1,5 @@
 
-LIB("bugs/test.normal.lib");
+LIB("src/tests/test.normal.lib");
 
 option("warn");
 option("redSB");

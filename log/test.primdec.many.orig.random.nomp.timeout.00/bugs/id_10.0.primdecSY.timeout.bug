@@ -4,7 +4,7 @@ def assumeLevel = 3;
 //  voice = 2;
 system("random",1059795267);
 //random: 1059795267
-LIB("bugs/test.primdec.many.orig.mp.timeout");
+LIB("src/tests/test.primdec.many.orig.mp.timeout");
 intvec op = 67108864,16787537;
 ring rng = (0),(x,y,z),(dp(2),lp(1),C);
 minpoly = 0;

@@ -1,5 +1,5 @@
 
-LIB("bugs/test.finduni");
+LIB("src/tests/test.finduni");
 
 
 proc  testFinduniWrapper( cchar, ordering )

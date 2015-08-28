@@ -1,6 +1,6 @@
 
 LIB("randomIdeal.lib");
-LIB("bugs/test.resultant");
+LIB("src/tests/test.resultant");
 
 
 option("warn");

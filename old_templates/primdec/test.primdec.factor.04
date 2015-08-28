@@ -1,5 +1,5 @@
 
-LIB("bugs/test.primdec.factor");
+LIB("src/tests/test.primdec.factor");
 
 
 proc  testFactorWrapper( cchar, ordering )

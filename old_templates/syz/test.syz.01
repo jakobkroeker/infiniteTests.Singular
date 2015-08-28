@@ -3,8 +3,8 @@
 option("nowarn");
 
 LIB("bugs/randomRing.lib");
-LIB("bugs/test.syz");
-LIB("bugs/test.std.correct");
+LIB("src/tests/test.syz");
+LIB("src/tests/test.std.correct");
 // monitor("log/test.syz.02","io");
 
 

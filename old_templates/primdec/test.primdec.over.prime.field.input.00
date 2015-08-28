@@ -1,5 +1,5 @@
 
-LIB("bugs/test.primdec.over.prime.field.lib");
+LIB("src/tests/test.primdec.over.prime.field.lib");
 
 option("warn");
 option("redSB");

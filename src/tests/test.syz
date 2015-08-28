@@ -48,7 +48,7 @@ proc testSyz( getRng, idealG, trials, optionlist, testflags, logfile )
        monitor(logfile,"io");
        dbprint(1, "LIB \"primdec.lib\";");
        dbprint(1, "LIB \"wrappers.lib\";");
-       dbprint(1, "LIB \"bugs/test.syz\";");
+       dbprint(1, "LIB \"src/tests/test.syz\";");
        dbprint( 1, "ring rng = "  + string( basering)+";" );
       
        if ( not ("0" == string(minpoly) ))

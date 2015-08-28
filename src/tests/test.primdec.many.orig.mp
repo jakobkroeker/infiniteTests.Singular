@@ -282,7 +282,7 @@ proc testPrimdec( getRng, genTable, trials, logfile )
                dbprint(1, "//  voice = "+string( voice ) + ";" );
                dbprint(1, "system(\"random\","+string( system("random") ) + ");" );
                dbprint(1, "//random: "+ string( system("random") )  );
-               dbprint(1, "LIB(\"bugs/test.primdec.many.orig.mp\");");
+               dbprint(1, "LIB(\"src/tests/test.primdec.many.orig.mp\");");
                dbprint(1, "intvec op = "+string( option(get) )+";");
                dbprint(1, "ring rng = "+string(basering)+";");
                dbprint(1, "minpoly = "+string(minpoly)+";");

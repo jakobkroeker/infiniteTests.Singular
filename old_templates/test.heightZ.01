@@ -1,6 +1,6 @@
 
 
-LIB("bugs/test.heightZ");
+LIB("src/tests/test.heightZ");
 monitor("log/test.heightZ.01","io");
 
 

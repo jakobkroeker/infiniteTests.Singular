@@ -1,7 +1,7 @@
 
 LIB("bugs/randomRing.lib");
-LIB("bugs/test.intersect");
-LIB("bugs/test.std.correct");
+LIB("src/tests/test.intersect");
+LIB("src/tests/test.std.correct");
 
 
 //////////////////////////////////////////////////////////////////////////////// 

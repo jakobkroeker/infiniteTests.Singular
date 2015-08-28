@@ -144,7 +144,7 @@ proc testPrimdec( rng, idealG, trials, logfile )
        
        write(":w "+logfile,emptystring);
        monitor(logfile,"io");
-       dbprint(1, "LIB(\"bugs/test.primdec.many\");");
+       dbprint(1, "LIB(\"src/tests/test.primdec.many\");");
        dbprint(1, "intvec op = "+string( option(get) )+";");
        dbprint(1, "ring rng = "+string(basering)+";");
        dbprint(1, "ideal I = "+string(I)+";");
@@ -356,7 +356,7 @@ proc testPrimdec( rng, idealG, trials, logfile )
 
 /*
 
-LIB("bugs/test.primdec.many");
+LIB("src/tests/test.primdec.many");
 
 init_randomIdeal();
 

@@ -1,7 +1,7 @@
 
 LIB "primdec.lib";
 LIB "wrappers.lib";
-LIB "bugs/test.syz";
+LIB "src/tests/test.syz";
 ring rng = (integer),(x(1),x(2)),(lp(2),C);
 intvec op = 67108866,10321;
  option(set, op) ;

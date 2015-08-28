@@ -108,7 +108,7 @@ proc  testQuotientOverZZ( getRng, gens,  trials, testflags, optionlist, logfile 
        dbprint(1, " // voice = "+string( voice ) + ";" );
        dbprint(1, "system(\"random\","+string( system("random") ) + ");" );
        dbprint(1, "//random: "+ string( system("random") )  );
-       dbprint(1, "LIB(\"bugs/test.quotient.ZZ\");");
+       dbprint(1, "LIB(\"src/tests/test.quotient.ZZ\");");
        //dbprint(1, "LIB(\"primdec.lib\");");
        //dbprint(1, "LIB(\"ehv.lib\");");
        dbprint(1, "ring rng = "+string(basering)+";");

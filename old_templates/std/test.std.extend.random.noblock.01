@@ -1,7 +1,7 @@
 
 option("nowarn");
 
-LIB("bugs/test.std.extend");
+LIB("src/tests/test.std.extend");
 
 LIB("src/randomRing.lib");
 

@@ -1,6 +1,6 @@
 
 LIB("bugs/randomRing.lib");
-LIB("bugs/test.char_series");
+LIB("src/tests/test.char_series");
 
 
 

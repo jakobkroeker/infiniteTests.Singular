@@ -1,8 +1,8 @@
 
 
 LIB("bugs/randomRing.lib");
-LIB("bugs/test.quotient.ZZ");
-LIB("bugs/test.std.correct");
+LIB("src/tests/test.quotient.ZZ");
+LIB("src/tests/test.std.correct");
 
 
 //////////////////////////////////////////////////////////////////////////////// 
