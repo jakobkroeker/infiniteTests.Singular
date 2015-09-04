@@ -1,0 +1,14 @@
+LIB("primdec.lib");
+LIB("randomideal.lib");
+ring rng = (2),(x,y,z),(lp(1),rp(2),C);
+bigint trial = 17211;
+ideal I = x*z^2+y^2+y,x*y+y^2*z^2;
+printIdealInfo( I ) ;
+// numVars     = 3;
+// maxAbsCoeff = 1;
+// maxDeg      = 4;
+// maxTerms    = 3;
+// numGens     = 2;
+def cs = char_series(I);
+quit;
+quit;

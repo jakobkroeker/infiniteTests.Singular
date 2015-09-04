@@ -21,8 +21,8 @@ TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
 
 genParams.absMaxCoeff       = 300;
 genParams.minVarFactorsPerMonomial = 0;
-genParams.maxVarFactorsPerMonomial = 3;
-genParams.maxTermsPerGen    = 2;
+genParams.maxVarFactorsPerMonomial = 5;
+genParams.maxTermsPerGen    = 4;
 genParams.maxGens           = 3;
 genParams.bFractionsOn      = 1;
 
@@ -49,8 +49,8 @@ def genTable = createRandomGeneratorsByParams( genParams  );
  
   //////////////////////  composing ring options  //////////////// 
   TRandomRingOpts ropts;
-  ropts.minChar = 0;
-  ropts.maxChar = 0;
+  ropts.minChar = 23;
+  ropts.maxChar = 200;
   ropts.doExt   = 2; //0:no; 1:yes; 2:randomly
   ropts.minVars = 1;
   ropts.maxVars = 5;
