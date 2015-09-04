@@ -31,7 +31,7 @@ proc testCharSeries( getRng, idealG, trials, filename )
        kill rng;      
        def rng = getRng( );
        setring rng;
-       ideal cs,  I;
+       def cs,  I;
 
       if (warnIsSet)
       {
@@ -55,7 +55,7 @@ proc testCharSeries( getRng, idealG, trials, filename )
        dbprint( 1, "ideal I = "+string( I )+";");
        dbprint(1, "printIdealInfo( I ) ;");
        printIdealInfo(I);
-       dbprint( 1,"ideal cs = char_series(I);");
+       dbprint( 1,"def cs = char_series(I);");
        cs = char_series(I);
        close(l);
        monitor ("") ;
