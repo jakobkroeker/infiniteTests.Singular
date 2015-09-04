@@ -22,7 +22,7 @@ TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
 genParams.absMaxCoeff       = 100;
 genParams.minVarFactorsPerMonomial = 0;
 genParams.maxVarFactorsPerMonomial = 6;
-genParams.maxTermsPerGen    = 6;
+genParams.maxTermsPerGen    = 5;
 genParams.maxGens           = 6;
 genParams.bFractionsOn      = 0;
 
