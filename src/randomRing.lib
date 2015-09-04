@@ -212,9 +212,25 @@ proc randomStraightGlobalOrdering()
     return( l[random(1, size(l) ) ]);
 }
 
-proc reverseDegreeGlobalOrdering()
+proc degreeReverseLexicographicalOrdering()
 {
     return("dp");
+}
+
+proc dpOrdering()
+{
+    return("dp");
+}
+
+
+proc lexicographicalOrdering()
+{
+    return("lp");
+}
+
+proc lpOrdering()
+{
+    return("lp");
 }
 
 proc straightBlockString(sord,blocksize)
