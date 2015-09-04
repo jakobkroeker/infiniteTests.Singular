@@ -1,0 +1,21 @@
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = 3;  
+//  voice = 3;
+system("random",1534741523);
+//random: 1534741523
+LIB("src/tests/test.primdec.mp.timeout");
+intvec op = 0,16787537;
+ring rng = (29),(x,y,z),(lp(3),C);
+minpoly = 0;
+ideal I = 10*x^3-11*y^3*z-10*z^2,-13*x^2*y^2-x*z^3+3;
+printIdealInfo( I ) ;
+// numVars     = 3;
+// maxAbsCoeff = -1;
+// maxDeg      = 4;
+// maxTerms    = 3;
+// numGens     = 2;
+bigint trial = 0;
+def result= primdecSY(I);
+quit;
