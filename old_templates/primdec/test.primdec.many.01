@@ -1,6 +1,6 @@
 
 
-LIB("bugs/test.primdec.many");
+LIB("src/tests/test.primdec.many");
 // monitor("log/test.std.correct.01","io");
 
 string logfile = "log/test.std.correct.02.cont"+contstr;

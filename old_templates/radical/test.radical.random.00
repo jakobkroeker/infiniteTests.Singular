@@ -2,7 +2,7 @@
 
 option(nowarn);
 
-LIB("bugs/test.radical");
+LIB("src/tests/test.radical");
 
 LIB("src/automatedTests.lib");
 

@@ -168,7 +168,7 @@ proc testIntersect( getRng, idealG, trials, testflags, optionlist, logfile )
        monitor(logfile,"io");
        dbprint(1, "LIB \"wrappers.lib\";");
        dbprint(1, "LIB \"src/randomRing.lib\" ;");
-       dbprint(1, "LIB(\"bugs/test.intersect\");");
+       dbprint(1, "LIB(\"src/tests/test.intersect\");");
        
       
        dbprint( 1, "ring rng = "  + string( basering)+";" );

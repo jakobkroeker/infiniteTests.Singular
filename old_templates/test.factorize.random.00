@@ -7,7 +7,7 @@ LIB("ellipticcovers.lib");
 LIB("randomIdeal.lib");
 LIB("src/randomRing.lib");
 
-LIB("src/test.factorize.lib");
+LIB("src/test/test.factorize.lib");
 
 LIB("src/wrappers.lib");
 

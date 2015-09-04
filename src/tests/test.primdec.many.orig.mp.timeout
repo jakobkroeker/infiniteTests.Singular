@@ -91,7 +91,7 @@ proc minAssPrimCharsets1Orig  (I)   {    return ( Primdec::min_ass_prim_charsets
 
 
 
-// this is a filter. Implement is as a constraint filter for a test (only test if random ideal matches filter)
+
 proc testPrimdecZeroDim( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials )
 {
     print ("testPrimdecZeroDim");
@@ -101,6 +101,7 @@ proc testPrimdecZeroDim( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTe
     setring rng;
     export(rng);
 
+    list ideals;
 
     int trial;
 
@@ -127,11 +128,85 @@ proc testPrimdecZeroDim( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTe
 }
 
 
-
-
-proc testPrimdec( getRng, genTable, trials, procName, logfile )
+proc testPrimaryDecomp(ideal I)
 {
-    print ("//testPrimdec");
+        if (defined(PL))  {kill PL; }
+        list PL;
+        int i;
+        
+        list methodsPairs = list( list("primdecGTZ",primdecGTZ),
+                                  list("primdecGTZkeepKomp",primdecGTZkeepKomp),
+                                  list("primdecSY",primdecSY) 
+                                  //, list("primdecSYNoOptimalOrdering",primdecSYNoOptimalOrdering)
+                               );
+         list perms =  permute(methodsPairs);
+         
+         def perm =     perms[random(1,size( perms))];
+         proc foo ;
+         
+         i = 1;
+         
+         dbprint(1, "  PL["+string(i)+"] = "+perm[i][1]+"(I);");
+         foo =  perm[i][2];
+         PL[i] =  foo (I) ;
+              
+         dbprint(1, "ASSUME(0, testPrimary( PL[1] , I ) );");
+         ASSUME(0, testPrimary( PL[i] , I ) );
+        
+         for (i=2;i<=size(perm);i++)
+         { 
+               dbprint(1, "  PL["+string(i)+"] = "+perm[i][1]+"(I);");               
+               foo =  perm[i][2];
+               PL[i] =  foo (I) ;
+               ASSUME(0, testPrimary( PL[i] , I ) );
+               dbprint(1, "ASSUME(0, primDecsAreEquivalent(PL["+string(i-1)+"],PL["+string(i)+"]));");
+               ASSUME(0, primDecsAreEquivalent(  PL[i-1],  PL[i]  )   );
+         }
+}
+
+
+proc testMinAssDecomp(ideal I)
+{
+            if (defined(ML))  {kill ML; }
+            list ML;
+            int i;
+            def minAss1,minAss1e;
+            list methodsPairs = list( list("minAssGTZ",minAssGTZ),
+                                  list("minAssGTZFacSTD",minAssGTZFacSTD),
+                                  list("minAssGTZGTZ",minAssGTZGTZ)
+                               );
+
+             list perms =  permute(methodsPairs);
+         
+             def perm =     perms[random(1,size( perms))];
+            
+            i = 1;
+            proc foo ;
+            dbprint(1, "  ML["+string(i)+"] = "+perm[i][1]+"(I);");
+            foo =  perm[i][2];
+            ML[i] =  foo (I) ;
+
+                        
+         
+            for (i=2;i<=size(perm);i++)
+            { 
+                  dbprint(1, "  ML["+string(i)+"] = "+perm[i][1]+"(I);");
+                  foo =  perm[i][2];
+                  ML[i] =  foo (I) ;
+                  
+                  dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ML["+string(i-1)+"],ML["+string(i)+"]));");
+                  ASSUME(0, minAssDecompAreEquivalent(ML[i-1],ML[i]));
+                        
+            }
+
+            dbprint(1, "minAss1  = minAss(I);");
+                        minAss1  = minAss(I);
+}
+
+
+proc testPrimdec( getRng, genTable, trials, logfile )
+{
+    print ("testPrimdec");
     adjustAssumeLevel();
     if (defined(basering) ) {   def BAS=basering; }
 
@@ -146,7 +221,15 @@ proc testPrimdec( getRng, genTable, trials, procName, logfile )
     list ideals;
 
     int trial,i;
-    link l=":w "+logfile;
+    list L1,L2,L3;
+    list PL,ML;
+
+    
+    def wdec;
+
+    def minAss1,minAss1e;
+    
+    int PDfirst;
 
     ideal I;
     string emptystring="";
@@ -175,6 +258,7 @@ proc testPrimdec( getRng, genTable, trials, procName, logfile )
 
            if (not isZero(I) && not idealsAreEqual( ideal(1), I ) )
            {
+
                monitor ("") ;
                l=":w "+logfile;
                open(l);
@@ -182,25 +266,36 @@ proc testPrimdec( getRng, genTable, trials, procName, logfile )
                write(l,"");
                close(l);        
                monitor(logfile,"io");
-               //write(":w "+logfile,emptystring); // empty logfile twice  - otherwise it seems not to work
                dbprint(1, "////////////////////////////////////////////////////////////////////////////////////////");
                dbprint(1, "if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = "+string( assumeLevel ) + ";  " );
                dbprint(1, "//  voice = "+string( voice ) + ";" );
                dbprint(1, "system(\"random\","+string( system("random") ) + ");" );
                dbprint(1, "//random: "+ string( system("random") )  );
-               dbprint(1, "LIB(\"bugs/test.primdec.mp.timeout\");");
+               dbprint(1, "LIB(\"src/tests/test.primdec.many.orig.mp\");");
                dbprint(1, "intvec op = "+string( option(get) )+";");
                dbprint(1, "ring rng = "+string(basering)+";");
                dbprint(1, "minpoly = "+string(minpoly)+";");
                dbprint(1, "ideal I = "+string(I)+";");
-               dbprint(1, "printIdealInfo( I ) ;");
-               printIdealInfo(I);
                dbprint(1, "bigint trial = "+string(trial)+";");
+               dbprint(1, "    def minAss1,minAss1e;");
 
-               dbprint(1, "def result= "+procName+"(I);");              
-               execute("def result="+procName+"(I);");    
+               dbprint(1, "list  PL,ML;");
+               
+               PDfirst = random(0,1);
+               if (PDfirst)
+               {
+                   testPrimaryDecomp(I);
+                   testMinAssDecomp(I);
+               }
+               else
+               {
+
+                   testMinAssDecomp(I);
+                   testPrimaryDecomp(I);
+               }
                monitor ("") ;
-               trial++;
+
+                trial++;
            }
         //}
           

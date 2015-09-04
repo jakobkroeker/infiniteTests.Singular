@@ -158,7 +158,7 @@ proc testPrimdec( rng, idealG, trials, logfile )
            dbprint(1, " // voice = "+string( voice ) + ";" );
            dbprint(1, "system(\"random\","+string( system("random") ) + ");" );
            dbprint(1, "//random: "+ string( system("random") )  );
-           dbprint(1, "LIB(\"bugs/test.primdec.many.orig\");");
+           dbprint(1, "LIB(\"src/tests/test.primdec.many.orig\");");
            dbprint(1, "intvec op = "+string( option(get) )+";");
            dbprint(1, "ring rng = "+string(basering)+";");
            dbprint(1, "ideal I = "+string(I)+";");
@@ -246,7 +246,7 @@ proc testPrimdec( rng, idealG, trials, logfile )
 
 /*
 
-LIB("bugs/test.primdec.many");
+LIB("src/tests/test.primdec.many");
 
 init_randomIdeal();
 

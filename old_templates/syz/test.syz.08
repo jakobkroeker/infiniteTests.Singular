@@ -1,6 +1,6 @@
 
 
-LIB("bugs/test.syz");
+LIB("src/tests/test.syz");
 monitor("log/test.syz.08","io");
 
 

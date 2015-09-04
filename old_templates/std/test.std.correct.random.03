@@ -2,7 +2,7 @@
 
 option(nowarn);
 
-LIB("bugs/test.std.correct");
+LIB("src/tests/test.std.correct");
 
 LIB("src/automatedTests.lib");
 

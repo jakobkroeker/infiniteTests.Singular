@@ -1,6 +1,6 @@
 
 
-LIB("bugs/test.std.correct");
+LIB("src/tests/test.std.correct");
 
 LIB("src/randomRing.lib");
 
@@ -33,7 +33,7 @@ option("nowarn");
 
 
  //////////////////////  composing ring options  //////////////// 
-  TRandomRingOpts ropts;
+  TRandomRingOpts ropts = defaultRandomRingOpts();
   ropts.minChar = 0;
   ropts.maxChar = 200;
   ropts.doExt   = 0; //0:no; 1:yes; 2:randomly

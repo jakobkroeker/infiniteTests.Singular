@@ -2,7 +2,7 @@
 
 option(nowarn);
 
-LIB "src/test.primdec.many.orig.mp";
+LIB "src/test/test.primdec.many.orig.mp";
 
 LIB "src/randomRing.lib";
 
@@ -52,6 +52,7 @@ def genTable = createRandomGeneratorsByParams( genParams  );
   ropts.minChar = 0;
   ropts.maxChar = 0;
   ropts.doExt   = 2; //0:no; 1:yes; 2:randomly
+  ropts.minVars = 1;
   ropts.maxVars = 5;
   
   ropts.minpolyGenParams = minpolyGenParams;

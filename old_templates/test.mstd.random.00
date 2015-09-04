@@ -1,6 +1,6 @@
 
 
-LIB("bugs/test.mstd");
+LIB("src/tests/test.mstd");
 
 LIB("src/randomRing.lib");
 //monitor("log/test.std.correct.00","io");

@@ -21,11 +21,13 @@ static proc mod_init()
 
         int TWeighttedOpts_def = 0;
         newstruct("TOrderingOpts",   " int minWeight,   int maxWeight, proc randomOrd");   
-        newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, TIdealGeneratingParameters quotientIdealParams,  int minChar, int maxChar, int doExt, int quotientIdeal, int maxVars,  TOrderingOpts oopts, proc ordString");
+        newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, TIdealGeneratingParameters quotientIdealParams,  int minChar, int maxChar, int doExt, int quotientIdeal, int minVars, int maxVars,  TOrderingOpts oopts, proc ordString");
         //newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, int maxChar, int doExt, int maxVars");
         newstruct("TRandomRingGens", "proc randomOrd, proc getMinPolyStr, proc quotientIdeal, proc ordString, proc getChar, proc doExt, proc numVars, proc getRing, proc getIntegerRing");            
     }
 }
+
+
 
 proc randomZeroOne()  {    return (random(0,1));  }  
   
@@ -210,9 +212,25 @@ proc randomStraightGlobalOrdering()
     return( l[random(1, size(l) ) ]);
 }
 
-proc reverseDegreeGlobalOrdering()
+proc degreeReverseLexicographicalOrdering()
 {
     return("dp");
+}
+
+proc dpOrdering()
+{
+    return("dp");
+}
+
+
+proc lexicographicalOrdering()
+{
+    return("lp");
+}
+
+proc lpOrdering()
+{
+    return("lp");
 }
 
 proc straightBlockString(sord,blocksize)
@@ -604,9 +622,10 @@ proc testRandomWeightedBlockOrdering()
  
   proc createRandomVarNumGen(ropts)
   {
+     ASSUME(0, ropts.minVars>0);
      string cmd = "proc getRandomVarNum()
      {
-         return ( random(1, "+string(ropts.maxVars)+" ));
+         return ( random("+string(ropts.minVars)+", "+string(ropts.maxVars)+" ));
      }";
      execute(cmd);
      return (getRandomVarNum);
@@ -855,13 +874,45 @@ proc testRandomWeightedBlockOrdering()
 
 proc minimizeVars(TRandomRingOpts ropts,  int subtrahend)
 {
+    ASSUME(0, ropts.minVars>0);
     dbprint(1, " // ropts"+ string(ropts));
      dbprint(1, " // subtrahend"+ string(subtrahend));
-    ropts.maxVars = max(1,  ropts.maxVars-subtrahend);
+    ropts.maxVars = max(ropts.minVars,  ropts.maxVars-subtrahend);
     return(ropts);
 }
 
 proc minimizeVarsS( subtrahend) {     ropts = minimizeVars(ropts, subtrahend); }
+
+
+proc defaultOrderingOpts()
+{
+   TOrderingOpts ordOpts;
+
+   ordOpts.minWeight = 1;
+   ordOpts.maxWeight = 1;
+   ordOpts.randomOrd = chooseStraightGlobalOrdering;
+   return(ordOpts);
+}
+
+proc defaultRandomRingOpts()
+{
+  TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
+
+  TRandomRingOpts ropts;
+  ropts.minChar = 0;
+  ropts.maxChar = 200;
+  ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.minVars = 1;
+  ropts.maxVars = 3;
+  
+  ropts.minpolyGenParams = minpolyGenParams;
+  ropts.oopts   = defaultOrderingOpts();     //rename to monomialOrderingOpts
+
+  ropts.ordString = randomGLWOrdering; // rename to ordStringP or ordStringF
+  return(ropts);
+}
+
+
 
 /*
 

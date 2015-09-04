@@ -5,7 +5,7 @@ LIB( "wrappers.lib" );
 LIB( "reslipman.lib" );
 LIB( "randomIdeal.lib" );
 LIB("src/randomRing.lib");
-LIB("bugs/test.lipmanresolve.lib");
+LIB("src/tests/test.lipmanresolve.lib");
 def assumeLevel = 3;
 
 

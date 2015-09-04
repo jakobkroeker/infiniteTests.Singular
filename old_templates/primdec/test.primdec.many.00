@@ -1,6 +1,6 @@
 
 
-LIB("bugs/test.primdec.many");
+LIB("src/tests/test.primdec.many");
 // monitor("log/test.std.correct.00","io");
 
 

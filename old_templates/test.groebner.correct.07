@@ -1,6 +1,6 @@
 
 
-LIB("bugs/test.groebner.correct");
+LIB("src/tests/test.groebner.correct");
 monitor("log/test.groebner.correct.07","io");
 
 

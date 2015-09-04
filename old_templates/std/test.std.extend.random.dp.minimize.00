@@ -1,0 +1,87 @@
+
+
+LIB("src/tests/test.std.correct");
+
+LIB("src/randomRing.lib");
+//monitor("log/test.std.correct.00","io");
+
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+def assumeLevel=3;
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 30;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 6;
+genParams.maxTermsPerGen    = 10;
+genParams.maxGens           = 3;
+genParams.bFractionsOn      = 0;
+
+def genTable = createRandomGeneratorsByParams( genParams  );
+
+ def optionlist = list ("redSB", "redTail");
+ 
+ ////////////////////////////////// random ring options   ////////////////////////////////
+  
+ // ordering settings
+  TOrderingOpts oopts;  
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
+  oopts.randomOrd = dpOrdering; // chooseStraightOrdering; //rename to ordStringP
+  
+  // minpoly settings
+  TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
+
+  minpolyGenParams.absMaxCoeff       = 300;
+  minpolyGenParams.minVarFactorsPerMonomial = 0;
+  minpolyGenParams.maxVarFactorsPerMonomial = 6;
+  minpolyGenParams.maxTermsPerGen    = 10;
+  minpolyGenParams.bFractionsOn      = 0;
+ 
+  //////////////////////  composing ring options  //////////////// 
+  TRandomRingOpts ropts = defaultRandomRingOpts();
+  ropts.minChar = 0;
+  ropts.maxChar = 0;
+  ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.maxVars = 2;
+  
+  ropts.minpolyGenParams = minpolyGenParams;
+  ropts.oopts   = oopts;     //rename to monomialOrderingOpts
+
+  //ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
+ 
+  ropts.ordString = randomGLWOrdering; // rename to ordStringP or ordStringF
+ 
+  /////////////////////////////////////////////////////////////////////////////////////////
+
+  TRandomRingGens rgens = createRandomRingGens(ropts);  
+
+  // def R = rgens.getRing(); setring R;
+
+option(warn);
+
+int trials = 10000000;
+
+
+int checkRedSB=1;
+
+TGroebnerTestFlags flags = defaultGroebnerTestFlags();
+
+  flags.reduceTest = 0;
+  flags.repeatApplication = 0;
+  flags.equalTest = 0;
+  flags.optionflagTest = 1;
+
+
+
+testPureGroebner( rgens.getRing, genTable, optionlist, trials, flags, logfile);
+
+
+

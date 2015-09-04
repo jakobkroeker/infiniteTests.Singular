@@ -1,6 +1,6 @@
 
 
-LIB("src/test.primdec.many.orig.mp");
+LIB("src/test/test.primdec.many.orig.mp");
 
 LIB("src/automatedTests.lib");
 

@@ -1,7 +1,7 @@
 
 option("nowarn");
 
-LIB("src/test.sba");
+LIB("src/test/test.sba");
 
 LIB("src/automatedTests.lib");
 

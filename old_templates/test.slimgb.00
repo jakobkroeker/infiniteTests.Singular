@@ -1,6 +1,6 @@
 
 
-LIB("bugs/test.slimgb");
+LIB("src/tests/test.slimgb");
 monitor("log/test.slimgb.00","io");
 
 

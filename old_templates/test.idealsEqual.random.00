@@ -2,7 +2,7 @@
 
 option(nowarn);
 
-LIB("bugs/test.idealsEqual");
+LIB("src/tests/test.idealsEqual");
 
 LIB("src/automatedTests.lib");
 

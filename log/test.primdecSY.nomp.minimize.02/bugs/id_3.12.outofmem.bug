@@ -5,7 +5,7 @@ if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = 3;
 //  voice = 3;
 system("random",799732850);
 //random: 799732850
-LIB("bugs/test.primdec.mp.timeout");
+LIB("src/tests/test.primdec.mp.timeout");
 intvec op = 0,16787537;
 ring rng = (53),(x,y,z,u),(lp(4),C);
 minpoly = 0;

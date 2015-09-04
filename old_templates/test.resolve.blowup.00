@@ -1,6 +1,6 @@
 
 
-LIB("bugs/test.resolve.blowup");
+LIB("src/tests/test.resolve.blowup");
 monitor("log/test.resolve.blowup.00","io");
 
 

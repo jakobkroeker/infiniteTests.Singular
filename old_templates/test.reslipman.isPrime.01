@@ -1,4 +1,4 @@
- LIB("bugs/test.reslipman.isPrime");
+ LIB("src/tests/test.reslipman.isPrime");
 
 
 

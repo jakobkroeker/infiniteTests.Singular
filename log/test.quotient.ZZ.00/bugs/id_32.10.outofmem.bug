@@ -4,7 +4,7 @@ def assumeLevel = 3;
  // voice = 2;
 system("random",1216127596);
 //random: 1216127596
-LIB("bugs/test.quotient.ZZ");
+LIB("src/tests/test.quotient.ZZ");
 ring rng = (integer),(x(1),x(2),x(3)),(lp(1),lp(1),lp(1),C);
 intvec op = 100663296,10321;
  option(set, op) ;

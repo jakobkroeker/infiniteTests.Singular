@@ -1,6 +1,6 @@
 
 
-LIB("bugs/test.std.correct");
+LIB("src/tests/test.std.correct");
 monitor("log/test.std.correct.06","io");
 
 

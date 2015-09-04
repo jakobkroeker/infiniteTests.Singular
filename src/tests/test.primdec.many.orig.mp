@@ -136,8 +136,8 @@ proc testPrimaryDecomp(ideal I)
         
         list methodsPairs = list( list("primdecGTZ",primdecGTZ),
                                   list("primdecGTZkeepKomp",primdecGTZkeepKomp),
-                                  list("primdecSY",primdecSY) 
-                                  //, list("primdecSYNoOptimalOrdering",primdecSYNoOptimalOrdering)
+                                  list("primdecSY",primdecSY),
+                                  list("primdecSYNoOptimalOrdering",primdecSYNoOptimalOrdering)
                                );
          list perms =  permute(methodsPairs);
          
@@ -152,7 +152,10 @@ proc testPrimaryDecomp(ideal I)
               
          dbprint(1, "ASSUME(0, testPrimary( PL[1] , I ) );");
          ASSUME(0, testPrimary( PL[i] , I ) );
-        
+
+         dbprint(1, "ASSUME(0, not hasRedundantComponents(PL[1]));");        
+         ASSUME(0, not hasRedundantComponents(PL[1]));
+
          for (i=2;i<=size(perm);i++)
          { 
                dbprint(1, "  PL["+string(i)+"] = "+perm[i][1]+"(I);");               
@@ -161,6 +164,8 @@ proc testPrimaryDecomp(ideal I)
                ASSUME(0, testPrimary( PL[i] , I ) );
                dbprint(1, "ASSUME(0, primDecsAreEquivalent(PL["+string(i-1)+"],PL["+string(i)+"]));");
                ASSUME(0, primDecsAreEquivalent(  PL[i-1],  PL[i]  )   );
+               dbprint(1, "ASSUME(0, not hasRedundantComponents(PL[i]));");
+               ASSUME(0, not hasRedundantComponents(PL[i]));
          }
 }
 
@@ -206,7 +211,10 @@ proc testMinAssDecomp(ideal I)
 
 proc testPrimdec( getRng, genTable, trials, logfile )
 {
-    print ("testPrimdec");
+    print ("// testPrimdec");
+
+    link l=":w "+logfile;
+
     adjustAssumeLevel();
     if (defined(basering) ) {   def BAS=basering; }
 
@@ -263,15 +271,18 @@ proc testPrimdec( getRng, genTable, trials, logfile )
                l=":w "+logfile;
                open(l);
                write(l,"");
+               // write(":w "+logfile,emptystring);
                write(l,"");
+
                close(l);        
                monitor(logfile,"io");
+
                dbprint(1, "////////////////////////////////////////////////////////////////////////////////////////");
                dbprint(1, "if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = "+string( assumeLevel ) + ";  " );
                dbprint(1, "//  voice = "+string( voice ) + ";" );
                dbprint(1, "system(\"random\","+string( system("random") ) + ");" );
                dbprint(1, "//random: "+ string( system("random") )  );
-               dbprint(1, "LIB(\"bugs/test.primdec.many.orig.mp\");");
+               dbprint(1, "LIB(\"src/tests/test.primdec.many.orig.mp\");");
                dbprint(1, "intvec op = "+string( option(get) )+";");
                dbprint(1, "ring rng = "+string(basering)+";");
                dbprint(1, "minpoly = "+string(minpoly)+";");
@@ -293,9 +304,11 @@ proc testPrimdec( getRng, genTable, trials, logfile )
                    testMinAssDecomp(I);
                    testPrimaryDecomp(I);
                }
-               monitor ("") ;
+     
 
                 trial++;
+
+                monitor ("") ;
            }
         //}
           

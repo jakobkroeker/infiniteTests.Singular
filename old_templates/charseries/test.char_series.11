@@ -1,6 +1,6 @@
 
 
-LIB("bugs/test.char_series");
+LIB("src/tests/test.char_series");
 monitor("log/test.char_series.11","io");
 
 option("warn");
