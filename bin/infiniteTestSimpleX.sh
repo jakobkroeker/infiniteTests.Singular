@@ -258,8 +258,14 @@ do
         echo "quit;" >> log/$filename/id_$idx.$count;
 
         sleep 2;
-        set -o pipefail; timeout --kill-after=5 $extTimeout  $singularBinary -v -r $randomNum log/$filename/id_$idx.$count 2>&1 | tee log/$filename/id_$idx.log;
-        status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
+	if [ $keepLog -eq 1 ]
+	then
+	        set -o pipefail; timeout --kill-after=5 $extTimeout  $singularBinary -v -r $randomNum log/$filename/id_$idx.$count 2>&1 | tee -a log/$filename/id_$idx.log;
+	        status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
+	else
+	        set -o pipefail; timeout --kill-after=5 $extTimeout  $singularBinary -v -r $randomNum log/$filename/id_$idx.$count 2>&1 | tee log/$filename/id_$idx.log;
+	        status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
+	fi;
     fi; 
 
     if  ( [ $status -eq 14 ] && [ $checkOutOfMem -eq 0 ] ) || ( [ $status -eq 137 ] && [ $considerTimeout -eq 0 ] )  || ( [ $status -eq 124 ] && [ $considerTimeout -eq 0 ] ) || [ $status -eq 0 ] || ( [ $overflow -eq 1 ] && [ $ignoreOverflow -eq 1 ] )
