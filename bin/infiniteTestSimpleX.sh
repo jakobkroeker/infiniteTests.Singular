@@ -261,10 +261,10 @@ do
 	if [ $keepLog -eq 1 ]
 	then
 	        set -o pipefail; timeout --kill-after=5 $extTimeout  $singularBinary -v -r $randomNum log/$filename/id_$idx.$count 2>&1 | tee -a log/$filename/id_$idx.log;
-	        status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
+	        status=$?; echo "confirmedstatus="$status;echo "status"$status >> log/$filename/id_$idx.log;
 	else
 	        set -o pipefail; timeout --kill-after=5 $extTimeout  $singularBinary -v -r $randomNum log/$filename/id_$idx.$count 2>&1 | tee log/$filename/id_$idx.log;
-	        status=$?; echo "status="$status;echo "status"$status >> log/$filename/id_$idx.log;
+	        status=$?; echo "confirmedstatus="$status;echo "status"$status >> log/$filename/id_$idx.log;
 	fi;
     fi; 
 

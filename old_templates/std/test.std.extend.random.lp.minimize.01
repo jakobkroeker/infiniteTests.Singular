@@ -24,7 +24,7 @@ genParams.maxTermsPerGen    = 7;
 genParams.maxGens           = 3;
 genParams.bFractionsOn      = 0;
 
-def genTable = createRandomGeneratorsByParams( genParams  );
+// def genTable = createRandomGeneratorsByParams( genParams  );
 
  def optionlist = list ("redSB", "redTail");
  
@@ -62,7 +62,7 @@ def genTable = createRandomGeneratorsByParams( genParams  );
  
   /////////////////////////////////////////////////////////////////////////////////////////
 
-  TRandomRingGens rgens = createRandomRingGens(ropts);  
+//  TRandomRingGens rgens = createRandomRingGens(ropts);  
 
   // def R = rgens.getRing(); setring R;
 
@@ -82,7 +82,14 @@ TGroebnerTestFlags flags = defaultGroebnerTestFlags();
 
 
 
-testPureGroebner( rgens.getRing, genTable, optionlist, trials, flags, logfile);
+proc run()
+{
+     def genTable = createRandomGeneratorsByParams( genParams  );
+
+     TRandomRingGens rgens = createRandomRingGens(ropts);
+
+     testPureGroebner( rgens.getRing, genTable, optionlist, trials, flags, logfile);
+}
 
 
 
