@@ -21,7 +21,6 @@ genParams.maxTermsPerGen    = 3;
 genParams.maxGens           = 3;
 genParams.bFractionsOn      = 0;
 
-def genTable = createRandomGeneratorsByParams( genParams  );
 
    // minpoly settings
   TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
@@ -65,9 +64,31 @@ int trials = 100000;
  
   /////////////////////////////////////////////////////////////////////////////////////////
 
-  TRandomRingGens rgens = createRandomRingGens(ropts);  
-  
+  def po = createPrintObj();
+  def fo = createOutputFileObj(logfile);
+  list L ;
+  L[1] = po;
+  L[2] = fo;
+  def lo = createOutputListObj(L);
 
-testCharSeries( rgens.getRing, genTable.idealG, trials, logfile);
+
+proc run()
+{
+
+  def genTable = createRandomGeneratorsByParams( genParams  );
+
+  ropts.quotientIdealParams = genParams;
+
+  TRandomRingGens rgens = createRandomRingGens(ropts);  
+
+  dbprint(1, "// genParams.absMaxCoeff = "+string(genParams.absMaxCoeff));
+  dbprint(1, "// genParams.maxVarFactorsPerMonomial = "+string(genParams.maxVarFactorsPerMonomial));
+  dbprint(1, "// genParams.maxTermsPerGen = "+string(genParams.maxTermsPerGen));
+  dbprint(1, "// genParams.maxGens = "+string(genParams.maxGens));
+  dbprint(1, "// ropts.maxVars = "+string(ropts.maxVars));
+
+  testCharSeries( rgens.getRing, genTable.idealG, trials, lo);  
+
+}
 
 

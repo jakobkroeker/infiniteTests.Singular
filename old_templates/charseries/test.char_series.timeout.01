@@ -74,6 +74,13 @@ int trials = 100000;
  
   /////////////////////////////////////////////////////////////////////////////////////////
 
+  def po = createPrintObj();
+  def fo = createOutputFileObj(logfile);
+  list L ;
+  L[1] = po;
+  L[2] = fo;
+  def lo = createOutputListObj(L);
+
 
 
 proc run()
@@ -91,7 +98,7 @@ proc run()
   dbprint(1, "// genParams.maxGens = "+string(genParams.maxGens));
   dbprint(1, "// ropts.maxVars = "+string(ropts.maxVars));
 
-  testCharSeries( rgens.getRing, genTable.idealG, trials, logfile);  
+  testCharSeries( rgens.getRing, genTable.idealG, trials, lo);  
 
 }
 

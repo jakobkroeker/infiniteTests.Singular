@@ -9,7 +9,7 @@ LIB "ehv.lib";
 LIB "randomideal.lib";
  
 
-proc testCharSeries( getRng, idealG, trials, filename )
+proc testCharSeries( getRng, idealG, trials, lo )
 {
     int warnIsSet = optionIsSet("warn");
     if (defined(basering) ) {   def BAS=basering; }
@@ -21,8 +21,7 @@ proc testCharSeries( getRng, idealG, trials, filename )
     short = 0;
 
     bigint trial;
-    link l=":w "+filename;
-    l;
+    lo.clear();
 
     while( trial<trials )
     {  
@@ -37,28 +36,19 @@ proc testCharSeries( getRng, idealG, trials, filename )
       {
         option(warn);
       }
-
-       //dbprint( 1, "basering: ", basering );
-       monitor ("") ;
-       //l=":w "+filename;
-       open(l);
-       write(l,"");
-       close(l);       
-       open(l); 
-       monitor(filename,"io");
-       dbprint(1, "LIB(\"primdec.lib\");");
-       dbprint(1,"LIB(\"randomideal.lib\");");
-       dbprint(1,"ring rng = "+string(basering)+";");
-       dbprint(1,"bigint trial = "+string(trial)+";");
+       lo.clear();
+       lo.write("LIB(\"primdec.lib\");");
+       lo.write("LIB(\"randomideal.lib\");");
+       lo.write("ring rng = "+string(basering)+";");
+       lo.write("bigint trial = "+string(trial)+";");
        ///dbprint( 1, "trial: ", trial );
        I = idealG( );
-       dbprint( 1, "ideal I = "+string( I )+";");
-       dbprint(1, "printIdealInfo( I ) ;");
-       printIdealInfo(I);
-       dbprint( 1,"ideal cs = char_series(I);");
+       lo.write("ideal I = "+string( I )+";");
+       lo.write( "printIdealInfo( I ) ;");
+       lo.write( idealInfoString(I) ) ;
+       lo.write("ideal cs = char_series(I);");
+       //lo.write("quit;");
        cs = char_series(I);
-       close(l);
-       monitor ("") ;
        trial = trial+1;
        //ASSUME(0, 0);
     }
@@ -67,15 +57,4 @@ proc testCharSeries( getRng, idealG, trials, filename )
     return(1);
 }
 
-/*
-proc  testCharSeriesWrapper( cchar, ordering, numVars, genParams, trials )
-{
-    def rng = createRing( cchar,ordering, numVars ) ;
-
-    def idealG = idealGeneratorFromParams( genParams  );
-
-	testCharSeries( rng, idealG, trials);
-}
-*/
-	
 
