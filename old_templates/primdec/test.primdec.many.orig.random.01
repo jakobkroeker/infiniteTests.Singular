@@ -2,7 +2,7 @@
 
 option(nowarn);
 
-LIB "src/test/test.primdec.mp.timeout";
+LIB "src/tests/test.primdec.many.orig.mp";
 
 LIB "src/randomRing.lib";
 
@@ -19,14 +19,14 @@ def assumeLevel=3;
 //////// adjust random ideal generator params: 
 TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
 
-genParams.absMaxCoeff       = 100;
+genParams.absMaxCoeff       = 300;
 genParams.minVarFactorsPerMonomial = 0;
-genParams.maxVarFactorsPerMonomial = 4;
-genParams.maxTermsPerGen    = 3;
-genParams.maxGens           = 4;
-genParams.bFractionsOn      = 0;
+genParams.maxVarFactorsPerMonomial = 5;
+genParams.maxTermsPerGen    = 4;
+genParams.maxGens           = 3;
+genParams.bFractionsOn      = 1;
 
-
+def genTable = createRandomGeneratorsByParams( genParams  );
 
  def optionlist = list ("redSB", "redTail");
  
@@ -49,11 +49,11 @@ genParams.bFractionsOn      = 0;
  
   //////////////////////  composing ring options  //////////////// 
   TRandomRingOpts ropts;
-  ropts.minChar = 0;
+  ropts.minChar = 23;
   ropts.maxChar = 200;
-  ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.doExt   = 2; //0:no; 1:yes; 2:randomly
   ropts.minVars = 1;
-  ropts.maxVars = 4;
+  ropts.maxVars = 5;
   
   ropts.minpolyGenParams = minpolyGenParams;
   ropts.oopts   = oopts;     //rename to monomialOrderingOpts
@@ -70,16 +70,12 @@ option(warn);
 
 int trialsPerRing = 10;
 
-proc run()
-{
-    def genTable = createRandomGeneratorsByParams( genParams  );
-    testPrimdec( rgens.getRing , genTable, trialsPerRing, "minAssGTZ", logfile);
-}
+testPrimdec( rgens.getRing , genTable, trialsPerRing, logfile);
 
 ///////////////////////////////////////////////////////////
 
 // ./bin/infiniteTestX.sh ../singular-spielwiese test.primdec.many.orig.random_mp.00 randomsetup/ring/char_0__vars_3__ordering__lp__redSB_redTail randomsetup/genTable/maxCoeff_50__degree_0-3__maxTerms_2__maxGens_3__FractionsOff 30 1000000 1
 
-// /bin/infiniteTestSimpleX.sh bin/alwaysrun.sh /home/jakob/newwork/Projects/lipmanresolve/infiniteTests/../Singular-spielwiese/BUILD/Singular/Singular input/primdec/test.primdec.many.orig.random.nomp.timeout.01  0 0 1 1 1 50 2  1000000 16 12
+// ./bin/infiniteTestSimpleX.sh bin/alwaysrun.sh ../singular-spielwiese input/test.primdec.many.orig.random.00 1 150 1000000 3 5
 
 

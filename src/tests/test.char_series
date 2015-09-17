@@ -30,7 +30,7 @@ proc testCharSeries( getRng, idealG, trials, lo )
        kill rng;      
        def rng = getRng( );
        setring rng;
-       ideal cs,  I;
+       def cs,  I;
 
       if (warnIsSet)
       {
@@ -46,7 +46,7 @@ proc testCharSeries( getRng, idealG, trials, lo )
        lo.write("ideal I = "+string( I )+";");
        lo.write( "printIdealInfo( I ) ;");
        lo.write( idealInfoString(I) ) ;
-       lo.write("ideal cs = char_series(I);");
+       lo.write("def cs = char_series(I);");
        //lo.write("quit;");
        cs = char_series(I);
        trial = trial+1;
