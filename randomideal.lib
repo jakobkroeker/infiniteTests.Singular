@@ -3097,6 +3097,23 @@ proc printIdealInfo(ideal I)
     return();
 }
 
+proc idealInfoString(ideal I)
+{
+    TIdealInfo idealInfo = getIdealInfo(I);
+    string result ="";
+    result = result + "// numVars     = "+string(idealInfo.numVars)+";
+" ;
+    result = result + "// maxAbsCoeff = "+string(idealInfo.maxAbsCoeff)+";
+" ;
+    result = result + "// maxDeg      = "+string(idealInfo.maxDeg)+";
+" ;
+    result = result + "// maxTerms    = "+string(idealInfo.maxTerms)+";
+" ;
+    result = result + "// numGens     = "+string(idealInfo.numGens)+";
+" ;
+    return(result);
+}
+
 
 proc minimizeMonomialDeg(TIdealGeneratingParameters genParams,  int subtrahend)
 {

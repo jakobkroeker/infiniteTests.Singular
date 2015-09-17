@@ -140,6 +140,18 @@ proc createOutputListObj(outputObjects)
      return (outputObj);
 }
 
+proc createDefaultOutputInterface(logfile);
+{
+
+  def po = createPrintObj();
+  def fo = createOutputFileObj(logfile);
+  list L ;
+  L[1] = po;
+  L[2] = fo;
+  def ol = createOutputListObj(L);
+
+  return(ol);
+}
 
 proc randomZeroOne()  {    return (random(0,1));  }  
   

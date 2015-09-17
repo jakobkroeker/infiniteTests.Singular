@@ -21,7 +21,7 @@ proc testCharSeries( getRng, idealG, trials, lo )
     short = 0;
 
     bigint trial;
-    lo.clear();
+    lo.clearX();
 
     while( trial<trials )
     {  
@@ -36,17 +36,20 @@ proc testCharSeries( getRng, idealG, trials, lo )
       {
         option(warn);
       }
-       lo.clear();
-       lo.write("LIB(\"primdec.lib\");");
-       lo.write("LIB(\"randomideal.lib\");");
-       lo.write("ring rng = "+string(basering)+";");
-       lo.write("bigint trial = "+string(trial)+";");
+       lo.clearX();
+       lo.writeX("");
+       lo.writeX("LIB(\"primdec.lib\");");
+       lo.writeX("LIB(\"randomideal.lib\");");
+       lo.writeX("ring rng = "+string(basering)+";");
+       lo.writeX("bigint trial = "+string(trial)+";");
        ///dbprint( 1, "trial: ", trial );
        I = idealG( );
-       lo.write("ideal I = "+string( I )+";");
-       lo.write( "printIdealInfo( I ) ;");
-       lo.write( idealInfoString(I) ) ;
-       lo.write("def cs = char_series(I);");
+       lo.writeX("ideal I = "+string( I )+";");
+       //lo.writeX( "printIdealInfo( I ) ;");
+       lo.writeX( idealInfoString(I) ) ;
+       lo.writeX("def cs = char_series(I);");
+       lo.writeX("");
+       lo.writeX("");
        //lo.write("quit;");
        cs = char_series(I);
        trial = trial+1;
