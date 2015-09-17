@@ -18,19 +18,6 @@ proc quotientZWrapper(ideal A,ideal B)
 
 proc quotientPropertySatisfied(ideal I, ideal J, colonIdeal, idealG, trials )
 {
-
-    /* TIdealGeneratingParameters genParams = defaultIdealGeneratorParams();
-      // adjust random ideal generator params:
- 
-      genParams.absMaxCoeff = 10;
-      genParams.maxMonomialDegree = 6;
-      genParams.maxTermsPerGen = 6;
-      genParams.maxGens = 6;
-
-      proc idealG = idealGeneratorFromParams( genParams  );
-*/
-
-
     int trial;
     int genId;
     ideal colonIdealElem, i ;
@@ -49,7 +36,7 @@ proc quotientPropertySatisfied(ideal I, ideal J, colonIdeal, idealG, trials )
     return(1);
 }
 
-proc  testQuotientOverZZ( getRng, gens,  trials, testflags, optionlist, logfile )
+proc  testQuotientOverZZ( getRng, gens,  trials, testflags, optionlist, ol )
 {
     if (not (defined(assumeLevel)) ) { def Top::assumeLevel=3; }
     print ("testQuotientOverZZ");
@@ -87,10 +74,9 @@ proc  testQuotientOverZZ( getRng, gens,  trials, testflags, optionlist, logfile 
       
 
 
-       monitor(logfile,"io");
-       write(":w "+logfile,emptystring);
-       write(":w "+logfile,emptystring);
-       monitor(logfile,"io");
+       ol.clearX();
+       ol.writeX("");
+       ol.writeX("");
 
 
         ideal quotient_JI, quotient_JK, quotient_J_IK, quotientZ_JI, quotient_gJgI, quotientZWrapper_gJgI,I,J,gI,gJ, K, gK;
@@ -103,43 +89,43 @@ proc  testQuotientOverZZ( getRng, gens,  trials, testflags, optionlist, logfile 
 
        
 
-       dbprint(1, "////////////////////////////////////////////////////////////////////////////////////////");
-       dbprint(1, "def assumeLevel = "+string( assumeLevel ) + ";" );
-       dbprint(1, " // voice = "+string( voice ) + ";" );
-       dbprint(1, "system(\"random\","+string( system("random") ) + ");" );
-       dbprint(1, "//random: "+ string( system("random") )  );
-       dbprint(1, "LIB(\"src/tests/test.quotient.ZZ\");");
-       //dbprint(1, "LIB(\"primdec.lib\");");
-       //dbprint(1, "LIB(\"ehv.lib\");");
-       dbprint(1, "ring rng = "+string(basering)+";");
+       ol.writeX( "////////////////////////////////////////////////////////////////////////////////////////");
+       ol.writeX( "def assumeLevel = "+string( assumeLevel ) + ";" );
+       ol.writeX( " // voice = "+string( voice ) + ";" );
+       ol.writeX( "system(\"random\","+string( system("random") ) + ");" );
+       ol.writeX( "//random: "+ string( system("random") )  );
+       ol.writeX( "LIB(\"src/tests/test.quotient.ZZ\");");
+       //ol.writeX( "LIB(\"primdec.lib\");");
+       //ol.writeX( "LIB(\"ehv.lib\");");
+       ol.writeX( "ring rng = "+string(basering)+";");
        if ( not ("0" == string(minpoly) ))
        {
-         dbprint( 1, "minpoly = " + string(minpoly) + ";");
+         ol.writeX( "minpoly = " + string(minpoly) + ";");
        }
 
-       dbprint( 1, "intvec op = "+string( option(get) )+";");           
-       dbprint( 1, " option(set, op) ;");
-       dbprint( 1, " option() ;");
-       dbprint( 1, " // option() ;" + option() );
+       ol.writeX( "intvec op = "+string( option(get) )+";");           
+       ol.writeX( " option(set, op) ;");
+       ol.writeX( " option() ;");
+       ol.writeX( " // option() ;" + option() );
       
-       dbprint(1, " ideal quotient_JI,quotient_JK, quotient_J_IK,  quotientZ_JI, quotient_gJgI, quotientZWrapper_gJgI, I, J, gI, gJ, K, gK;");
-       dbprint(1, " I = "+string(I)+";");
-       dbprint(1, " J = "+string(J)+";");
-       dbprint(1, " K = "+string(K)+";");
-       dbprint(1, "bigint trial = "+string(trial)+";");
+       ol.writeX( " ideal quotient_JI,quotient_JK, quotient_J_IK,  quotientZ_JI, quotient_gJgI, quotientZWrapper_gJgI, I, J, gI, gJ, K, gK;");
+       ol.writeX( " I = "+string(I)+";");
+       ol.writeX( " J = "+string(J)+";");
+       ol.writeX( " K = "+string(K)+";");
+       ol.writeX( "bigint trial = "+string(trial)+";");
 
-       dbprint(1, "quotient_JI = quotient(J,I); ");
+       ol.writeX( "quotient_JI = quotient(J,I); ");
        quotient_JI = quotient(J,I);
 
-       dbprint(1, " quotientZ_JI = quotientZWrapper(J,I);");
+       ol.writeX( " quotientZ_JI = quotientZWrapper(J,I);");
        quotientZ_JI = quotientZWrapper(J,I); 
 
-       dbprint(1, "// ASSUME(0, quotientPropertySatisfied( J,I , quotientZ_JI ,gens.idealG, 300 ) );");   
+       ol.writeX( "// ASSUME(0, quotientPropertySatisfied( J,I , quotientZ_JI ,gens.idealG, 300 ) );");   
        ASSUME(0, quotientPropertySatisfied( J,I , quotientZ_JI , gens.idealG, 300 ) );
 
    
-       dbprint(1, " quotient_JK = quotient(J,K); ");
-       dbprint(1, "  quotient_J_IK = quotient(J,I+K);   ");
+       ol.writeX( " quotient_JK = quotient(J,K); ");
+       ol.writeX( "  quotient_J_IK = quotient(J,I+K);   ");
      
 
        quotient_JK = quotient(J,K);
@@ -148,7 +134,7 @@ proc  testQuotientOverZZ( getRng, gens,  trials, testflags, optionlist, logfile 
 
 
        // Wikipedia (quotient ideal) says  J : (I + K) = (J : I) \cap (J : K)
-       dbprint(1, " ASSUME(0, idealsAreEqual(quotient_J_IK, intersect(quotient_JI, quotient_JK)));  ");
+       ol.writeX( " ASSUME(0, idealsAreEqual(quotient_J_IK, intersect(quotient_JI, quotient_JK)));  ");
        ASSUME(0, idealsAreEqual(quotient_J_IK, intersect(quotient_JI, quotient_JK)));
 
        if (isSubModule(I,J))       {   ASSUME(0, idealsAreEqual(ideal(1),quotient_JI));  }
@@ -156,25 +142,25 @@ proc  testQuotientOverZZ( getRng, gens,  trials, testflags, optionlist, logfile 
        if (idealsAreEqual(ideal(1),I))       {   ASSUME(0, idealsAreEqual(ideal(J),quotient_JI));  }
 
  
-       dbprint(1, "ASSUME(0, idealsAreEqual(quotient_JI,quotientZ_JI) );");
+       ol.writeX( "ASSUME(0, idealsAreEqual(quotient_JI,quotientZ_JI) );");
        ASSUME(0, idealsAreEqual(quotient_JI,quotientZ_JI) );
 
 
-       dbprint(1, " gI = std(gI);");
+       ol.writeX( " gI = std(gI);");
        gI = std(gI);
-       dbprint(1, " gJ =std(gJ);");
+       ol.writeX( " gJ =std(gJ);");
        gJ = std(gJ);
 
-       dbprint(1, "quotientZWrapper_gJgI = quotientZWrapper(gJ,gI); ");
+       ol.writeX( "quotientZWrapper_gJgI = quotientZWrapper(gJ,gI); ");
        quotientZWrapper_gJgI = quotientZWrapper(gJ,gI); 
 
-       dbprint(1, "// ASSUME(0, quotientPropertySatisfied( gJ,gI , quotientZWrapper_gJgI , idealG, 300 ) );");   
+       ol.writeX( "// ASSUME(0, quotientPropertySatisfied( gJ,gI , quotientZWrapper_gJgI , idealG, 300 ) );");   
        ASSUME(0, quotientPropertySatisfied( gJ,gI , quotientZWrapper_gJgI ,gens.idealG,  300 ) );
 
-       dbprint(1, "quotient_gJgI = quotient(gJ,gI); ");
+       ol.writeX( "quotient_gJgI = quotient(gJ,gI); ");
        quotient_gJgI = quotient( gJ, gI ); 
 
-       dbprint(1, "ASSUME(0, idealsAreEqual(quotient_gJgI, quotientZWrapper_gJgI) );");
+       ol.writeX( "ASSUME(0, idealsAreEqual(quotient_gJgI, quotientZWrapper_gJgI) );");
        ASSUME(0, idealsAreEqual(quotient_gJgI, quotientZWrapper_gJgI) );
 
 
@@ -184,30 +170,5 @@ proc  testQuotientOverZZ( getRng, gens,  trials, testflags, optionlist, logfile 
     return(1);
 }
 
-/*
-proc testQuotientOverZZWrapper()
-{
-      //printlevel = 0 ;
-      //TRACE = 1;
-
-      init_randomIdeal();
-             
-      TIdealGeneratingParameters genParams = defaultIdealGeneratorParams();
-      // adjust random ideal generator params:
-      genParams.absMaxCoeff = 4;
-      genParams.maxMonomialDegree = 4;
-      genParams.maxTermsPerGen = 4;
-      genParams.maxGens = 4;
-
-      proc idealG = idealGeneratorFromParams( genParams  );
-
  
-	int trials = 300;
-    int numVars = 4;
-	testQuotientOverZZ( numVars, idealG, trials);
-}
-
-testQuotientOverZZWrapper();
-*/
-
 

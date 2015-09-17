@@ -52,7 +52,7 @@ proc invariantHasNegEntry(invar)
 }
 
 
-proc testInvariants( getRng, gens, optionlist, trials, logfile )
+proc testInvariants( getRng, gens, optionlist, trials, ol )
 {
 
     int nothing =1;
@@ -71,7 +71,7 @@ proc testInvariants( getRng, gens, optionlist, trials, logfile )
       option(nowarn);  
       kill rng;      
 
-      dbprint(1, " // getRng() ;");
+      ol.writeX( " // getRng() ;");
 
       def rng = getRng( );
       setring rng;
@@ -88,28 +88,28 @@ proc testInvariants( getRng, gens, optionlist, trials, logfile )
       
       
        if (defined(qrng)) {kill qrng; }
-       monitor(logfile,"io");
-       write(":w "+logfile,emptystring);
-       write(":w "+logfile,emptystring);
-       monitor(logfile,"io");
-       // write(":w "+logfile,emptystring);
+       ol.clearX();
+       ol.writeX( "");
+       ol.writeX( "");
 
-       dbprint(1, "LIB \"hnoether.lib\";");      
-       dbprint(1, "LIB \"wrappers.lib\";");
-       dbprint(1, "LIB \"src/randomRing.lib\" ;");
-       dbprint(1, "LIB \"src/tests/test.hnoether\" ;");
-       dbprint( 1, "ring rng = "  + string( basering)+";" );
-       dbprint( 1, "short = 0 ;" );
+       
+
+       ol.writeX( "LIB \"hnoether.lib\";");      
+       ol.writeX( "LIB \"wrappers.lib\";");
+       ol.writeX( "LIB \"src/randomRing.lib\" ;");
+       ol.writeX( "LIB \"src/tests/test.hnoether\" ;");
+       ol.writeX( "ring rng = "  + string( basering)+";" );
+       ol.writeX( "short = 0 ;" );
        
        if ( not ("0" == string(minpoly) ))
        {
-         dbprint( 1, "minpoly = " + string(minpoly) + ";");
+         ol.writeX( "minpoly = " + string(minpoly) + ";");
        }
-       dbprint( 1, "intvec op = "+string( option(get) )+";");           
-       dbprint( 1, " option(set, op) ;");
-       dbprint( 1, " option() ;");
-       dbprint( 1, " // option() ;" + option() );
-       dbprint( 1, "int trial = " + string( trial) + ";" );
+       ol.writeX( "intvec op = "+string( option(get) )+";");           
+       ol.writeX( " option(set, op) ;");
+       ol.writeX( " option() ;");
+       ol.writeX( " // option() ;" + option() );
+       ol.writeX( "int trial = " + string( trial) + ";" );
        short = 0;
   
        while (f==0)
@@ -118,24 +118,21 @@ proc testInvariants( getRng, gens, optionlist, trials, logfile )
 
             if ( deg(f)>1 )
             {
-               dbprint(1, "// ok");            
+               ol.writeX( "// ok");            
             }
-            else    {    f=0;      dbprint(1, "// not ok");      }
+            else    {    f=0;      ol.writeX( "// not ok");      }
        }
 
-       dbprint( 1, "system(\"random\", " + string( system("random") ) + ");" );
-       dbprint( 1, "poly f  = " + string( f ) + ";" );
-       dbprint( 1, "  dbprint( 1, \"poly f = \" + string( f ) + \";\" );" );
+       ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
+       ol.writeX( "poly f  = " + string( f ) + ";" );
+       ol.writeX( "  ol.writeX( \"poly f = \" + string( f ) + \";\" );" );
 
        invars = invariants(f);
        if (size(invars)>0)
        {
-           dbprint( 1, "      ASSUME(0, 0==invariantHasNegEntry(invariants(f)));" );
+           ol.writeX( "      ASSUME(0, 0==invariantHasNegEntry(invariants(f)));" );
            ASSUME(0,  0==invariantHasNegEntry(invariants(f)));
        }
- 
-       write(":w "+logfile,emptystring);
-       //monitor(logfile,"io");
 
        trial = trial+1;
     }

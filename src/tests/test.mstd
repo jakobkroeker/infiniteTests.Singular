@@ -9,7 +9,7 @@ LIB "randomIdeal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
  
-proc testMStd( getRng, gens, optionlist, trials, basic, logfile )
+proc testMStd( getRng, gens, optionlist, trials, basic, ol )
 {
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
@@ -40,44 +40,45 @@ proc testMStd( getRng, gens, optionlist, trials, basic, logfile )
       }
       
      
-       write(":w "+logfile,emptystring);
-       monitor(logfile,"io");
-       write(":w "+logfile,emptystring);
-       dbprint(1, "LIB \"primdec.lib\";");
-       dbprint(1, "LIB \"wrappers.lib\";");
-       dbprint(1, "LIB \"src/randomRing.lib\" ;");
-       dbprint( 1, "ring rng = "  + string( basering)+";" );
-       dbprint( 1, "short = 0 ;" );
-       dbprint( 1, "minpoly = " + string(minpoly) + ";");
-       dbprint( 1, "intvec op = "+string( option(get) )+";");           
-       dbprint( 1, " option(set, op) ;");
-       dbprint( 1, " option() ;");
-       dbprint( 1, " // option() ;" + option() );
-       dbprint( 1, "int trial = " + string( trial) + ";" );
+       ol.clearX();
+       ol.writeX( "");
+       ol.writeX( "");
+
+       ol.writeX( "LIB \"primdec.lib\";");
+       ol.writeX( "LIB \"wrappers.lib\";");
+       ol.writeX( "LIB \"src/randomRing.lib\" ;");
+       ol.writeX( "ring rng = "  + string( basering)+";" );
+       ol.writeX( "short = 0 ;" );
+       ol.writeX( "minpoly = " + string(minpoly) + ";");
+       ol.writeX( "intvec op = "+string( option(get) )+";");           
+       ol.writeX( " option(set, op) ;");
+       ol.writeX( " option() ;");
+       ol.writeX( " // option() ;" + option() );
+       ol.writeX( "int trial = " + string( trial) + ";" );
        short = 0;
        I = gens.idealG( );
-       dbprint( 1, "system(\"random\", " + string( system("random") ) + ");" );
-       dbprint( 1, "ideal I = " + string( I ) + ";" );
+       ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
+       ol.writeX( "ideal I = " + string( I ) + ";" );
        
-       dbprint( 1, "       list mgI =  mstd(I);" );
-       dbprint( 1, "   gI =  lmgI[1];");
-       dbprint( 1, "   mgI =  lmgI[2];");
+       ol.writeX( "       list mgI =  mstd(I);" );
+       ol.writeX( "   gI =  lmgI[1];");
+       ol.writeX( "   mgI =  lmgI[2];");
        lmgI = mstd(I);
        gI =  lmgI[1];
        mgI = lmgI[2];
-       //dbprint( 1, "//        gI = "+string(gI) );
-       dbprint( 1, "       list lmggI =  mstd(gI);" );
-       dbprint( 1, "   ggI =  lmggI[1];");
-       dbprint( 1, "   mggI =  lmggI[2];");
+       //ol.writeX( "//        gI = "+string(gI) );
+       ol.writeX( "       list lmggI =  mstd(gI);" );
+       ol.writeX( "   ggI =  lmggI[1];");
+       ol.writeX( "   mggI =  lmggI[2];");
        lmggI =  mstd(gI);
        ggI = lmggI[1];
        mggI =  lmggI[2];
-       //dbprint( 1, "//        ggI = "+string(ggI) +";");
+       //ol.writeX( "//        ggI = "+string(ggI) +";");
 
-       dbprint(1, "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
+       ol.writeX( "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
        ASSUME(0, 0== size( std(reduce (I,gI ) ))  );
 
-       dbprint(1, "ASSUME(0, 0== size( std(reduce (mgI,gI ) ))  );");
+       ol.writeX( "ASSUME(0, 0== size( std(reduce (mgI,gI ) ))  );");
        ASSUME(0, 0== size( std(reduce (mgI,gI ) ))  );
 
        
@@ -86,15 +87,15 @@ proc testMStd( getRng, gens, optionlist, trials, basic, logfile )
 
        //}
    
-       dbprint(1,"ASSUME(0, idealsAreEqual(gI,ggI ));");
+       ol.writeX("ASSUME(0, idealsAreEqual(gI,ggI ));");
        ASSUME(0, idealsAreEqual(gI,ggI ));
 
-       dbprint(1,"ASSUME(0, idealsAreEqual(mggI,ggI ));");
+       ol.writeX("ASSUME(0, idealsAreEqual(mggI,ggI ));");
        ASSUME(0, idealsAreEqual(mggI,ggI ));
 
        
        
-       dbprint(1,"ASSUME(0, idealsEqual(gI,ggI ));");
+       ol.writeX("ASSUME(0, idealsEqual(gI,ggI ));");
        ASSUME(0, idealsEqual(gI,ggI ));
 
 
@@ -110,28 +111,28 @@ proc testMStd( getRng, gens, optionlist, trials, basic, logfile )
           if ( optionIsSet("redSB") )
           {
  
-                dbprint(1,"ASSUME(0, size(gI)== size(ggI) );");
+                ol.writeX("ASSUME(0, size(gI)== size(ggI) );");
                 ASSUME(0, size(gI)== size(ggI) );
 
 
                 if (not idealRepresentationReducedTail(gI ) )
                 {
-                   dbprint( 1, "//        gI = "+string(gI) );
+                   ol.writeX( "//        gI = "+string(gI) );
                 }
                 if (not idealRepresentationReducedTail(ggI ) )
                 {
-                   dbprint( 1, "//        ggI = "+string(ggI) +";");
+                   ol.writeX( "//        ggI = "+string(ggI) +";");
                 }
 
-               dbprint(1,"ASSUME(0, idealRepresentationReducedTail( gI ));");
+               ol.writeX("ASSUME(0, idealRepresentationReducedTail( gI ));");
                ASSUME(0, idealRepresentationReducedTail( gI ));
-               dbprint(1,"ASSUME(0, idealRepresentationReducedTail( ggI ));");
+               ol.writeX("ASSUME(0, idealRepresentationReducedTail( ggI ));");
                ASSUME(0, idealRepresentationReducedTail( ggI ));
                
 
-               dbprint(1,"ASSUME(0, idealRepresentationReduced( gI ));");
+               ol.writeX("ASSUME(0, idealRepresentationReduced( gI ));");
                ASSUME(0, idealRepresentationReduced( gI ));
-               dbprint(1,"ASSUME(0, idealRepresentationReduced( ggI ));");
+               ol.writeX("ASSUME(0, idealRepresentationReduced( ggI ));");
                ASSUME(0, idealRepresentationReduced( ggI ));
           }
 
@@ -139,21 +140,21 @@ proc testMStd( getRng, gens, optionlist, trials, basic, logfile )
 
 
    /*
-       dbprint(1,"ASSUME(0, idealRepresentationsEqual(gI,ggI ));");
+       ol.writeX("ASSUME(0, idealRepresentationsEqual(gI,ggI ));");
        ASSUME(0, idealRepresentationsEqual(gI,ggI ));
-       dbprint(1,"ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));");
+       ol.writeX("ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));");
        ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));
 
-    dbprint(1, "ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );");
+    ol.writeX( "ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );");
       ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );
 
-         dbprint(1,"ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );");
+         ol.writeX("ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );");
       ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );
 
-      dbprint(1,"ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );");
+      ol.writeX("ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );");
       ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );
 
-      dbprint(1,"ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );");
+      ol.writeX("ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );");
       ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );
 
  */

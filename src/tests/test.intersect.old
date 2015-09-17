@@ -9,7 +9,7 @@ LIB "randomIdeal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
  
-proc testIntersect( rng, idealG, trials, logfile )
+proc testIntersect( rng, idealG, trials, ol )
 {
     if (defined(basering) ) {   def BAS=basering; }
     setring rng;
@@ -20,70 +20,71 @@ proc testIntersect( rng, idealG, trials, logfile )
     {   
 
        if (defined(qrng)) {kill qrng; }
-       write(":w "+logfile,emptystring);
-       monitor(logfile,"io");
-       write(":w "+logfile,emptystring);
-       dbprint(1, "option(redSB);");
-       dbprint(1, "LIB \"primdec.lib\";");
-       dbprint(1, "LIB \"wrappers.lib\";");
-       dbprint( 1, "ring rng = "  + string( basering)+";" );
-       dbprint( 1, "int trial = " + string( trial) + ";" );
+       ol.clearX();
+       ol.writeX( "");
+       ol.writeX( "");
+
+       ol.writeX( "option(redSB);");
+       ol.writeX( "LIB \"primdec.lib\";");
+       ol.writeX( "LIB \"wrappers.lib\";");
+       ol.writeX( "ring rng = "  + string( basering)+";" );
+       ol.writeX( "int trial = " + string( trial) + ";" );
        short = 0;
        I = idealG( );
        J = idealG( );
-       dbprint( 1, "system(\"random\", " + string( system("random") ) + ");" );
-       dbprint( 1, "ideal I = " + string( I ) + ";" );
-       dbprint( 1, "ideal J = " + string( J ) + ";" );
+       ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
+       ol.writeX( "ideal I = " + string( I ) + ";" );
+       ol.writeX( "ideal J = " + string( J ) + ";" );
        
-       dbprint( 1, "       ideal gI =  std(I);" );
+       ol.writeX( "       ideal gI =  std(I);" );
        gI =  std(I);
-       //dbprint( 1, "//        gI = "+string(gI) );
-       dbprint( 1, "       ideal ggI =  std(gI);" );
+       //ol.writeX( "//        gI = "+string(gI) );
+       ol.writeX( "       ideal ggI =  std(gI);" );
        ggI =  std(gI);
-       //dbprint( 1, "//        ggI = "+string(ggI) +";");
+       //ol.writeX( "//        ggI = "+string(ggI) +";");
 
-       dbprint( 1, "       ideal gJ =  std(J);" );
+       ol.writeX( "       ideal gJ =  std(J);" );
 
        gJ =  std(J);
-       //dbprint( 1, "//        gJ = "+string(gJ)+";" );
-       dbprint( 1, "       ideal ggJ =  std(gJ);" );
+       //ol.writeX( "//        gJ = "+string(gJ)+";" );
+       ol.writeX( "       ideal ggJ =  std(gJ);" );
        ggJ =  std(gJ);
-       //dbprint( 1, "//        ggJ = "+string(ggJ)+";" );
+       //ol.writeX( "//        ggJ = "+string(ggJ)+";" );
 
-       dbprint(1, "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
+       ol.writeX( "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
        ASSUME(0, 0== size( std(reduce (I,gI ) ))  );
-        dbprint(1, "ASSUME(0, 0== size( std(reduce (J,gJ ) ))  );");
+        ol.writeX( "ASSUME(0, 0== size( std(reduce (J,gJ ) ))  );");
        ASSUME(0, 0== size( std(reduce (J,gJ ) ))  );
 
-       dbprint(1,"ASSUME(0, size(gJ)== size(ggJ) );");
+       ol.writeX("ASSUME(0, size(gJ)== size(ggJ) );");
        ASSUME(0, size(gJ)== size(ggJ) );
-       dbprint(1,"ASSUME(0, size(gI)== size(ggI) );");
+       ol.writeX("ASSUME(0, size(gI)== size(ggI) );");
        ASSUME(0, size(gI)== size(ggI) );
 
 
-        dbprint(1,"ASSUME(0, idealsEqual(gI,ggI ));");
+        ol.writeX("ASSUME(0, idealsEqual(gI,ggI ));");
        ASSUME(0, idealsEqual(gI,ggI ));
 
-        dbprint(1,"ASSUME(0, idealsEqual(gJ,ggJ ));");
+        ol.writeX("ASSUME(0, idealsEqual(gJ,ggJ ));");
        ASSUME(0, idealsEqual(gJ,ggJ ));
 
-        dbprint(1,"ASSUME(0, idealsAreEqual(gI,ggI ));");
+        ol.writeX("ASSUME(0, idealsAreEqual(gI,ggI ));");
        ASSUME(0, idealsAreEqual(gI,ggI ));
 
-        dbprint(1,"ASSUME(0, idealsAreEqual(gJ,ggJ ));");
+        ol.writeX("ASSUME(0, idealsAreEqual(gJ,ggJ ));");
        ASSUME(0, idealsAreEqual(gJ,ggJ ));
 
 
-       dbprint(1, "ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );");
+       ol.writeX( "ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );");
       ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );
 
-         dbprint(1,"ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );");
+         ol.writeX("ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );");
       ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );
 
-      dbprint(1,"ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );");
+      ol.writeX("ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );");
       ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );
 
-      dbprint(1,"ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );");
+      ol.writeX("ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );");
       ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );
 
 

@@ -9,7 +9,7 @@ LIB "randomIdeal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
  
-proc testRadical( getRng, gens, optionlist, trials, logfile )
+proc testRadical( getRng, gens, optionlist, trials, ol )
 {
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
@@ -38,39 +38,39 @@ proc testRadical( getRng, gens, optionlist, trials, logfile )
         option(warn);
       }
       
-       write(":w "+logfile,emptystring);
-       monitor(logfile,"io");
-       write(":w "+logfile,emptystring);
-       dbprint(1, "LIB \"primdec.lib\";");
-       dbprint(1, "LIB \"wrappers.lib\";");
-       dbprint(1, "LIB \"src/automatedTests.lib\" ;");
-       dbprint( 1, "ring rng = "  + string( basering)+";" );
-       dbprint( 1, "short = 0 ;" );
-       dbprint( 1, "minpoly = " + string(minpoly) + ";");
-       dbprint( 1, "intvec op = "+string( option(get) )+";");           
-       dbprint( 1, " option(set, op) ;");
-       dbprint( 1, " option() ;");
-       dbprint( 1, " // option() ;" + option() );
-       dbprint( 1, "int trial = " + string( trial) + ";" );
+       ol.clearX();
+       ol.writeX("");
+       ol.writeX("");
+       ol.writeX( "LIB \"primdec.lib\";");
+       ol.writeX( "LIB \"wrappers.lib\";");
+       ol.writeX( "LIB \"src/automatedTests.lib\" ;");
+       ol.writeX( "ring rng = "  + string( basering)+";" );
+       ol.writeX( "short = 0 ;" );
+       ol.writeX( "minpoly = " + string(minpoly) + ";");
+       ol.writeX( "intvec op = "+string( option(get) )+";");           
+       ol.writeX( " option(set, op) ;");
+       ol.writeX( " option() ;");
+       ol.writeX( " // option() ;" + option() );
+       ol.writeX( "int trial = " + string( trial) + ";" );
        short = 0;
        I = gens.idealG( );
-       dbprint( 1, "system(\"random\", " + string( system("random") ) + ");" );
+       ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
        
-       dbprint( 1, "ideal I = " + string( I ) + ";" );
+       ol.writeX( "ideal I = " + string( I ) + ";" );
        
-       dbprint( 1, "       ideal   rSLI =  radical(I,\"SL\");" );
+       ol.writeX( "       ideal   rSLI =  radical(I,\"SL\");" );
        rSLI =  radical(I,"SL");
-       dbprint( 1, "       ideal   rSLI2 =  radical(rSLI,\"SL\");" );
+       ol.writeX( "       ideal   rSLI2 =  radical(rSLI,\"SL\");" );
        rSLI2 =  radical(rSLI,"SL");
        
-       dbprint( 1, "       ideal rKLI = radical(I, \"KL\");" );
+       ol.writeX( "       ideal rKLI = radical(I, \"KL\");" );
        rKLI =  radical(I,"KL");
-       dbprint( 1, "       ideal rKLI2 = radical(rKLI, \"KL\");" );
+       ol.writeX( "       ideal rKLI2 = radical(rKLI, \"KL\");" );
        rKLI2 =  radical(rKLI,"KL");
 
-       dbprint( 1, "  ASSUME(0, idealsAreEqual(rSLI, rSLI2));");
-       dbprint( 1, "  ASSUME(0, idealsAreEqual(rKLI, rKLI2));");
-       dbprint( 1, "  ASSUME(0, idealsAreEqual(rSLI, rKLI));");
+       ol.writeX( "  ASSUME(0, idealsAreEqual(rSLI, rSLI2));");
+       ol.writeX( "  ASSUME(0, idealsAreEqual(rKLI, rKLI2));");
+       ol.writeX( "  ASSUME(0, idealsAreEqual(rSLI, rKLI));");
 
        
        ASSUME(0, idealsAreEqual(rSLI, rSLI2));
@@ -79,15 +79,15 @@ proc testRadical( getRng, gens, optionlist, trials, logfile )
        
        if ( hasGlobalOrdering(basering) && (char(basering)==0 || char(basering)>100) )
        {
-          dbprint( 1, "       idealrEHVI =  radicalEHV(I);" );
+          ol.writeX( "       idealrEHVI =  radicalEHV(I);" );
           rEHVI = radicalEHV(I);
          
-          dbprint( 1, "       idealrEHVI2 =  radicalEHV(rEHVI);" );
+          ol.writeX( "       idealrEHVI2 =  radicalEHV(rEHVI);" );
           rEHVI2 = radicalEHV(rEHVI);
          
          
-          dbprint( 1, "  ASSUME(0, idealsAreEqual(rEHVI, rEHVI2));");
-          dbprint( 1, "  ASSUME(0, idealsAreEqual(rKLI, rEHVI));");
+          ol.writeX( "  ASSUME(0, idealsAreEqual(rEHVI, rEHVI2));");
+          ol.writeX( "  ASSUME(0, idealsAreEqual(rKLI, rEHVI));");
           ASSUME(0, idealsAreEqual(rKLI, rEHVI));
           ASSUME(0, idealsAreEqual(rEHVI, rEHVI2));
        }

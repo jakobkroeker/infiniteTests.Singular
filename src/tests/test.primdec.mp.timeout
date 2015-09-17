@@ -14,8 +14,8 @@ proc adjustAssumeLevel()
 {
     if (not (defined(assumeLevel) ) ) 
     {
-       dbprint(1, "       def Top::assumeLevel = 3;");
-       dbprint(1, " export (Top::assumeLevel);");
+       ol.writeX( "       def Top::assumeLevel = 3;");
+       ol.writeX( " export (Top::assumeLevel);");
        def Top::assumeLevel = 3;
        export (Top::assumeLevel);
     }
@@ -25,7 +25,7 @@ proc adjustAssumeLevel()
        { 
             assumeLevel = 3;
        }
-       dbprint(1, "  assumeLevel = "+string(assumeLevel)+";");
+       ol.writeX( "  assumeLevel = "+string(assumeLevel)+";");
     }
 }
 
@@ -129,7 +129,7 @@ proc testPrimdecZeroDim( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTe
 
 
 
-proc testPrimdec( getRng, genTable, trials, procName, logfile )
+proc testPrimdec( getRng, genTable, trials, procName, ol )
 {
     print ("//testPrimdec");
     adjustAssumeLevel();
@@ -146,8 +146,7 @@ proc testPrimdec( getRng, genTable, trials, procName, logfile )
     list ideals;
 
     int trial,i;
-    link l=":w "+logfile;
-
+ 
     ideal I;
     string emptystring="";
     // while (trial<trials)
@@ -165,41 +164,36 @@ proc testPrimdec( getRng, genTable, trials, procName, logfile )
       if (defined(minAss1e)) {kill minAss1e;}
 
       export(rng);
-       //dbprint(1, "// get random ideal ");
+       //ol.writeX( "// get random ideal ");
       trial = 0;
       //while (trial<trials)
       //{
 
            I = genTable.idealG(  );    
-           //dbprint(1, "// got random ideal ");
+           //ol.writeX( "// got random ideal ");
 
            if (not isZero(I) && not idealsAreEqual( ideal(1), I ) )
            {
-               monitor ("") ;
-               l=":w "+logfile;
-               open(l);
-               write(l,"");
-               write(l,"");
-               close(l);        
-               monitor(logfile,"io");
-               //write(":w "+logfile,emptystring); // empty logfile twice  - otherwise it seems not to work
-               dbprint(1, "////////////////////////////////////////////////////////////////////////////////////////");
-               dbprint(1, "if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = "+string( assumeLevel ) + ";  " );
-               dbprint(1, "//  voice = "+string( voice ) + ";" );
-               dbprint(1, "system(\"random\","+string( system("random") ) + ");" );
-               dbprint(1, "//random: "+ string( system("random") )  );
-               dbprint(1, "LIB(\"src/tests/test.primdec.mp.timeout\");");
-               dbprint(1, "intvec op = "+string( option(get) )+";");
-               dbprint(1, "ring rng = "+string(basering)+";");
-               dbprint(1, "minpoly = "+string(minpoly)+";");
-               dbprint(1, "ideal I = "+string(I)+";");
-               dbprint(1, "printIdealInfo( I ) ;");
+               ol.clearX();
+               ol.writeX("");
+               ol.writeX("");
+               ol.writeX( "////////////////////////////////////////////////////////////////////////////////////////");
+               ol.writeX( "if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = "+string( assumeLevel ) + ";  " );
+               ol.writeX( "//  voice = "+string( voice ) + ";" );
+               ol.writeX( "system(\"random\","+string( system("random") ) + ");" );
+               ol.writeX( "//random: "+ string( system("random") )  );
+               ol.writeX( "LIB(\"src/tests/test.primdec.mp.timeout\");");
+               ol.writeX( "intvec op = "+string( option(get) )+";");
+               ol.writeX( "ring rng = "+string(basering)+";");
+               ol.writeX( "minpoly = "+string(minpoly)+";");
+               ol.writeX( "ideal I = "+string(I)+";");
+               ol.writeX( "printIdealInfo( I ) ;");
                printIdealInfo(I);
-               dbprint(1, "bigint trial = "+string(trial)+";");
+               ol.writeX( "bigint trial = "+string(trial)+";");
 
-               dbprint(1, "def result= "+procName+"(I);");              
+               ol.writeX( "def result= "+procName+"(I);");              
                execute("def result="+procName+"(I);");    
-               monitor ("") ;
+ 
                trial++;
            }
         //}

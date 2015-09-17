@@ -39,28 +39,28 @@ proc testFactorsIrreducible(list fp)
 {
   int i = 0;
   def result, rfp, quot,pfp;
-  dbprint(1, "def pfp, result;");
+  ol.writeX( "def pfp, result;");
   for (i=2; i <= size( fp[1] ); i++)
   {
      pfp = fp[1][i];
-     dbprint( 1, "pfp = " +string(pfp)+ ";");
-     dbprint( 1, "result = factor( pfp );");          
+     ol.writeX( "pfp = " +string(pfp)+ ";");
+     ol.writeX( "result = factor( pfp );");          
      result = factorize( pfp );
-     dbprint( 1, "ASSUME(0, 2==size(result[1]) );");          
+     ol.writeX( "ASSUME(0, 2==size(result[1]) );");          
      ASSUME(0, size(result[1])==2); 
-     dbprint( 1, "rfp  = reconstruct(result);");          
+     ol.writeX( "rfp  = reconstruct(result);");          
      rfp  = reconstruct(result);
-     //dbprint( 1, " quot = p/rfp;");          
+     //ol.writeX( " quot = p/rfp;");          
      //quot = p/rfp;
 
        if ( (not (pfp == rfp)) 
 //       ||       (not (idealsAreEqual( ideal(pfp), ideal(rfp) )))
           )
        {
-         dbprint( 1, "// pfp = " + string( pfp) + ";");    
-         dbprint( 1, "// rfp = " + string(rfp) +";");
-         //dbprint( 1, " ASSUME(0, idealsAreEqual( ideal(pfp), ideal(rfp) ));");
-         dbprint( 1, " ASSUME(0, pfp == rfp) ;");                  
+         ol.writeX( "// pfp = " + string( pfp) + ";");    
+         ol.writeX( "// rfp = " + string(rfp) +";");
+         //ol.writeX( " ASSUME(0, idealsAreEqual( ideal(pfp), ideal(rfp) ));");
+         ol.writeX( " ASSUME(0, pfp == rfp) ;");                  
          //ASSUME(0, idealsAreEqual( ideal(pfp), ideal(rfp) ));
          ASSUME(0, pfp == rfp);
        }      
@@ -74,7 +74,7 @@ proc testFactorsUniq(list fp)
   int i = 0;
   int j = 0;
   def result, pfp, fpf;
-  dbprint(1, "def pfp,fpf, result;");
+  ol.writeX( "def pfp,fpf, result;");
   for (i=2; i <= size( fp[1] ); i++)
   {
      pfp = fp[1][i];
@@ -87,10 +87,10 @@ proc testFactorsUniq(list fp)
              fpf = fp[1][j];
              if (  deg(gcd(pfp,fpf))>0)
              {
-               dbprint( 1, "pfp = " +string(pfp)+ ";");
-               dbprint( 1, "fpf = " +string(fpf)+ ";");
-               dbprint( 1, "// ERROR: 0 < deg gcd ( fp[1]["+string(i)+"], fp[1]["+string(j)+"] ) !");
-               dbprint( 1, "ASSUME(0, deg(gcd(pfp,fpf))<=0 );");
+               ol.writeX( "pfp = " +string(pfp)+ ";");
+               ol.writeX( "fpf = " +string(fpf)+ ";");
+               ol.writeX( "// ERROR: 0 < deg gcd ( fp[1]["+string(i)+"], fp[1]["+string(j)+"] ) !");
+               ol.writeX( "ASSUME(0, deg(gcd(pfp,fpf))<=0 );");
                ASSUME( 0, deg( gcd(pfp,fpf) ) <= 0 );
              }
          }
@@ -102,7 +102,7 @@ proc testFactorsUniq(list fp)
 
 
 
-proc testFactorize( getRng, gens,  logfile);
+proc testFactorize( getRng, gens,  ol);
 {
     dbprint(printlevel-voice, "//testFactorize");
     int warnIsSet = optionIsSet("warn");
@@ -121,40 +121,40 @@ proc testFactorize( getRng, gens,  logfile);
        kill rng;      
        def rng = getRng(gens);
        setring rng;
-       dbprint(1, "//logfile = "+logfile);
-       write(":w "+logfile,emptystring);
-       monitor(logfile,"io");
-       write(":w "+logfile,emptystring);
-       dbprint(1, "LIB(\"primdec.lib\");");
-       dbprint(1, "LIB(\"src/wrappers.lib\");");
-       dbprint(1, "LIB(\"src/automatedTests.lib\");");
-       dbprint( 1, "ring rng = "  + string( basering )+";" );
-       dbprint( 1, "short = 0 ;" );
-       dbprint( 1, "minpoly = " + string(minpoly) + ";");
-       dbprint( 1, "intvec op = "+string( option(get) )+";");    
-       dbprint( 1, " option(set, op) ;");
-       dbprint( 1, " option() ;");
-       dbprint( 1, " // option() :" + option() );
-       dbprint( 1, "int trial = " + string( trial) + ";" );
+       ol.clearX();
+       ol.writeX( "");
+       ol.writeX( "");
+
+       ol.writeX( "LIB(\"primdec.lib\");");
+       ol.writeX( "LIB(\"src/wrappers.lib\");");
+       ol.writeX( "LIB(\"src/automatedTests.lib\");");
+       ol.writeX( "ring rng = "  + string( basering )+";" );
+       ol.writeX( "short = 0 ;" );
+       ol.writeX( "minpoly = " + string(minpoly) + ";");
+       ol.writeX( "intvec op = "+string( option(get) )+";");    
+       ol.writeX( " option(set, op) ;");
+       ol.writeX( " option() ;");
+       ol.writeX( " // option() :" + option() );
+       ol.writeX( "int trial = " + string( trial) + ";" );
        
-       dbprint( 1, " poly p; list fp; poly quot; poly rfp;" );
+       ol.writeX( " poly p; list fp; poly quot; poly rfp;" );
        short = 0;
        
        if ( defined(p) ) { kill p; }
        poly p = gens.polyG();
-       dbprint( 1, " poly p = "+string(p)+";" );
+       ol.writeX( " poly p = "+string(p)+";" );
        if ( idealsAreEqual( ideal(p), ideal(0) ) ) {continue;}
-       dbprint( 1, "trial =", trial );
-       dbprint( 1, " def fp = factorize(p);" );       
+       ol.writeX( "trial =", trial );
+       ol.writeX( " def fp = factorize(p);" );       
        def fp = factorize(p);
        dbprint (1, "");
        dbprint (1, " //  num factors  = "+string(size(fp[1])));
        dbprint (1, "");
        // if (string(minpoly) != "0" )      {      ASSUME(0, 2 >= size(fp[1]));       }
-       dbprint( 1, "rfp =reconstruct(fp);");     
+       ol.writeX( "rfp =reconstruct(fp);");     
        def rfp  = reconstruct(fp);
 
-       //dbprint( 1, "quot= p/rfp;");     
+       //ol.writeX( "quot= p/rfp;");     
        //def quot = p/rfp;
 
        
@@ -162,11 +162,11 @@ proc testFactorize( getRng, gens,  logfile);
 //        ||          (not (idealsAreEqual( ideal(p), ideal(rfp) )))
           )
        {
-         dbprint( 1, "// fp ="+string( fp)+ ";");    
-         dbprint( 1, "// quot ="+string( quot)+ ";");     
-         dbprint( 1, "// rfp="+ string(rfp)+";");
-         //dbprint( 1, " ASSUME(0, idealsAreEqual( ideal(p), ideal(rfp) ));");
-         dbprint( 1, " ASSUME(0,p == rfp) ;");                  
+         ol.writeX( "// fp ="+string( fp)+ ";");    
+         ol.writeX( "// quot ="+string( quot)+ ";");     
+         ol.writeX( "// rfp="+ string(rfp)+";");
+         //ol.writeX( " ASSUME(0, idealsAreEqual( ideal(p), ideal(rfp) ));");
+         ol.writeX( " ASSUME(0,p == rfp) ;");                  
   //       ASSUME(0, idealsAreEqual( ideal(p), ideal(rfp) ));
          ASSUME(0, p == rfp);
        }        

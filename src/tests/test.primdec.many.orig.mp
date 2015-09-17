@@ -14,8 +14,8 @@ proc adjustAssumeLevel()
 {
     if (not (defined(assumeLevel) ) ) 
     {
-       dbprint(1, "       def Top::assumeLevel = 3;");
-       dbprint(1, " export (Top::assumeLevel);");
+       ol.writeX( "       def Top::assumeLevel = 3;");
+       ol.writeX( " export (Top::assumeLevel);");
        def Top::assumeLevel = 3;
        export (Top::assumeLevel);
     }
@@ -25,7 +25,7 @@ proc adjustAssumeLevel()
        { 
             assumeLevel = 3;
        }
-       dbprint(1, "  assumeLevel = "+string(assumeLevel)+";");
+       ol.writeX( "  assumeLevel = "+string(assumeLevel)+";");
     }
 }
 
@@ -128,7 +128,7 @@ proc testPrimdecZeroDim( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTe
 }
 
 
-proc testPrimaryDecomp(ideal I)
+proc testPrimaryDecomp(ideal I, ol )
 {
         if (defined(PL))  {kill PL; }
         list PL;
@@ -146,31 +146,31 @@ proc testPrimaryDecomp(ideal I)
          
          i = 1;
          
-         dbprint(1, "  PL["+string(i)+"] = "+perm[i][1]+"(I);");
+         ol.writeX( "  PL["+string(i)+"] = "+perm[i][1]+"(I);");
          foo =  perm[i][2];
          PL[i] =  foo (I) ;
               
-         dbprint(1, "ASSUME(0, testPrimary( PL[1] , I ) );");
+         ol.writeX( "ASSUME(0, testPrimary( PL[1] , I ) );");
          ASSUME(0, testPrimary( PL[i] , I ) );
 
-         dbprint(1, "ASSUME(0, not hasRedundantComponents(PL[1]));");        
+         ol.writeX( "ASSUME(0, not hasRedundantComponents(PL[1]));");        
          ASSUME(0, not hasRedundantComponents(PL[1]));
 
          for (i=2;i<=size(perm);i++)
          { 
-               dbprint(1, "  PL["+string(i)+"] = "+perm[i][1]+"(I);");               
+               ol.writeX( "  PL["+string(i)+"] = "+perm[i][1]+"(I);");               
                foo =  perm[i][2];
                PL[i] =  foo (I) ;
                ASSUME(0, testPrimary( PL[i] , I ) );
-               dbprint(1, "ASSUME(0, primDecsAreEquivalent(PL["+string(i-1)+"],PL["+string(i)+"]));");
+               ol.writeX( "ASSUME(0, primDecsAreEquivalent(PL["+string(i-1)+"],PL["+string(i)+"]));");
                ASSUME(0, primDecsAreEquivalent(  PL[i-1],  PL[i]  )   );
-               dbprint(1, "ASSUME(0, not hasRedundantComponents(PL[i]));");
+               ol.writeX( "ASSUME(0, not hasRedundantComponents(PL[i]));");
                ASSUME(0, not hasRedundantComponents(PL[i]));
          }
 }
 
 
-proc testMinAssDecomp(ideal I)
+proc testMinAssDecomp(ideal I, ol)
 {
             if (defined(ML))  {kill ML; }
             list ML;
@@ -187,7 +187,7 @@ proc testMinAssDecomp(ideal I)
             
             i = 1;
             proc foo ;
-            dbprint(1, "  ML["+string(i)+"] = "+perm[i][1]+"(I);");
+            ol.writeX( "  ML["+string(i)+"] = "+perm[i][1]+"(I);");
             foo =  perm[i][2];
             ML[i] =  foo (I) ;
 
@@ -195,25 +195,24 @@ proc testMinAssDecomp(ideal I)
          
             for (i=2;i<=size(perm);i++)
             { 
-                  dbprint(1, "  ML["+string(i)+"] = "+perm[i][1]+"(I);");
+                  ol.writeX( "  ML["+string(i)+"] = "+perm[i][1]+"(I);");
                   foo =  perm[i][2];
                   ML[i] =  foo (I) ;
                   
-                  dbprint(1, "ASSUME(0, minAssDecompAreEquivalent(ML["+string(i-1)+"],ML["+string(i)+"]));");
+                  ol.writeX( "ASSUME(0, minAssDecompAreEquivalent(ML["+string(i-1)+"],ML["+string(i)+"]));");
                   ASSUME(0, minAssDecompAreEquivalent(ML[i-1],ML[i]));
                         
             }
 
-            dbprint(1, "minAss1  = minAss(I);");
+            ol.writeX( "minAss1  = minAss(I);");
                         minAss1  = minAss(I);
 }
 
 
-proc testPrimdec( getRng, genTable, trials, logfile )
+proc testPrimdec( getRng, genTable, trials, ol )
 {
     print ("// testPrimdec");
 
-    link l=":w "+logfile;
 
     adjustAssumeLevel();
     if (defined(basering) ) {   def BAS=basering; }
@@ -256,59 +255,52 @@ proc testPrimdec( getRng, genTable, trials, logfile )
       if (defined(minAss1e)) {kill minAss1e;}
 
       export(rng);
-       //dbprint(1, "// get random ideal ");
+       //ol.writeX( "// get random ideal ");
       trial = 0;
       //while (trial<trials)
       //{
 
            I = genTable.idealG(  );    
-           //dbprint(1, "// got random ideal ");
+           //ol.writeX( "// got random ideal ");
 
            if (not isZero(I) && not idealsAreEqual( ideal(1), I ) )
            {
 
-               monitor ("") ;
-               l=":w "+logfile;
-               open(l);
-               write(l,"");
-               // write(":w "+logfile,emptystring);
-               write(l,"");
+               ol.clearX();
+               ol.writeX("");
+               ol.writeX("");
 
-               close(l);        
-               monitor(logfile,"io");
+               ol.writeX( "////////////////////////////////////////////////////////////////////////////////////////");
+               ol.writeX( "if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = "+string( assumeLevel ) + ";  " );
+               ol.writeX( "//  voice = "+string( voice ) + ";" );
+               ol.writeX( "system(\"random\","+string( system("random") ) + ");" );
+               ol.writeX( "//random: "+ string( system("random") )  );
+               ol.writeX( "LIB(\"src/tests/test.primdec.many.orig.mp\");");
+               ol.writeX( "intvec op = "+string( option(get) )+";");
+               ol.writeX( "ring rng = "+string(basering)+";");
+               ol.writeX( "minpoly = "+string(minpoly)+";");
+               ol.writeX( "ideal I = "+string(I)+";");
+               ol.writeX( "bigint trial = "+string(trial)+";");
+               ol.writeX( "    def minAss1,minAss1e;");
 
-               dbprint(1, "////////////////////////////////////////////////////////////////////////////////////////");
-               dbprint(1, "if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = "+string( assumeLevel ) + ";  " );
-               dbprint(1, "//  voice = "+string( voice ) + ";" );
-               dbprint(1, "system(\"random\","+string( system("random") ) + ");" );
-               dbprint(1, "//random: "+ string( system("random") )  );
-               dbprint(1, "LIB(\"src/tests/test.primdec.many.orig.mp\");");
-               dbprint(1, "intvec op = "+string( option(get) )+";");
-               dbprint(1, "ring rng = "+string(basering)+";");
-               dbprint(1, "minpoly = "+string(minpoly)+";");
-               dbprint(1, "ideal I = "+string(I)+";");
-               dbprint(1, "bigint trial = "+string(trial)+";");
-               dbprint(1, "    def minAss1,minAss1e;");
-
-               dbprint(1, "list  PL,ML;");
+               ol.writeX( "list  PL,ML;");
                
                PDfirst = random(0,1);
                if (PDfirst)
                {
-                   testPrimaryDecomp(I);
-                   testMinAssDecomp(I);
+                   testPrimaryDecomp(I,ol);
+                   testMinAssDecomp(I,ol);
                }
                else
                {
 
-                   testMinAssDecomp(I);
-                   testPrimaryDecomp(I);
+                   testMinAssDecomp(I,ol);
+                   testPrimaryDecomp(I,ol);
                }
      
 
                 trial++;
 
-                monitor ("") ;
            }
         //}
           

@@ -11,7 +11,7 @@ info="
 //LIB "randomIdeal.lib" ;
 
 
-proc testLipmanResolve( rng, idealG, trials, logfile)
+proc testLipmanResolve( rng, idealG, trials, ol)
 {
     print ("//testResolve");
     if (defined(basering) ) {   def BAS=basering; }
@@ -31,14 +31,14 @@ proc testLipmanResolve( rng, idealG, trials, logfile)
 
 
        J = idealG();
-       //dbprint( 1, "J:", J, "" );
+       //ol.writeX( "J:", J, "" );
        I =  idealG();
-       //dbprint( 1, "I:", I, "" );
+       //ol.writeX( "I:", I, "" );
        
        I = I+J;
        I = Radical(I);
        I = std(I);
-       //dbprint( 1, "I:", I, "" );
+       //ol.writeX( "I:", I, "" );
 
       if (not isZero(I) && not idealsAreEqual(ideal(1), I) )
       {
@@ -51,7 +51,7 @@ proc testLipmanResolve( rng, idealG, trials, logfile)
                if ( defined(Rnew) )  { kill Rnew; }
                execute(" ring Rnew = ("+charstr(rng)+"), ("+string( occuringVariableData[1] )+"), dp; ");
 
-               //dbprint( 1, "rnew:", Rnew, "" );
+               //ol.writeX( "rnew:", Rnew, "" );
                ideal I = imap(rng,I);   
              
                I = Radical(I);
@@ -59,20 +59,21 @@ proc testLipmanResolve( rng, idealG, trials, logfile)
                
                if (    dimIdeal(I)==2 && ( not isZero(I) ) && ( not idealsAreEqual(ideal(1), I) )    )
                {
-                   write(":w "+logfile,emptystring);
-                   monitor(logfile,"io");
-                   write(":w "+logfile,emptystring);
-                   dbprint(1, "LIB \"wrappers.lib\";");
-                   dbprint(1, "LIB \"reslipman.lib\";");
-                   dbprint( 1, "ring rng = "  + string( basering)+";" );
-                   dbprint( 1, "short = 0 ;" );                   
-                   dbprint( 1, "intvec op = "+string( option(get) )+";");           
-                   dbprint( 1, " option(set, op) ;");
-                   dbprint( 1, " option() ;");
-                   dbprint( 1, " // option() ;" + option() );
-                   dbprint( 1, "int trial = " + string( trial) + ";" );
-                   dbprint( 1, "   ideal I = "+string(I)+";");
-                   dbprint( 1, "def L = lipmanresolve(I);" );
+                   ol.clearX();
+                   ol.writeX( "");
+                   ol.writeX( "");
+
+                   ol.writeX( "LIB \"wrappers.lib\";");
+                   ol.writeX( "LIB \"reslipman.lib\";");
+                   ol.writeX( "ring rng = "  + string( basering)+";" );
+                   ol.writeX( "short = 0 ;" );                   
+                   ol.writeX( "intvec op = "+string( option(get) )+";");           
+                   ol.writeX( " option(set, op) ;");
+                   ol.writeX( " option() ;");
+                   ol.writeX( " // option() ;" + option() );
+                   ol.writeX( "int trial = " + string( trial) + ";" );
+                   ol.writeX( "   ideal I = "+string(I)+";");
+                   ol.writeX( "def L = lipmanresolve(I);" );
                    trial = trial+1;
                    L = lipmanresolve(I);
                    L; 

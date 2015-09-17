@@ -8,7 +8,7 @@ info="
 LIB "randomIdeal.lib";
  
 
-proc testResultant( rng, polyG, trials, filename )
+proc testResultant( rng, polyG, trials, ol )
 {
  
     if (defined(basering) ) {   def BAS=basering; }
@@ -20,23 +20,19 @@ proc testResultant( rng, polyG, trials, filename )
 
     while( trial<trials )
     {   
-       dbprint( 1, "ring rng = "+string(basering)+";" );
-       write(":a "+filename,"LIB(\"randomIdeal.lib\");");
-       write(":a "+filename,"ring rng = "+string(basering)+";");
-       write(":a "+filename,"bigint trial = "+string(trial)+";");
-       dbprint( 1, "trial: ", trial );
+       ol.clearX();
+       ol.writeX("");
+       ol.writeX("");
+       ol.writeX("LIB(\"randomIdeal.lib\");");
+       ol.writeX("ring rng = "+string(basering)+";");
+       ol.writeX("bigint trial = "+string(trial)+";");
        polyP = polyG( );
        polyQ = polyG( );
        variable = randomVariable();
-       dbprint( 1, "I = ", I );
-       write(":a "+filename,"poly polyP= "+string(polyP)+";");
-       write(":a "+filename,"poly polyQ= "+string(polyQ)+";");
-       write(":a "+filename,"poly variable= "+string(variable)+";");
-       write(":a "+filename,"poly polyResultant = resultant(polyP,polyQ,variable);");
-       dbprint(1,"poly polyP= "+string(polyP)+";");
-       dbprint(1,"poly polyQ= "+string(polyQ)+";");
-       dbprint(1,"poly variable= "+string(variable)+";");
-       dbprint(1,"poly polyResultant = resultant(polyP,polyQ,variable);");
+       ol.writeX("poly polyP= "+string(polyP)+";");
+       ol.writeX("poly polyQ= "+string(polyQ)+";");
+       ol.writeX("poly variable= "+string(variable)+";");
+       ol.writeX("poly polyResultant = resultant(polyP,polyQ,variable);");
        polyResultant =resultant(polyP,polyQ,variable);
        trial = trial+1;
     }

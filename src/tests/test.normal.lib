@@ -8,7 +8,7 @@ info="
 
 
 
-proc testNormal( getRandomRing, gens, optionlist, trials, logfile);
+proc testNormal( getRandomRing, gens, optionlist, trials, ol);
 {
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
@@ -47,62 +47,62 @@ proc testNormal( getRandomRing, gens, optionlist, trials, logfile);
        
        if  ( idealsAreEqual(ideal(1), J)   )    {     continue;    }
  
-       
-       write(":w "+logfile,emptystring);
-       monitor(logfile,"io");
-       write(":w "+logfile,emptystring);
+       ol.clearX();
+       ol.writeX( "");
+       ol.writeX( "");
 
-       dbprint( 1, " intvec testResult; ");
-       dbprint( 1, " intvec v=1,1,1;");
-       dbprint( 1, "int voiceLvl = "+string(voice)+";");
-       
-       dbprint( 1, "LIB(\"normal.lib\");");
-       dbprint( 1, "LIB(\"src/wrappers.lib\");");
-       dbprint( 1, "LIB(\"src/randomRing.lib\");");
-       dbprint( 1, "ring rng = "  + string( basering )+";" );
-       dbprint( 1, "short = 0 ;" );
-       dbprint( 1, "minpoly = " + string(minpoly) + ";");
-       dbprint( 1, "intvec op = "+string( option(get) )+";");    
-       dbprint( 1, " option(set, op) ;");
-       dbprint( 1, " option() ;");
-       dbprint( 1,  option() );
-       dbprint( 1, "int trial ;");
-       dbprint( 1, "ideal J ="+string(J)+";" );
 
-       dbprint( 1, "def L = primdecGTZ(J);");
+       ol.writeX( " intvec testResult; ");
+       ol.writeX( " intvec v=1,1,1;");
+       ol.writeX( "int voiceLvl = "+string(voice)+";");
+       
+       ol.writeX( "LIB(\"normal.lib\");");
+       ol.writeX( "LIB(\"src/wrappers.lib\");");
+       ol.writeX( "LIB(\"src/randomRing.lib\");");
+       ol.writeX( "ring rng = "  + string( basering )+";" );
+       ol.writeX( "short = 0 ;" );
+       ol.writeX( "minpoly = " + string(minpoly) + ";");
+       ol.writeX( "intvec op = "+string( option(get) )+";");    
+       ol.writeX( " option(set, op) ;");
+       ol.writeX( " option() ;");
+       ol.writeX(  option() );
+       ol.writeX( "int trial ;");
+       ol.writeX( "ideal J ="+string(J)+";" );
+
+       ol.writeX( "def L = primdecGTZ(J);");
        def L = primdecGTZ(J);
-       dbprint( 1, "ASSUME(0, testPrimary(L,J) ); ");
+       ol.writeX( "ASSUME(0, testPrimary(L,J) ); ");
        ASSUME(0, testPrimary(L,J) );
        
-       dbprint( 1, "ideal component;");
+       ol.writeX( "ideal component;");
 
        if ( defined(component) ) { kill component; }
        ideal component;   
       
        if ( defined(normalResult) ) { kill normalResult; }
-       dbprint( 1, "list normalResult;");
+       ol.writeX( "list normalResult;");
        list normalResult;
           
        for ( npos=1; npos<=size(L); npos++ )
        {
-           dbprint(1, "component   = L["+string(npos)+"][2];");
+           ol.writeX( "component   = L["+string(npos)+"][2];");
            component = L[npos][2];
 
-           dbprint(1, string(option()));
+           ol.writeX( string(option()));
            
-           dbprint(1, " ASSUME(0, isPrime(component) );" );
+           ol.writeX( " ASSUME(0, isPrime(component) );" );
            ASSUME(0, isPrime(component) );
  
            if (isPrime(component) && (not isZero(component)) && (not idealsAreEqual(ideal(1),component)) && (not idealsAreEqual(ideal(1),slocus(component) ))  )
            {
                trial = trial+1;
-               dbprint(1, "trial = "+string(trial)+";");
+               ol.writeX( "trial = "+string(trial)+";");
 
-               dbprint(1, "normalResult = normal(component);");
+               ol.writeX( "normalResult = normal(component);");
                normalResult = normal(component);
-               dbprint(1, " testResult = norTest(component, normalResult);");
+               ol.writeX( " testResult = norTest(component, normalResult);");
                testResult = norTest(component, normalResult);
-               dbprint(1, "ASSUME(0, v == norTest(component, normalResult) );");
+               ol.writeX( "ASSUME(0, v == norTest(component, normalResult) );");
                ASSUME(0, v == testResult);  
                        
            }
