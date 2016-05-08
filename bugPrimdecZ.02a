@@ -1,0 +1,62 @@
+
+ option(noredefine);
+LIB "src/tests/test.primdecZ"; 
+ring rng1 = (integer),(x,y),(dp(2),C);short = 0 ;ring rng = rng1;intvec op = 67108864,16787521; option(set, op) ; option() ; // option() ;//options: intStrategy loadLib usage prompt warn
+int trial = 6;
+system("random", 657902225);
+ideal input = x*y+26,7*y^3+1,-2*x^2*y-1;
+std(input);
+ option(redefine);
+       string cmd = "def result = primdecZ(input);";
+  execute(cmd);
+       cmd = "testPrimaryZ(result, input);";
+  execute(cmd);
+quit;
+
+
+/*
+empty:
+ option(noredefine);
+LIB "src/tests/test.primdecZ"; 
+ring rng1 = (integer),(x,y),(dp(2),C);short = 0 ;ring rng = rng1;intvec op = 67108864,16787521; option(set, op) ; option() ; // option() ;//options: intStrategy loadLib usage prompt warn
+int trial = 6;
+system("random", 657902225);
+ideal input = x+26,7*y^3+1,-2*x^2*y-1;
+std(input);
+ option(redefine);
+       string cmd = "def result = primdecZ(input);";
+  execute(cmd);
+       cmd = "testPrimaryZ(result, input);";
+  execute(cmd);
+quit;
+
+ option(noredefine);
+LIB "src/tests/test.primdecZ"; 
+ring rng1 = (integer),(x,y),(lp(2),C);short = 0 ;ring rng = rng1;intvec op = 67108864,16787521; option(set, op) ; option() ; // option() ;//options: intStrategy loadLib usage prompt warn
+int trial = 6;
+system("random", 657902225);
+ideal input = x*y-36,-y^3+15,-4*x^2*y-11;
+std(input);
+ option(redefine);
+       string cmd = "def result = primdecZ(input);";
+  execute(cmd);
+       cmd = "testPrimaryZ(result, input);";
+  execute(cmd);
+quit;
+
+ option(noredefine);
+LIB "src/tests/test.primdecZ"; 
+ring rng1 = (integer),(x,y),(dp(2),C);short = 0 ;ring rng = rng1;intvec op = 67108864,16787521; option(set, op) ; option() ; // option() ;//options: intStrategy loadLib usage prompt warn
+int trial = 6;
+system("random", 657902225);
+ideal input = x*y-22,-7*y^3+1,-4*x^2*y-1;
+std(input);
+ option(redefine);
+       string cmd = "def result = primdecZ(input);";
+  execute(cmd);
+       cmd = "testPrimaryZ(result, input);";
+  execute(cmd);
+quit;
+
+
+*/

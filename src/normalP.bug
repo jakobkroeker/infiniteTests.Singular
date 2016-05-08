@@ -1,0 +1,40 @@
+
+LIB("normal.lib");
+proc test1()
+{
+    ring r=2,(x,y),dp;
+    ideal I=x5+x2, x4y+x2, y5+y2;
+    I = radical(I);
+    list primeL = primdecGTZ(I);
+    int i;
+    list nor;
+    def result;
+    def R;
+    for (i=1;i<=size(primeL);i++)
+    {           
+        nor=normalP(primeL[i][2],"withRing"); 
+        result = norTest(primeL[i][2],nor); 
+        if (result != [1,1,1])
+        {
+            dbprint(1, " failed for ");
+            dbprint(1, "primeL", primeL[i][2]);
+            dbprint(1, " ");
+            dbprint(1, " result: ", result);
+            dbprint(1, " ");
+            R = nor[1][1];
+            setring R;
+            dbprint(1, "R", basering);
+            dbprint(1, "normap", normap);
+            dbprint(1, "norid", norid);
+            dbprint(1, " ");
+            dbprint(1, " ");
+        }
+        setring r;
+
+        // ASSUME(0, result == [1,1,1]);
+    }
+    return(0);
+}
+
+test1();
+

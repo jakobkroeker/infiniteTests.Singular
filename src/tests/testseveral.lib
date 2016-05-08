@@ -1,0 +1,98 @@
+/////////////////////
+version="version test.several";
+category="Commutative Algebra";
+info="
+";
+
+
+
+proc testSeveralMethodsOnce(list methodsPairs, input, resultCheckFktName, resultEquivFktName, ol)
+{
+            if (defined(ML))  {kill ML; }
+            list ML;
+            ol.writeX( "   list ML;");
+            int i;
+                 
+            string cmd;
+
+            list perms =  permute(methodsPairs);
+         
+            def perm =     perms[random(1,size( perms))];
+            
+            i = 1;
+            proc foo ;
+            ol.writeX( "  ML["+string(i)+"] = "+perm[i][1]+"(input);");
+            foo =  perm[i][2];
+            ML[i] =  foo (I) ;
+
+            cmd = " ASSUME(0, "+resultCheckFktName+"(ML[1],input));";
+            ol.writeX( cmd );
+            execute(cmd);                                                
+         
+            for (i=2;i<=size(perm);i++)
+            { 
+                  ol.writeX( "  ML["+string(i)+"] = "+perm[i][1]+"(input);");
+                  foo =  perm[i][2];
+                  ML[i] =  foo (I) ;
+                  
+                  cmd =  "ASSUME(0, "+resultEquivFktName+"(ML["+string(i-1)+"],ML["+string(i)+"]));";
+                  ol.writeX(cmd);                   
+                  execute(cmd);                        
+            }
+
+         
+}
+
+
+proc testSeveralMethods(/*requiredLibStr ,*/requiredLibEscapedStr, getRng, inputG, inputToStr,  trialsPerSameRing,  methodsPairs, resultCheckFktName, resultEquivFktName, ol)
+{
+    string cmd;
+
+    // cmd = requiredLibStr;
+    // execute(cmd);    
+
+    int warnIsSet = optionIsSet("warn");
+    option(nowarn);
+    if (defined(basering) ) {   def BAS=basering; }
+    def rng = getRng( );
+    setring rng;
+    option(warn);
+
+    short = 0;
+    int trial;
+    
+    while( 1 )
+    {   
+        option(nowarn);  
+        kill rng;      
+
+        ol.writeX( " // getRng() ;");
+
+        def rng = getRng( );
+        setring rng;
+        if (warnIsSet)      {        option(warn);      }
+  
+       ol.clearX();
+       ol.writeX( "");
+       ol.writeX( "");
+      
+       ol.writeX( requiredLibEscapedStr );
+       ol.writeX(  ringToStringHack (basering) );
+       ol.writeX( "int trial = " + string( trial) + ";" );
+       short = 0;
+       def input = inputG();
+       ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
+       ol.writeX( "def  input = " + inputToStr( input ) + ";" );
+       testSeveralMethodsOnce(methodsPairs, input, resultCheckFktName, resultEquivFktName, ol);
+
+       trial = trial+1;
+
+    }
+
+    if ( defined(BAS) ) {  setring BAS; }
+    return(1);
+}
+
+
+
+

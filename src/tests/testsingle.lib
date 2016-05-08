@@ -1,0 +1,77 @@
+version="version test.single";
+category="Commutative Algebra";
+info="
+";
+
+LIB "randomIdeal.lib";
+LIB "ringutils.lib";
+LIB "wrappers.lib";
+LIB "ehv.lib";
+
+
+// procname: name of the function to test, whoch takes as a single input 
+// an ideal.
+
+// improvement: gens has member gens.testinput()
+// howewer, how to pass it correcly to the testee?
+
+// testname function: first input parameter ist the result of procname
+//                    second parameter is the input to procname
+
+// example for testname is testPrimdecEx
+
+proc testSingleProc( libraryListEscapedStr, getRng, inputGenerator, trialsPerRing, procname, testname,ol )
+{
+    int warnIsSet = optionIsSet("warn");
+    option(nowarn);  
+  
+    if (defined(basering) ) {   def BAS=basering; }
+    def rng = getRng( );
+    setring rng;
+    option(warn);
+
+    short = 0;
+    int trial;    
+    while(1)
+    {   
+        option(nowarn);  
+        kill rng;      
+
+        ol.writeX( " // getRng() ;");
+
+        def rng = getRng( );
+        setring rng;
+        
+        if (warnIsSet)      {        option(warn);      }
+        
+        ol.writeX( libraryListEscapedStr );
+        ol.writeX(  ringToStringHack (basering) );
+        ol.writeX( "int trial = " + string( trial) + ";" );
+        def I = inputGenerator(  );
+        ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
+        ol.writeX( "def I = " + string( I ) + ";" );
+        ol.writeX( "  ol.writeX( \"def I = \" + string( I ) + \";\" );" );
+
+        if (not isZero(I) && not idealsAreEqual( ideal(1), I ) )
+        {
+            ol.writeX( "       string cmd = \"def L1 = "+procname+"\"(I);\";");
+            ol.writeX( "  execute(cmd);");
+            ol.writeX( "       cmd = \""+testname+"\"(L1,I);\";");
+
+            string cmd = "def L1 = "+procname+"(I);";
+            execute(cmd);
+            cmd = testname+ "(L1,I);";
+            execute(cmd);
+        }      
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}
+
+
+
+ 
+
+

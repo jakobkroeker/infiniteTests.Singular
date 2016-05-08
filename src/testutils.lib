@@ -1,0 +1,281 @@
+version="version testutils.lib";
+category="Commutative Algebra";
+info="
+";
+
+
+// depends on ringToStringHack
+
+
+
+// TProcInfo.procedure kann man nicht für alles verwenden, z.B. nicht für std.
+// daher bleibt in wirklichkeit nur noch der Umweg über den string 'std'+execute...
+
+
+static proc mod_init()
+{
+    if (not defined(TProcInfo_def) )
+    {
+        int TProcInfo_def = 0;
+        export(TProcInfo_def);
+        newstruct("TProcInfo",   "proc procedure, string name");         
+    }
+    if (not defined(TInputResultPair_def) )
+    {
+        int TInputResultPair_def = 0;
+        newstruct("TInputResultPair",   " def input, def result ");   
+    }
+}
+
+    // anpassung des Generators: radikal ziehen 
+    // (etwas komplizierter, um keine Namenskonflikte auszulösen...)
+proc singleInputToCollectionG(inputG)
+{
+     string inputGRandomName = getRandomName();  
+     string cmd = "def Testutils::"+inputGRandomName+";";     execute(cmd);
+     cmd = "Testutils::"+inputGRandomName+" = inputG";        execute(cmd);
+     execute("export(Testutils::"+inputGRandomName+");");
+     
+    cmd = "proc inputCollectionG()
+    {
+       
+        list randomInputCollection;
+        randomInputCollection[1] = Testutils::"+inputGRandomName+"();
+        return (randomInputCollection);
+             
+    }";
+    execute(cmd);
+    return (inputCollectionG);
+}
+
+// for each test   ol.writeX(testname(result,input) !
+
+
+
+
+    // anpassung des Generators: radikal ziehen 
+    // (etwas komplizierter, um keine Namenskonflikte auszulösen...)
+proc constructFixpointCheckFunction(testeeName, resultIsEquivalentCheckName, ol)
+{
+     string IOName = getRandomName();  
+     string cmd = "def Testutils::"+IOName+";";     execute(cmd);
+     cmd = "Testutils::"+IOName+" = ol";            execute(cmd);
+     execute("export(Testutils::"+IOName+");");
+     
+    cmd = "proc checkResultIsFixpoint(result,input)
+    {
+        string cmd;
+        
+        cmd = \"def secondResult = "+testeeName+"(result);\";
+        IOName.writeX(cmd);
+        execute(cmd);       
+        
+        cmd = \"ASSUME(0, "+resultIsEquivalentCheckName+"(result,secondResult);\";
+        IOName.writeX(cmd);
+        execute(cmd);   
+        
+    }";
+    execute(cmd);
+    return (checkResultIsFixpoint);
+}
+
+
+proc constructResultNotDecomposableCheck(testeeName, ol)
+{
+     string IOName = getRandomName();  
+     string cmd = "def Testutils::"+IOName+";";     execute(cmd);
+     cmd = "Testutils::"+IOName+" = ol";            execute(cmd);
+     execute("export(Testutils::"+IOName+");");
+     
+    cmd = "proc assumeResultNotDecomposable(result,input)
+    {
+        string cmd;
+        int i;
+        
+        for (i=1;i<=size(result);i=i+1)
+        {
+        
+            cmd = \"def secondResult = "+testeeName+"(result["+string(i)+"][1]);\";
+            IOName.writeX(cmd);
+            execute(cmd);       
+            
+            cmd = \"ASSUME(0, size(secondResult)==1);\";
+            IOName.writeX(cmd);
+            execute(cmd);   
+        }
+        
+    }";
+    execute(cmd);
+    return (assumeResultNotDecomposable);
+}
+
+
+
+    // anpassung des Generators: radikal ziehen 
+    // (etwas komplizierter, um keine Namenskonflikte auszulösen...)
+proc constructRadicalG(idealG)
+{
+     string idealGRandomName = getRandomName();  
+     string cmd = "def Testutils::"+idealGRandomName+";";     execute(cmd);
+     cmd = "Testutils::"+idealGRandomName+" = idealG";        execute(cmd);
+     execute("export(Testutils::"+idealGRandomName+");");
+     
+    cmd = "proc inputGGG()
+    {
+        return(  groebner(radical(Testutils::"+idealGRandomName+"()))  );
+        
+    }";
+    execute(cmd);
+    return (inputGGG);
+}
+
+
+
+// anpassung des Generators: gb berechnen
+// (etwas komplizierter, um keine Namenskonflikte auszulösen...)
+proc constructSBIdealG(idealG)
+{
+     string idealGRandomName = getRandomName();  
+     string cmd = "def Testutils::"+idealGRandomName+";";     execute(cmd);
+     cmd = "Testutils::"+idealGRandomName+" = idealG";        execute(cmd);
+     execute("export(Testutils::"+idealGRandomName+");");
+     
+    cmd = "proc inputGGG()
+    {
+        return(  groebner(Testutils::"+idealGRandomName+"())  );
+        
+    }";
+    execute(cmd);
+    return (inputGGG);
+}
+
+
+
+
+proc infiniteTestsFinished(int currTrial)
+{
+    return(0);
+}
+
+proc newProcInfo(string procname)
+{
+     TProcInfo procinfo;   
+     procinfo.name = procname;    
+     // will not work for internal commands like 'std' and so on
+     // string cmd = "procinfo.procedure ="+procname+";";
+     // dbprint(1, cmd);
+     // execute(cmd);
+     return (procinfo);
+}
+
+proc newProcInfoNameOnly(string procname)
+{
+     TProcInfo procinfo;   
+     procinfo.name = procname;         
+     return (procinfo);
+}
+
+proc unchangedOptions()
+{
+    return(0);
+}
+
+proc inputIsAlwaysGood(input)
+{
+    return(1);
+}
+
+proc inputIsNotUnit(input)
+{
+    return(not idealsAreEqual(ideal(1),input));
+}
+
+proc noResultCheck(def result, def input)
+{
+    return(1);
+}
+
+
+proc basicInputSerialize(input, name)
+{
+   string inputCmdStr =  typeof(input)+" "+name +" = " + string( input ) + ";";
+   return (inputCmdStr);
+}
+
+/*
+proc basicInputSerialize(input)
+{
+  return (basicInputSerialize(input,"input"));
+}
+*/
+
+
+proc genericIdealInputIsGood(ideal input)
+{
+    if (isZero(input))
+        return(0);
+    if (idealsAreEqual( ideal(1), input ) )
+        return 0;
+    return (1);
+}
+
+
+
+
+proc serializeIdeal(ideal input, string name)
+{
+    string result;        
+    result = basicInputSerialize (input,name) ;
+    return (result);
+}
+
+proc serializeRing(def input, string name)
+{
+    string result;
+    if (defined(basering) ) {   def BAS=basering; }
+    setring input;
+    result=ringToStringHack (basering) ;
+    if (defined(BAS)) {  setring BAS; }    
+    return (result);
+}
+
+proc serializeObj(def input, string name)
+{
+    string result;
+    // dbprint(1,"typeof(input)",typeof(input));
+    if (typeof(input)=="ring")    {   return(   serializeRing (input,name) );    }
+    // if (typeof(input)=="ideal")   {   return(   serializeIdeal(input,name) );   }
+    return(   basicInputSerialize(input,name) );
+}
+example
+{
+    ring rng = 0,x,dp;
+    ideal I = 5,x;
+    string cmd = serializeObj(I,"I");
+    cmd;
+    execute(cmd);
+    cmd = serializeObj(rng,"rng");
+    cmd;
+    execute(cmd);
+}
+
+
+proc testSerializeObj()
+{
+    ring rng = 7,(x,y),lp;
+    ideal I = 5,x;
+    string cmd = serializeObj(rng,"rng");
+    cmd;
+    kill rng;
+    execute(cmd);
+    setring rng;
+    ASSUME(0, char(rng)==7);
+    ASSUME(0, nvars(rng)==2);
+    ASSUME(0, ordstr(rng)=="lp(2),C");    
+}
+
+
+proc radicalsAreEqual(I,J)
+{
+    return(idealsAreEqual(Radical(I),Radical(J)));
+}

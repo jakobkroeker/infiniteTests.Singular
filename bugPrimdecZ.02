@@ -1,0 +1,12 @@
+
+ option(noredefine);
+LIB "src/tests/test.primdecZ"; 
+ring rng1 = (integer),(x,y),(lp(2),C);short = 0 ;ring rng = rng1;intvec op = 67108864,16787521; option(set, op) ; option() ; // option() ;//options: intStrategy loadLib usage prompt warn
+int trial = 6;
+system("random", 657902225);
+ideal input = x*y-36,-19*y^3+15,-29*x^2*y-22;
+ option(redefine);
+       string cmd = "def result = primdecZ(input);";
+  execute(cmd);
+       cmd = "testPrimaryZ(result, input);";
+  execute(cmd);
