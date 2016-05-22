@@ -11,50 +11,69 @@ LIB "wrappers.lib";
 LIB "resolve.lib";
 
 
-proc testBlowUp( rng, idealG, trials )
+proc testBlowUp( getRng, gens, trials, ol )
 {
+    int warnIsSet = optionIsSet("warn");
+    
     if (defined(basering) ) {   def BAS=basering; }
+    def rng = getRng( );
     setring rng;
 
-    int trial;
-    ideal cs,  I, J,V,C;
-    while( trial<trials )
-    {   
+    int trial = 0;
+   
+    while( 1 )
+    {  
+        option(nowarn);  
+        kill rng;      
+        def rng = getRng( );
+        setring rng;
+        
+        ideal cs, I, J, V, C;
+        
+        if ( warnIsSet )        {            option(warn);        }
+        if ( defined(qrng) )  {   kill qrng; }
+      
+        ol.clearX();
+        ol.writeX( "");
+        ol.writeX( "");
+        ol.writeX( "LIB \"wrappers.lib\";");
+        ol.writeX( "LIB \"src/randomRing.lib\" ;");
+        ol.writeX( "LIB \"src/tests/test.resolve.blowup\" ;");
+        ol.writeX(ringToStringHack( basering ) );
+        ol.writeX( "int trial = " + string( trial) + ";" );
+        
+        I = gens.idealG( );
+        J = gens.idealG( );
+        
+        ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
+        ol.writeX( "ideal I = " + string( I ) + ";" );
+        ol.writeX( "ideal J = " + string( J ) + ";" );
+        
+        
+        V = std(intersect(I,J));    
+        C = std(I+J);
+        
+        ol.writeX( "ideal V = std(intersect(I,J));");
+        ol.writeX( "ideal C = std(I+J);");
+        
+        if ( idealsEqual(V, ideal(0))  )
+        {
+            continue; 
+        }
 
-       if (defined(qrng)) {kill qrng; }
-       dbprint( 1, "basering: ", basering );
-       dbprint( 1, "trial: ", trial );
+        if ( idealsEqual(C, ideal(1))  )
+        {
+            continue; 
+        }
 
-       I = idealG( );
-       J = idealG( );
+        if ( not idealsEqual(slocus(C), ideal(1))  )
+        {
+            continue; 
+        }
+        ol.writeX( " blowUp(V,C); ");
+        blowUp(V,C);        
 
-       dbprint( 1, "I = ", I );
-       dbprint( 1, "J = ", J );
-
-       V = std(intersect(I,J));
-       C = std(I+J);
-
-       if ( idealsEqual(V, ideal(0))  )
-       {
-           continue; 
-       }
-
-       if ( idealsEqual(C, ideal(1))  )
-       {
-           continue; 
-       }
-
-       if ( not idealsEqual(slocus(C), ideal(1))  )
-       {
-          continue; 
-       }
-
-       dbprint( 1, "V = ", V );
-       dbprint( 1, "C = ", C );
-
-       blowUp(V,C);
-
-       trial = trial+1;
+        trial = trial+1;
     }
 
     if ( defined(BAS) ) {  setring BAS; }

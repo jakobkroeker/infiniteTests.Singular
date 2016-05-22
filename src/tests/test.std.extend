@@ -8,8 +8,13 @@ LIB "primdecint.lib";
 LIB "randomIdeal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
- 
-proc testGroebnerAppend( getRng, gens, optionlist, trials, basic, ol )
+
+
+
+/// tests appending a polynomial to existing standard basis
+///
+
+proc testGroebnerAppend( getRng, gens, optionlist, trials, basic, finisned, ol )
 {
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
@@ -21,13 +26,13 @@ proc testGroebnerAppend( getRng, gens, optionlist, trials, basic, ol )
     short = 0;
     int trial;
 
-    while( 1 )
+    while( not finisned(trial) )
     {   
       option(nowarn);  
       kill rng;      
       def rng = getRng( );
       setring rng;
-      ideal cs,  I, J,gI,IJ, gIJ, gI_J, Ip, gIp, gI_p; 
+      ideal cs,  I, J, I_std,I_plus_J, I_plus_J_std, I_std_append_J_std, I_plus_p, I_plus_p_std, I_std_append_p_std ; 
       poly p ;
 
       if ( hasGlobalOrdering(basering))
@@ -47,13 +52,7 @@ proc testGroebnerAppend( getRng, gens, optionlist, trials, basic, ol )
        ol.writeX( "LIB \"primdec.lib\";");
        ol.writeX( "LIB \"wrappers.lib\";");
        ol.writeX( "LIB \"src/randomRing.lib\" ;");
-       ol.writeX( "ring rng = "  + string( basering)+";" );
-       ol.writeX( "short = 0 ;" );
-       ol.writeX( "minpoly = " + string(minpoly) + ";");
-       ol.writeX( "intvec op = "+string( option(get) )+";");           
-       ol.writeX( " option(set, op) ;");
-       ol.writeX( " option() ;");
-       ol.writeX( " // option() ;" + option() );
+       ol.writeX(  ringToStringHack (basering) );
        ol.writeX( "int trial = " + string( trial) + ";" );
        short = 0;
        I = gens.idealG( );
@@ -64,58 +63,58 @@ proc testGroebnerAppend( getRng, gens, optionlist, trials, basic, ol )
        ol.writeX( "ideal J = " + string( J ) + ";" );
        ol.writeX( "poly p = " + string( p ) + ";" );
        
-       ol.writeX( "   ideal gI   =  std(I);" );
-       ol.writeX( "   ideal IJ   = I+J;");
-       ol.writeX( "   ideal gIJ  = std(IJ);");
-       ol.writeX( "   ideal gI_J = std(gI,J);");
-       ol.writeX( "   ideal Ip   = I+p;");
-       ol.writeX( "   ideal gIp  = std(Ip);");
-       ol.writeX( "   ideal gI_p = std(gI,p);");
+       ol.writeX( "   ideal I_std   =  std(I);" );
+       ol.writeX( "   ideal I_plus_J   = I+J;");
+       ol.writeX( "   ideal I_plus_J_std  = std(I_plus_J);");
+       ol.writeX( "   ideal I_std_append_J_std = std(I_std,J);");
+       ol.writeX( "   ideal I_plus_p   = I+p;");
+       ol.writeX( "   ideal I_plus_p_std  = std(I_plus_p);");
+       ol.writeX( "   ideal I_std_append_p_std  = std(I_std,p);");
 
-       gI =  std(I);
-       IJ = I+J;
-       gIJ = std(IJ);
-       gI_J= std(gI,J);
-       Ip = I+p;
-       gIp  = std(Ip);
-       gI_p = std(gI,p);
+       I_std =  std(I);
+       I_plus_J = I+J; // plus_I_J
+       I_plus_J_std = std(I_plus_J);  // I_plus_J_std // std_plus_I_J
+       I_std_append_J_std= std(I_std,J); // stdI_J_std // std_list_J_stdI //Istd_J_list_std
+       I_plus_p = I+p;
+       I_plus_p_std  = std(I_plus_p); // I_plus_p_std
+       I_std_append_p_std  = std(I_std,p); // I_std_append_p_std 
 
-       ol.writeX( "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
-       ASSUME(0, 0== size( std(reduce (I,gI ) ))  );
+       ol.writeX( "ASSUME(0, 0== size( std(reduce (I, I_std ) ))  );");
+       ASSUME(0, 0== size( std(reduce (I, I_std ) ))  );
 
 
-       ol.writeX( " ASSUME(0, 0== size( std(reduce (IJ,gIJ ) ))  ); ");
-       ASSUME(0, 0== size( std(reduce (IJ,gIJ ) ))  );
-       ol.writeX( " ASSUME(0, 0== size( std(reduce (IJ,gI_J ) ))  );");
-       ASSUME(0, 0== size( std(reduce (IJ,gI_J ) ))  );
-       ol.writeX( "ASSUME(0, 0== size( std(reduce (gI_J, gIJ) ))  ); ");
-       ASSUME(0, 0== size( std(reduce (gI_J, gIJ) ))  );
+       ol.writeX( " ASSUME(0, 0== size( std(reduce (I_plus_J, I_plus_J_std ) ))  ); ");
+       ASSUME(0, 0== size( std(reduce (I_plus_J, I_plus_J_std ) ))  );
+       ol.writeX( " ASSUME(0, 0== size( std(reduce (I_plus_J, I_std_append_J_std ) ))  );");
+       ASSUME(0, 0== size( std(reduce (I_plus_J, I_std_append_J_std ) ))  );
+       ol.writeX( "ASSUME(0, 0== size( std(reduce (I_std_append_J_std, I_plus_J_std) ))  ); ");
+       ASSUME(0, 0== size( std(reduce (I_std_append_J_std, I_plus_J_std) ))  );
      
 
-       ol.writeX( " ASSUME(0, 0== size( std(reduce (Ip,gIp ) ))  ); ");
-       ASSUME(0, 0== size( std(reduce (Ip,gIp ) ))  );
+       ol.writeX( " ASSUME(0, 0== size( std(reduce (I_plus_p,I_plus_p_std ) ))  ); ");
+       ASSUME(0, 0== size( std(reduce (I_plus_p, I_plus_p_std ) ))  );
 
-       ol.writeX( " ASSUME(0, 0== size( std(reduce (Ip,gI_p ) ))  );");
-       ASSUME(0, 0== size( std(reduce (Ip,gI_p ) ))  );
-       ol.writeX( "ASSUME(0, 0== size( std(reduce (gI_p, gIp) ))  ); ");
-       ASSUME(0, 0== size( std(reduce (gI_p, gIp) ))  );
+       ol.writeX( " ASSUME(0, 0== size( std(reduce (I_plus_p,I_std_append_p_std  ) ))  );");
+       ASSUME(0, 0== size( std(reduce (I_plus_p, I_std_append_p_std  ) ))  );
+       ol.writeX( "ASSUME(0, 0== size( std(reduce (I_std_append_p_std , I_plus_p_std) ))  ); ");
+       ASSUME(0, 0== size( std(reduce (I_std_append_p_std , I_plus_p_std) ))  );
 
 
        
        //if ( hasGlobalOrdering(basering))
        //{
 
-       ol.writeX("ASSUME(0, idealsEqual(gI_J,gIJ ));");
-       ASSUME(0, idealsEqual(gI_J,gIJ ));
+       ol.writeX("ASSUME(0, idealsEqual(I_std_append_J_std, I_plus_J_std ));");
+       ASSUME(0, idealsEqual(I_std_append_J_std, I_plus_J_std ));
 
-       ol.writeX("ASSUME(0, idealsEqual(gIJ, gI_J));");
-       ASSUME(0, idealsEqual(gIJ, gI_J ));
+       ol.writeX("ASSUME(0, idealsEqual(I_plus_J_std, I_std_append_J_std));");
+       ASSUME(0, idealsEqual(I_plus_J_std, I_std_append_J_std ));
 
-      ol.writeX("ASSUME(0, idealsEqual(gI_p,gIp ));");
-       ASSUME(0, idealsEqual(gI_p,gIp ));
+      ol.writeX("ASSUME(0, idealsEqual(I_std_append_p_std, I_plus_p_std ));");
+       ASSUME(0, idealsEqual(I_std_append_p_std , I_plus_p_std ));
 
-       ol.writeX("ASSUME(0, idealsEqual(gIp, gI_p));");
-       ASSUME(0, idealsEqual(gIp, gI_p ));
+       ol.writeX("ASSUME(0, idealsEqual(I_plus_p_std, I_std_append_p_std ));");
+       ASSUME(0, idealsEqual(I_plus_p_std, I_std_append_p_std  ));
 
 
 
@@ -131,64 +130,64 @@ proc testGroebnerAppend( getRng, gens, optionlist, trials, basic, ol )
           if ( optionIsSet("redSB") )
           {
  
-                ol.writeX("ASSUME(0, size(gI_J)== size(gIJ) );");
-                ASSUME(0, size(gI_J)== size(gIJ)  );
+                ol.writeX("ASSUME(0, size(I_std_append_J_std)== size(I_plus_J_std) );");
+                ASSUME(0, size(I_std_append_J_std)== size(I_plus_J_std)  );
 
-                ol.writeX("ASSUME(0, size(gI_p)== size(gIp) );");
-                ASSUME(0, size(gI_p)== size(gIp)  );
+                ol.writeX("ASSUME(0, size(I_std_append_p_std )== size(I_plus_p_std) );");
+                ASSUME(0, size(I_std_append_p_std )== size(I_plus_p_std)  );
 
 
 
-                if (not idealRepresentationReducedTail(gI ) )
+                if (not idealRepresentationReducedTail(I_std ) )
                 {
-                   ol.writeX( "//        gI = "+string(gI) );
+                   ol.writeX( "//        I_std = "+string(I_std) );
                 }
-                if (not idealRepresentationReducedTail(gIJ ) )
+                if (not idealRepresentationReducedTail(I_plus_J_std ) )
                 {
-                   ol.writeX( "//        gIJ = "+string(gIJ) +";");
+                   ol.writeX( "//        I_plus_J_std = "+string(I_plus_J_std) +";");
                 }
-                if (not idealRepresentationReducedTail(gI_J ) )
+                if (not idealRepresentationReducedTail(I_std_append_J_std ) )
                 {
-                   ol.writeX( "//        gI_J = "+string(gI_J) );
+                   ol.writeX( "//        I_std_append_J_std = "+string(I_std_append_J_std) );
                 }
 
-                if (not idealRepresentationReducedTail(gIp ) )
+                if (not idealRepresentationReducedTail(I_plus_p_std ) )
                 {
-                   ol.writeX( "//        gIp = "+string(gIp) +";");
+                   ol.writeX( "//        I_plus_p_std = "+string(I_plus_p_std) +";");
                 }
-                if (not idealRepresentationReducedTail(gI_p ) )
+                if (not idealRepresentationReducedTail(I_std_append_p_std  ) )
                 {
-                   ol.writeX( "//        gI_p = "+string(gI_p) );
+                   ol.writeX( "//        I_std_append_p_std  = "+string(I_std_append_p_std ) );
                 }
 
  
 
-               ol.writeX("ASSUME(0, idealRepresentationReducedTail( gI ));");
-               ASSUME(0, idealRepresentationReducedTail( gI ));
-               ol.writeX("ASSUME(0, idealRepresentationReducedTail( gIJ ));");
-               ASSUME(0, idealRepresentationReducedTail( gIJ ));
+               ol.writeX("ASSUME(0, idealRepresentationReducedTail( I_std ));");
+               ASSUME(0, idealRepresentationReducedTail( I_std ));
+               ol.writeX("ASSUME(0, idealRepresentationReducedTail( I_plus_J_std ));");
+               ASSUME(0, idealRepresentationReducedTail( I_plus_J_std ));
                
-               ol.writeX("ASSUME(0, idealRepresentationReducedTail( gI_J ));");
-               ASSUME(0, idealRepresentationReducedTail( gI_J ));
+               ol.writeX("ASSUME(0, idealRepresentationReducedTail( I_std_append_J_std ));");
+               ASSUME(0, idealRepresentationReducedTail( I_std_append_J_std ));
 
-               ol.writeX("ASSUME(0, idealRepresentationReducedTail( gIp ));");
-               ASSUME(0, idealRepresentationReducedTail( gIp ));
+               ol.writeX("ASSUME(0, idealRepresentationReducedTail( I_plus_p_std ));");
+               ASSUME(0, idealRepresentationReducedTail( I_plus_p_std ));
                
-               ol.writeX("ASSUME(0, idealRepresentationReducedTail( gI_p ));");
-               ASSUME(0, idealRepresentationReducedTail( gI_p ));
+               ol.writeX("ASSUME(0, idealRepresentationReducedTail( I_std_append_p_std  ));");
+               ASSUME(0, idealRepresentationReducedTail( I_std_append_p_std  ));
 
             
-               ol.writeX("ASSUME(0, idealRepresentationReduced( gI ));");
-               ASSUME(0, idealRepresentationReduced( gI ));
-               ol.writeX("ASSUME(0, idealRepresentationReduced( gIJ ));");
-               ASSUME(0, idealRepresentationReduced( gIJ ));
-               ol.writeX("ASSUME(0, idealRepresentationReduced( gI_J ));");
-               ASSUME(0, idealRepresentationReduced( gI_J ));
+               ol.writeX("ASSUME(0, idealRepresentationReduced( I_std ));");
+               ASSUME(0, idealRepresentationReduced( I_std ));
+               ol.writeX("ASSUME(0, idealRepresentationReduced( I_plus_J_std ));");
+               ASSUME(0, idealRepresentationReduced( I_plus_J_std ));
+               ol.writeX("ASSUME(0, idealRepresentationReduced( I_std_append_J_std ));");
+               ASSUME(0, idealRepresentationReduced( I_std_append_J_std ));
 
-               ol.writeX("ASSUME(0, idealRepresentationReduced( gIp ));");
-               ASSUME(0, idealRepresentationReduced( gIp ));
-               ol.writeX("ASSUME(0, idealRepresentationReduced( gI_p ));");
-               ASSUME(0, idealRepresentationReduced( gI_p ));
+               ol.writeX("ASSUME(0, idealRepresentationReduced( I_plus_p_std ));");
+               ASSUME(0, idealRepresentationReduced( I_plus_p_std ));
+               ol.writeX("ASSUME(0, idealRepresentationReduced( I_std_append_p_std  ));");
+               ASSUME(0, idealRepresentationReduced( I_std_append_p_std  ));
 
  
           }
@@ -197,22 +196,22 @@ proc testGroebnerAppend( getRng, gens, optionlist, trials, basic, ol )
 
 
    /*
-       ol.writeX("ASSUME(0, idealRepresentationsEqual(gI,ggI ));");
-       ASSUME(0, idealRepresentationsEqual(gI,ggI ));
+       ol.writeX("ASSUME(0, idealRepresentationsEqual(I_std,gI_std ));");
+       ASSUME(0, idealRepresentationsEqual(I_std,gI_std ));
        ol.writeX("ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));");
        ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));
 
-    ol.writeX( "ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );");
-      ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );
+    ol.writeX( "ASSUME(0, idealsEqual(intersect(I,J),intersect(I_std,gJ) ) );");
+      ASSUME(0, idealsEqual(intersect(I,J),intersect(I_std,gJ) ) );
 
-         ol.writeX("ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );");
-      ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );
+         ol.writeX("ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,I_std) ) );");
+      ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,I_std) ) );
 
-      ol.writeX("ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );");
-      ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );
+      ol.writeX("ASSUME(0, idealsAreEqual(intersect(I,J),intersect(I_std,gJ) ) );");
+      ASSUME(0, idealsAreEqual(intersect(I,J),intersect(I_std,gJ) ) );
 
-      ol.writeX("ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );");
-      ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );
+      ol.writeX("ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,I_std) ) );");
+      ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,I_std) ) );
 
  */
 

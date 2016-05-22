@@ -39,7 +39,7 @@ proc quotientPropertySatisfied(ideal I, ideal J, colonIdeal, idealG, trials )
 proc  testQuotientOverZZ( getRng, gens,  trials, testflags, optionlist, ol )
 {
     if (not (defined(assumeLevel)) ) { def Top::assumeLevel=3; }
-    print ("testQuotientOverZZ");
+    ol.writeX("// testQuotientOverZZ");
     if (defined(basering) ) {   def BAS=basering; }
 
     int warnIsSet = optionIsSet("warn");

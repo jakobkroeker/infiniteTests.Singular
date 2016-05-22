@@ -104,7 +104,7 @@ proc testFactorsUniq(list fp)
 
 proc testFactorize( getRng, gens,  ol);
 {
-    dbprint(printlevel-voice, "//testFactorize");
+    ol.writeX(  " // testFactorize");
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
@@ -147,9 +147,9 @@ proc testFactorize( getRng, gens,  ol);
        ol.writeX( "trial =", trial );
        ol.writeX( " def fp = factorize(p);" );       
        def fp = factorize(p);
-       dbprint (1, "");
-       dbprint (1, " //  num factors  = "+string(size(fp[1])));
-       dbprint (1, "");
+       ol.writeX( "");
+       ol.writeX( " //  num factors  = "+string(size(fp[1])));
+       ol.writeX( "");
        // if (string(minpoly) != "0" )      {      ASSUME(0, 2 >= size(fp[1]));       }
        ol.writeX( "rfp =reconstruct(fp);");     
        def rfp  = reconstruct(fp);

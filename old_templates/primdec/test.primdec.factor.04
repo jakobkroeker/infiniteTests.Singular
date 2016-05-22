@@ -1,4 +1,128 @@
 
+/* 
+
+string logfile= "/tmp/tst.log";
+
+string cmd = read("input/primdec/test.primdec.factor.04"); execute(cmd);
+ 
+run();
+ 
+ */
+
+option(noredefine);
+option(nowarn);
+
+// LIB("src/wrappers.lib");
+// LIB("src/randomRing.lib");
+
+LIB "src/tests/test.primdec.factor";
+LIB "src/randomRing.lib";
+LIB "src/testutils.lib";
+
+//////////////////////////////////////////////////////////////////////////////// 
+//////// adjust verbosity
+printlevel = 0 ;
+TRACE = 0;
+echo  = 0;
+
+def assumeLevel = 3;
+
+def Top::assumeLevel = 3;
+
+//////// adjust random ideal generator params: 
+TIdealGeneratingParameters genParams = defaultRandomConstructionParams();
+
+genParams.absMaxCoeff       = 140;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 7;
+genParams.maxTermsPerGen    = 7;
+genParams.maxGens           = 1;
+genParams.bFractionsOn      = 1;
+
+def genTable = createRandomGeneratorsByParams( genParams  );
+
+ def optionlist = list ("redSB", "redTail");
+ 
+ ////////////////////////////////// random ring options   ////////////////////////////////
+  
+ // ordering settings
+  TOrderingOpts oopts;  
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
+  oopts.randomOrd = chooseStraightGlobalOrdering; //rename to ordStringP
+  
+  // minpoly settings
+  TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
+
+  minpolyGenParams.absMaxCoeff       = 30;
+  minpolyGenParams.minVarFactorsPerMonomial = 0;
+  minpolyGenParams.maxVarFactorsPerMonomial = 3;
+  minpolyGenParams.maxTermsPerGen    = 3;
+  minpolyGenParams.bFractionsOn      = 0;
+ 
+  //////////////////////  composing ring options  //////////////// 
+  TRandomRingOpts ropts;
+  ropts.minChar = 0;
+  ropts.maxChar = 200;
+  ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.minVars = 1;
+  ropts.maxVars = 5;
+  
+  ropts.minpolyGenParams = minpolyGenParams;
+  ropts.oopts   = oopts;     //rename to monomialOrderingOpts
+
+  ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
+ 
+  /////////////////////////////////////////////////////////////////////////////////////////
+
+  TRandomRingGens rgens = createRandomRingGens(ropts);  
+
+
+
+int trialsPerRing = 1;
+
+int maxTrials = 10;
+
+def ol = createDefaultOutputInterface(logfile);
+option(warn);
+
+
+proc runHelper(testFactorMethod, finished)
+{
+
+  def genTable = createRandomGeneratorsByParams( genParams  );
+  ropts.quotientIdealParams = genParams;
+  TRandomRingGens rgens = createRandomRingGens(ropts);  
+  
+  dbprint(1, "// genParams.absMaxCoeff = "+string(genParams.absMaxCoeff));
+  dbprint(1, "// genParams.maxVarFactorsPerMonomial = "+string(genParams.maxVarFactorsPerMonomial));
+  dbprint(1, "// genParams.maxTermsPerGen = "+string(genParams.maxTermsPerGen));
+  dbprint(1, "// genParams.maxGens = "+string(genParams.maxGens));
+  dbprint(1, "// ropts.maxVars = "+string(ropts.maxVars));  
+  testFactorMethod( rgens.getIntegerRing, unchangedOptions, genTable, trialsPerRing, finished, ol );
+
+  }
+
+
+proc run()
+{  
+  
+   proc finished(int trials)
+   {
+        return ( trials > maxTrials );
+   }
+   
+   int runLoops = 0;
+   
+   while (not  infiniteTestsFinished (runLoops) )
+   {   
+        runHelper( testPrimdecFactorEx, finished );  
+     
+        runLoops = runLoops+1;
+   }
+}
+
+/*
 LIB("src/tests/test.primdec.factor");
 
 
@@ -21,5 +145,6 @@ proc  testFactorWrapper( cchar, ordering )
 	testPrimdecFactor( rng, polyG, trials );
 }
 
-
  testFactorWrapper("integer", "dp");
+ 
+ */

@@ -6,6 +6,7 @@ ring rng = (integer),(x(1),x(2)),(ls(2),C);
 short = 0 ;
 intvec op = 67108866,16787537;
  option(set, op) ;
+option(redTail);
  option() ;
  // option() ;//options: redSB intStrategy redefine loadLib usage prompt warn
 int trial = 690;

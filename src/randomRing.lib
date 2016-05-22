@@ -14,12 +14,15 @@ static proc mod_init()
 
     if (not defined(Randomideal) )
     {
+      "not defined(Randomideal)";
       LIB "randomideal.lib";
     }
     if (not defined(TWeighttedOpts_def) )
     {
-
-        int TWeighttedOpts_def = 0;
+        "not defined(TWeighttedOpts_def)";
+        int TWeighttedOpts_def = 0; 
+        export(TWeighttedOpts_def);
+        
         newstruct("TSimpleOutput",   "proc clearX, proc writeX");   
         newstruct("TOrderingOpts",   " int minWeight,   int maxWeight, proc randomOrd");   
         newstruct("TRandomRingOpts", "TIdealGeneratingParameters minpolyGenParams, TIdealGeneratingParameters quotientIdealParams,  int minChar, int maxChar, int doExt, int quotientIdeal, int minVars, int maxVars,  TOrderingOpts oopts, proc ordString");

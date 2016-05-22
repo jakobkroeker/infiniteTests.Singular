@@ -1,13 +1,28 @@
 
+/*
+
+string logfile = "/tmp/std01.log";
+
+string cmd = read("input/std/test.std.correct.random.01"); execute(cmd);
+
+run();
+
+// solche parameter sind gut, die 
+   bewirken, dass möglichst viele pfade/ quelltext
+   abgedeckt wird.
+
+*/
+
 
 option(nowarn);
+option(noredefine);
 
 LIB("src/tests/test.std.correct");
+LIB("src/testutils.lib");
+LIB("randomideal.lib");
+LIB("src/randomRing.lib");
 
-LIB("src/automatedTests.lib");
-
-//monitor("log/test.std.correct.01","io");
-
+// LIB("src/automatedTests.lib");
 
 
 //////////////////////////////////////////////////////////////////////////////// 
@@ -15,76 +30,78 @@ LIB("src/automatedTests.lib");
 printlevel = 0 ;
 TRACE = 0;
 echo  = 0;
-
-//////// adjust random ideal generator params: 
-def genParams = defaultRandomConstructionParams();
-
-//genParams.absMaxCoeff       = 150;
-genParams.absMaxCoeff       = 10;
-genParams.minVarFactorsPerMonomial = 0;
-genParams.maxVarFactorsPerMonomial = 5;
-genParams.maxTermsPerGen    = 3;
-genParams.maxGens           = 3;
-
-def gens = createRandomGeneratorsByParams( genParams  );
-
-
-
-
-//////// adjust num of trials  
-int trials = 100000000;
+ 
 //////////////////////////////////////////////////////////////////////////////// 
  def optionlist = list ("redSB", "redTail");
  
-  TWeightedOpts wopts;  
-  wopts.randomOrdProc = chooseGLWOrdering;
-  wopts.wmin = -10;
-  wopts.wmax = 5;
-  int numvars = 5;
-   
-proc getRandomRing( genTable )
-{
+ 
+//////// adjust random ideal generator params: 
+def genParams = defaultRandomConstructionParams();
 
-   int maxChar = 32003;
+genParams.absMaxCoeff       = 10;
+genParams.minVarFactorsPerMonomial = 0;
+genParams.maxVarFactorsPerMonomial = 5; // max degree
+genParams.maxTermsPerGen    = 3;
+genParams.maxGens           = 3;
 
-   //int maxChar = 100;
+def genTable = createRandomGeneratorsByParams( genParams  );
 
-   int c =  randomChar( maxChar );
-   
-   
-   int maxVars = 16;
-   
-   int numVars = random(1,maxVars);
 
-   string vstr = "(x(1.."+string(numVars)+"))";
-         
-   string str_rng = "ring rng = (c),"+vstr+",";  
+   // minpoly settings
+  TIdealGeneratingParameters minpolyGenParams = defaultRandomConstructionParams();
 
-   int doExt = random(0,1);      
-   if (doExt)    {    str_rng = "ring rng = (c,vv),"+vstr+",";    }
-   
+  minpolyGenParams.absMaxCoeff       = 50;
+  minpolyGenParams.minVarFactorsPerMonomial = 0;
+  minpolyGenParams.maxVarFactorsPerMonomial = 3;
+  minpolyGenParams.maxTermsPerGen    = 2;
+  minpolyGenParams.bFractionsOn      = 0;
+//////////////////////////////////////////////////////////////////////////////// 
+ 
+def optionlist = list ("redSB", "redTail");
 
-   
-   string orderingString = randomGLWBlockOrdering(wopts, numVars);   
-   str_rng = str_rng + orderingString + ";";
-   execute(str_rng);
-   setring rng;
+  TOrderingOpts oopts;  
+  oopts.minWeight = -10; //rename to minWeight
+  oopts.maxWeight = 5; //rename to maxWeight
+  oopts.randomOrd = chooseStraightOrdering; //rename to ordStringP
 
-   if (doExt)
-   {
-      dbprint(1, "// getRandomMinpolyStr");
-      string str_mp = getRandomMinpolyStr(c, "vv", genTable );
-      dbprint(1, "// getRandomMinpolyStr");
-      execute(str_mp);
-   }
-   option(redTail);
-   dbprint(1, "basering");
-   return (basering);
-}
+ //////////////////////  composing ring options  //////////////// 
+  TRandomRingOpts ropts = defaultRandomRingOpts();
+  ropts.minChar = 2;
+  ropts.maxChar = 200;
+  ropts.doExt   = 0; //0:no; 1:yes; 2:randomly
+  ropts.maxVars = 7;
+  
+  ropts.minpolyGenParams = minpolyGenParams;
+  ropts.oopts   = oopts;     //rename to monomialOrderingOpts
 
+  //ropts.ordString = randomGLWMixedOrdering; // rename to ordStringP or ordStringF
+ 
+  ropts.ordString = randomGLWOrdering; // rename to ordStringP or ordStringF
+ 
+  /////////////////////////////////////////////////////////////////////////////////////////
+
+  TRandomRingGens rgens = createRandomRingGens(ropts);  
+
+  // def R = rgens.getRing(); setring R;
 
 option(warn);
+def ol = createDefaultOutputInterface(logfile);
+int trialsPerRing = 10;
 
-testGroebner( getRandomRing, gens, optionlist, trials, logfile);
+
+int checkRedSB=1;
+
+
+
+proc run()
+{
+     TGroebnerTestFlags testflags = defaultGroebnerTestFlags();
+     
+     TProcInfo testeeInfo;   testeeInfo.name = "groebner";    
+     
+    option(warn);
+   //  testGroebner( testeeinfo, rgens.getRing, gens, optionlist, trialsPerRing, ol );
+    testPureGroebner( testeeInfo, rgens.getRing, genTable, optionlist, trialsPerRing, testflags, infiniteTestsFinished, ol );
+}
 
 

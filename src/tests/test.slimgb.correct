@@ -1,5 +1,5 @@
 /////////////////////
-version="version test.slimgb";
+version="version test.slimgb.correct";
 category="Commutative Algebra";
 info="
 ";
@@ -9,31 +9,52 @@ LIB "randomIdeal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
  
-proc testSlimgb( rng, idealG, trials )
+proc testSlimgb( getRng, idealG, trials )
 {
+
+    int warnIsSet = optionIsSet("warn");
+    option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
+    def rng = getRng( );
     setring rng;
+    option(warn);
 
     int trial;
-    ideal cs,  I, J, gI, gJ, ggI, ggJ;
-    while( trial<trials )
+   
+    while( 1 )
     {   
+        option(nowarn);  
+        kill rng;      
 
-       if (defined(qrng)) {kill qrng; }
-       dbprint( 1, "basering: ", basering );
-       dbprint( 1, "trial: ", trial );
+        ol.writeX( " // getRng() ;");
 
-       I = idealG( );
+        def rng = getRng( );
+        setring rng;  
 
-       dbprint( 1, "I = ", I );
-       
-       sI = slimgb(I);
-       gI = groebner(I);
+        if (warnIsSet)      {        option(warn);      }
 
 
-       ASSUME(0, idealsAreEqual(sI,gI) );
+        ol.writeX( "LIB \"wrappers.lib\";");
+        ol.writeX( "LIB \"src/randomRing.lib\" ;");
+        ol.writeX( "LIB \"src/tests/test.slimgb.correct\" ;"); 
+        ol.writeX(  ringToStringHack (basering) );
+        ol.writeX( "int trial = " + string( trial) + ";" );
 
-       trial = trial+1;
+
+        I = idealG( );
+
+        ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
+        ol.writeX( "ideal I = " + string( I ) + ";" );
+        ol.writeX( "  ol.writeX( \"ideal I = \" + string( I ) + \";\" );" );
+
+        ol.writeX( " ideal sI = slimgb(I);  ");
+        ol.writeX( " ideal gI = groebner(I); ");
+        ideal sI = slimgb(I);
+        ideal gI = groebner(I);
+
+        ol.writeX( "   ASSUME(0, idealsAreEqual(sI,gI) );");
+        ASSUME(0, idealsAreEqual(sI,gI) );
+        trial = trial+1;
     }
 
     if ( defined(BAS) ) {  setring BAS; }

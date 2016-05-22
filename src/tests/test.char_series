@@ -42,7 +42,6 @@ proc testCharSeries( getRng, idealG, trials, lo )
        lo.writeX("LIB(\"randomideal.lib\");");
        lo.writeX("ring rng = "+string(basering)+";");
        lo.writeX("bigint trial = "+string(trial)+";");
-       ///dbprint( 1, "trial: ", trial );
        I = idealG( );
        lo.writeX("ideal I = "+string( I )+";");
        //lo.writeX( "printIdealInfo( I ) ;");

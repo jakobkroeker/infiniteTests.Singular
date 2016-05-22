@@ -1,4 +1,4 @@
-version="version test.single";
+version="version testsingle.lib";
 category="Commutative Algebra";
 info="
 ";
@@ -6,7 +6,6 @@ info="
 LIB "randomIdeal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
-LIB "ehv.lib";
 
 
 // procname: name of the function to test, whoch takes as a single input 
@@ -20,58 +19,160 @@ LIB "ehv.lib";
 
 // example for testname is testPrimdecEx
 
-proc testSingleProc( libraryListEscapedStr, getRng, inputGenerator, trialsPerRing, procname, testname,ol )
+proc testSingleProcMultipleInput( libraryListEscapedStr, 
+                                  ringG, 
+                                  randomOptionFlags, 
+                                  inputCollectionG, 
+                                  serializeInput, 
+                                  inputIsGood, 
+                                  trialsPerRing, 
+                                  testeeName, 
+                                  checkResultName, 
+                                  finished, 
+                                  ol 
+                                )
 {
+    intvec op = option("get");
+    string cmd;
     int warnIsSet = optionIsSet("warn");
     option(nowarn);  
   
     if (defined(basering) ) {   def BAS=basering; }
-    def rng = getRng( );
+    def rng = ringG( );
     setring rng;
     option(warn);
 
     short = 0;
-    int trial;    
-    while(1)
+    int trial, inputPos;   
+    while( not finished(trial))
     {   
         option(nowarn);  
         kill rng;      
+   
+        ol.clearX();
+        ol.writeX( " // ringG() ;");
 
-        ol.writeX( " // getRng() ;");
-
-        def rng = getRng( );
+        def rng = ringG( );
         setring rng;
-        
+        short = 0;
+        def input;
+        randomOptionFlags();      
         if (warnIsSet)      {        option(warn);      }
         
+        ol.writeX( " option(noredefine);");
         ol.writeX( libraryListEscapedStr );
         ol.writeX(  ringToStringHack (basering) );
-        ol.writeX( "int trial = " + string( trial) + ";" );
-        def I = inputGenerator(  );
+        ol.writeX( "int trial = " + string( trial) + ";" );        
+        
         ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
-        ol.writeX( "def I = " + string( I ) + ";" );
-        ol.writeX( "  ol.writeX( \"def I = \" + string( I ) + \";\" );" );
+        ol.writeX( " // def inputCollection = inputCollectionG(  );");
 
-        if (not isZero(I) && not idealsAreEqual( ideal(1), I ) )
-        {
-            ol.writeX( "       string cmd = \"def L1 = "+procname+"\"(I);\";");
-            ol.writeX( "  execute(cmd);");
-            ol.writeX( "       cmd = \""+testname+"\"(L1,I);\";");
+        def inputCollection = inputCollectionG(  );
+        def result;
+        
+        for (inputPos = 1; inputPos <= size(inputCollection); inputPos=inputPos+1)
+        {                    
+            input = inputCollection[inputPos];
+            ol.writeX( serializeInput(input,"input") );
+               
+            if ( inputIsGood(input) )
+            {
+                ol.clearX();
+                ol.writeX( " option(noredefine);"); // eigentlich ein hack, um lästige redefings bei falscher LIB-reihenfolge zu vertuschen.
+                ol.writeX( libraryListEscapedStr );
+                ol.writeX(  ringToStringHack (basering) );
+                ol.writeX( "int trial = " + string( trial) + ";" );
+                                
+                ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
 
-            string cmd = "def L1 = "+procname+"(I);";
-            execute(cmd);
-            cmd = testname+ "(L1,I);";
-            execute(cmd);
-        }      
+                //ol.writeX( typeof(input)+" input = " + string( input) + ";" );
+                //ol.writeX( "  ol.writeX( \"" typeof(input)+" input = \" + string( input ) + \";\" );" );
+                
+                ol.writeX( serializeInput(input,"input") );
+                
+                ol.writeX( " option(redefine);"); 
+                
+                ol.writeX( "       string cmd = \"def result = "+testeeName+"(input);\";");
+                ol.writeX( "  execute(cmd);");
+                ol.writeX( "       cmd = \""+checkResultName+"(result, input);\";");
+                ol.writeX( "  execute(cmd);");
+
+                option(redefine);
+                
+                cmd = "result = "+testeeName+"(input);";
+                execute(cmd);
+                cmd = checkResultName + " ( result, input ); ";
+                execute(cmd);
+                option(noredefine);
+                trial = trial+1;
+            }      
+        }
     }
 
 
     if (defined(BAS)) {  setring BAS; }
+    option("set",op);
     return(1);
 }
+
+/*
+// testInputs: ringG, inputG,  testeeName, checkResultName, optionsG(rng), 
+// testOptions: trialsPerRing, finished, inputIsGood  
+
+// IO: libraryListEscapedStr, serializeInput, ol 
+*/
+
+proc testSingleProc(libraryListEscapedStr, 
+                    ringG, 
+                    randomOptionFlags, 
+                    inputG, 
+                    serializeInput, 
+                    inputIsGood, 
+                    trialsPerRing, 
+                    testeeName,
+                    checkResultName,
+                    finished, 
+                    ol 
+                )
+{
+    intvec op = option("get");
+    
+    def inputCollectionG = singleInputToCollectionG( inputG );
+    
+    testSingleProcMultipleInput(libraryListEscapedStr, 
+                                    ringG, 
+                                    randomOptionFlags, 
+                                    inputCollectionG, 
+                                    serializeInput, 
+                                    inputIsGood, 
+                                    trialsPerRing, 
+                                    testeeName, 
+                                    checkResultName,
+                                    finished, 
+                                    ol 
+                                );
+    option("set",op);
+}
+ 
 
 
 
  
-
-
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

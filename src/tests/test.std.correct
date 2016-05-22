@@ -17,6 +17,24 @@ static proc mod_init()
         int TGroebnerTestFlag_def = 0;
         newstruct("TGroebnerTestFlags",   " int reduceTest, int repeatApplication,  int equalTest, int optionflagTest, int testIntersect");   
     }
+    
+     if (not defined(TGroebnerTestInput_def) )
+    {
+        int TGroebnerTestInput_def = 0;
+        newstruct("TGroebnerTestInput",   " ideal I, ideal J, poly p");   
+    }
+    
+    if (not defined(TGroebnerTestResult_def) )
+    {
+        int TGroebnerTestResult_def = 0;
+        newstruct("TGroebnerTestResult",   " ideal gI, ideal gIJ, ideal gI_J, ideal gIp, ideal gI_p");   
+    }
+    
+    if (not defined(TGroebnerTestResultPair_def) )
+    {
+        int TGroebnerTestResultPair_def = 0;
+        newstruct("TGroebnerTestResultPair",   " TGroebnerTestResult result1, TGroebnerTestResult result2");   
+    }
 }
 
 proc defaultGroebnerTestFlags()
@@ -30,6 +48,109 @@ proc defaultGroebnerTestFlags()
   return (flags);
 }
 
+// pairList: (result computation, list of testing routines)
+// but then: how combine (or not combine?)
+
+// construct input and result generation depending on tests ? (later. basic variant: generate complete input)
+
+
+proc computeResultStd(TGroebnerTestInput input)
+{
+    TGroebnerTestResult result;
+    
+    result.gI  = std(input.I);
+    result.gIJ  = std(input.I + input.J);
+    result.gI_J = std(input.I, input.J);    
+    result.gIp = std(input.I + input.p);
+    result.gI_p = std(input.I, input.p);
+    
+    return(result);  
+}
+
+proc computeResultGroebner(TGroebnerTestInput input)
+{
+    TGroebnerTestResult result;
+    
+    result.gI   = groebner(input.I);
+    result.gIJ  = groebner(input.I + input.J);
+    result.gI_J = groebner(input.I, input.J);    
+    result.gIp  = groebner(input.I + input.p);
+    result.gI_p = groebner(input.I, input.p);
+    
+    return(result);  
+}
+
+
+proc reducesToZero(result,input)
+{
+   ASSUME (  0, 0==size( reduce(input.I, result.gI ) )  );
+}
+
+
+proc equalTest(result,input)
+{
+    ASSUME (  0,  idealsAreEqual(result.gI, input.I)  );
+}
+
+
+
+proc coeffIntegrityCheck(result,input)
+{
+     if (hasIntegerCoefficientRing(basering))
+     {                   
+          testLeadCoeffsNotNegative(result.gI);
+     }
+}
+
+ 
+proc resultIsFixpoint(result1,result2)
+{
+    ASSUME (  0,  idealsAreEqual(result1.gI, result2.gI)  );    
+}
+
+proc resultSizeIsFixpoint(result1, result2, input)
+{
+    ASSUME (  0,  size(result1.gI)==size(result2.gI)  );
+}
+
+
+proc checkAppendIdeal(result,input)
+{
+     ASSUME (  0,  size(result.gIJ)==size(result.gI_J)  );     
+     ASSUME (  0,  idealsAreEqual(result.gIJ, result.gI_J)  );
+}
+
+proc checkAppendPolynomial(result,input)
+{
+     ASSUME (  0,  size(result.gIp)==size(result.gI_p)  );     
+     ASSUME (  0,  idealsAreEqual(result.gIp, result.gI_p)  );
+}
+
+proc checkReducedTail(result,input)
+{
+      if ( hasGlobalOrdering(basering)  )
+      {  
+          if ( optionIsSet("redSB") )
+          {
+               
+                ol.writeX("  // idealRepresentationReducedTail(result.gI);");
+                if (not idealRepresentationReducedTail(result.gI ) )
+                {
+                   ol.writeX( "//        gI : "+string(result.gI) );
+                   ASSUME(0, "not idealRepresentationReducedTail");
+                }
+          }
+      }
+}
+               
+               
+
+proc testIntersect(result,input)
+{    
+      ASSUME(0, idealsAreEqual( intersect(input.J,   input.I),  intersect(result.gJ, result.gI)  ) );      
+      ASSUME(0, idealsAreEqual( intersect(input.I,   input.J),  intersect(result.gJ, result.gI)  ) );      
+      ASSUME(0, idealsAreEqual( intersect(result.gI, input.J),  intersect(input.J,   result.gI)  ) );
+}
 
 proc testLeadCoeffsNotNegative(gI)
 {
@@ -42,10 +163,14 @@ proc testLeadCoeffsNotNegative(gI)
 
 
 
-proc testPureGroebner( getRng, gens, optionlist, trials, testflags, ol )
-{
+// testeeInfo.testee: std or groebner (what about sba??)
+// testeeInfo.testeeName: "std" or "groebner"
 
- 
+
+proc testPureGroebner( testeeInfo, getRng, gens, optionlist, trialsPerSameRing, TGroebnerTestFlags testflags, finished, ol )
+{
+    def testeeName = testeeInfo.name;
+    
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
@@ -55,8 +180,8 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, ol )
       
     short = 0;
     int trial;
-
-    while( 1 )
+    string cmd ;
+    while( not finished(trial) )
     {   
       option(nowarn);  
       kill rng;      
@@ -67,7 +192,7 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, ol )
       setring rng;
       ideal cs,  I, J, gI, gJ, ggI, ggJ;
 
-
+      // todo: fkt getOptions() einführen bzw 
       if (testflags.optionflagTest)
       {
         if ( hasGlobalOrLocalOrdering(basering))
@@ -88,32 +213,24 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, ol )
       
        ol.writeX( "LIB \"wrappers.lib\";");
        ol.writeX( "LIB \"src/randomRing.lib\" ;");
-       ol.writeX( "LIB \"src/tests/test.std.correct\" ;");
-       ol.writeX( "ring rng = "  + string( basering)+";" );
-       ol.writeX( "short = 0 ;" );
-       
-       if ( not ("0" == string(minpoly) ))
-       {
-         ol.writeX( "minpoly = " + string(minpoly) + ";");
-       }
-       ol.writeX( "intvec op = "+string( option(get) )+";");           
-       ol.writeX( " option(set, op) ;");
-       ol.writeX( " option() ;");
-       ol.writeX( " // option() ;" + option() );
+       ol.writeX( "LIB \"src/tests/test.std.correct\" ;"); 
+       ol.writeX(  ringToStringHack (basering) );
+       ol.writeX( "  ideal cs,  I, J, gI, gJ, ggI, ggJ;");
        ol.writeX( "int trial = " + string( trial) + ";" );
        short = 0;
        I = gens.idealG( );
        ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
-       ol.writeX( "ideal I = " + string( I ) + ";" );
-       ol.writeX( "  ol.writeX( \"ideal I = \" + string( I ) + \";\" );" );
+       ol.writeX( "I = " + string( I ) + ";" );
+       ol.writeX( "  ol.writeX( \"I = \" + string( I ) + \";\" );" );
        
-       ol.writeX( "       ideal gI =  std(I);" );
-       gI =  std(I);
+       cmd = "       gI =  "+testeeName+"(I);";
+       ol.writeX( cmd);
+       execute(cmd);
        //ol.writeX( "//        gI = "+string(gI) );
      
 
       if (hasIntegerCoefficientRing(basering))
-      {
+      {          
           ol.writeX( "    testLeadCoeffsNotNegative(gI);" );
           testLeadCoeffsNotNegative(gI);
       }
@@ -121,8 +238,9 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, ol )
        
        if (testflags.reduceTest)
        {
-            ol.writeX( "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
-            ASSUME(0, 0== size( std(reduce (I,gI ) ))  );
+            cmd = "ASSUME(0, 0== size( "+testeeName+"(reduce (I,gI ) ))  );";
+            ol.writeX( cmd);
+            execute(cmd);
        }
        
         if (testflags.equalTest)
@@ -149,31 +267,33 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, ol )
        
        if (testflags.repeatApplication)
        { 
-           ol.writeX( "       ideal ggI =  std(gI);" );
-           ggI =  std(gI);
-          ol.writeX( "//  hasIntegerCoefficientRing(basering); ");
-          if (hasIntegerCoefficientRing(basering))
-          {
-              ol.writeX( " testLeadCoeffsNotNegative(ggI);" );
-              testLeadCoeffsNotNegative(ggI);
-          }
-   
-          if (testflags.equalTest)
-          {
-             ol.writeX("ASSUME(0, idealsAreEqual(gI,ggI ));");
-             ASSUME(0, idealsAreEqual(gI,ggI ));
- 
-             /*
-              if ( hasGlobalOrdering(basering) or hasLocalOrdering(basering) )
-              {
-                     ol.writeX("ASSUME(0, idealsEqual(gI,ggI ));");
-                     ASSUME(0, idealsEqual(gI,ggI ));
-              }
+            cmd = "        ggI =  "+testeeName+"(gI);" ;
+            ol.writeX(cmd);
+            execute(cmd);
+            
+            ol.writeX( "//  hasIntegerCoefficientRing(basering); ");
+            if (hasIntegerCoefficientRing(basering))
+            {
+                ol.writeX( " testLeadCoeffsNotNegative(ggI);" );
+                testLeadCoeffsNotNegative(ggI);
+            }
 
-              */
- 
- 
-          }
+            if (testflags.equalTest)
+            {
+                ol.writeX("ASSUME(0, idealsAreEqual(gI,ggI ));");
+                ASSUME(0, idealsAreEqual(gI,ggI ));
+
+                /*
+                if ( hasGlobalOrdering(basering) or hasLocalOrdering(basering) )
+                {
+                        ol.writeX("ASSUME(0, idealsEqual(gI,ggI ));");
+                        ASSUME(0, idealsEqual(gI,ggI ));
+                }
+
+                */
+
+
+            }
       }
 
      if (not testflags.optionflagTest)
@@ -240,96 +360,87 @@ proc testPureGroebner( getRng, gens, optionlist, trials, testflags, ol )
 }
 
 
-proc testGroebner( getRng, gens, optionlist, trials, testflags, ol )
+proc testGroebner( testeeInfo, ringG, gens, optionlist, trialsPerSameRing, testflags, finished, ol )
 {
+    def testeeName = testeeInfo.name;
+    string cmd;
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
-      def rng = getRng( );
+      def rng = ringG( );
       setring rng;
       option(warn);
       
     short = 0;
     int trial;
 
-    while( 1 )
+    while( not finished(trial) )
     {   
-      option(nowarn);  
-      kill rng;      
-      def rng = getRng( );
-      setring rng;
-      ideal cs,  I, J, gI, gJ, ggI, ggJ;
+        option(nowarn);  
+        kill rng;      
+        def rng = ringG( );
+        setring rng;
+        ideal cs,  I, J, gI, gJ, ggI, ggJ;
 
 
-      if (testflags.optionflagTest)
-      {
-        if ( hasGlobalOrLocalOrdering(basering))
+        if (testflags.optionflagTest)
         {
-           chooseRandomOptionsFromList(optionlist);
+            if ( hasGlobalOrLocalOrdering(basering))
+            {
+                chooseRandomOptionsFromList(optionlist);
+            }
         }
-      }
-      if (warnIsSet)
-      {
-        option(warn);
-      }
+        if (warnIsSet)        {            option(warn);        }
       
-      
-       if (defined(qrng)) {kill qrng; }
-       ol.clearX();
-       ol.writeX( "");
-       ol.writeX( "");
-       ol.writeX( "LIB \"primdec.lib\";");
-       ol.writeX( "LIB \"wrappers.lib\";");
-       ol.writeX( "LIB \"src/randomRing.lib\" ;");
-       ol.writeX( "LIB \"src/tests/test.std.correct\" ;");
-       ol.writeX( "ring rng = "  + string( basering)+";" );
-       ol.writeX( "short = 0 ;" );
-       
-       if ( not ("0" == string(minpoly) ))
-       {
-         ol.writeX( "minpoly = " + string(minpoly) + ";");
-       }
-       ol.writeX( "intvec op = "+string( option(get) )+";");           
-       ol.writeX( " option(set, op) ;");
-       ol.writeX( " option() ;");
-       ol.writeX( " // option() ;" + option() );
-       ol.writeX( "int trial = " + string( trial) + ";" );
-       short = 0;
-       I = gens.idealG( );
-       J = gens.idealG( );
-       ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
-       ol.writeX( "ideal I = " + string( I ) + ";" );
-       ol.writeX( "ideal J = " + string( J ) + ";" );
-       
-       ol.writeX( "       ideal gI =  std(I);" );
-       gI =  std(I);
-       //ol.writeX( "//        gI = "+string(gI) );
-     
 
-       ol.writeX( "       ideal gJ =  std(J);" );
+        if ( defined(qrng) ) {    kill qrng; }
+        ol.clearX();
+        ol.writeX( "");
+        ol.writeX( "");
+        ol.writeX( "LIB \"primdec.lib\";");
+        ol.writeX( "LIB \"wrappers.lib\";");
+        ol.writeX( "LIB \"src/randomRing.lib\" ;");
+        ol.writeX( "LIB \"src/tests/test.std.correct\" ;");
+        ol.writeX(  ringToStringHack (basering) );
+        ol.writeX( "int trial = " + string( trial) + ";" );
+        short = 0;
+        I = gens.idealG( );
+        J = gens.idealG( );
+        ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
+        ol.writeX( " ideal cs,  I, J, gI, gJ, ggI, ggJ;");
+        ol.writeX( "ideal I = " + string( I ) + ";" );
+        ol.writeX( "ideal J = " + string( J ) + ";" );
 
-       gJ =  std(J);
-       //ol.writeX( "//        gJ = "+string(gJ)+";" );
-          if (hasIntegerCoefficientRing(basering))
-          {
-              ol.writeX( " testLeadCoeffsNotNegative(gI);" );
-              ol.writeX( "    testLeadCoeffsNotNegative(gJ);" );
-              testLeadCoeffsNotNegative(gI);
-              testLeadCoeffsNotNegative(gJ);
-          }
+        cmd = "    gI =  "+testeeName+"(I);";
+        ol.writeX( cmd );
+        execute(cmd);
+        //ol.writeX( "//        gI = "+string(gI) );
+
+        cmd = "    gJ =  "+testeeName+"(J);";
+        ol.writeX(cmd  );
+        execute(cmd);      
+        //ol.writeX( "//        gJ = "+string(gJ)+";" );
+        if (hasIntegerCoefficientRing(basering))
+        {
+            ol.writeX( " testLeadCoeffsNotNegative(gI);" );
+            ol.writeX( "    testLeadCoeffsNotNegative(gJ);" );
+            testLeadCoeffsNotNegative(gI);
+            testLeadCoeffsNotNegative(gJ);
+        }
        
-       if (testflags.reduceTest)
-       {
-            ol.writeX( "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
-            ASSUME(0, 0== size( std(reduce (I,gI ) ))  );
-       
-            ol.writeX( "ASSUME(0, 0== size( std(reduce (J,gJ ) ))  );");
-            ASSUME(0, 0== size( std(reduce (J,gJ ) ))  );
-       }
+        if (testflags.reduceTest)
+        {
+            cmd = "ASSUME(0, 0== size( "+testeeName+"(reduce (I,gI ) ))  );";
+            ol.writeX( cmd);
+            execute(cmd);
+
+                cmd =  "ASSUME(0, 0== size( "+testeeName+"(reduce (J,gJ ) ))  );";
+                ol.writeX(cmd);
+                execute(cmd);
+        }
        
         if (testflags.equalTest)
         {
-
            ol.writeX("ASSUME(0, idealsAreEqual(I,gI ));");
            ASSUME(0, idealsAreEqual(I,gI ));
 
@@ -348,128 +459,128 @@ proc testGroebner( getRng, gens, optionlist, trials, testflags, ol )
 
        //}
        
-       if (testflags.repeatApplication)
-       { 
-           ol.writeX( "       ideal ggI =  std(gI);" );
-           ggI =  std(gI);
-           //ol.writeX( "//        ggI = "+string(ggI) +";");
-           
-           ol.writeX( "       ideal ggJ =  std(gJ);" );
-           ggJ =  std(gJ);
-           //ol.writeX( "//        ggJ = "+string(ggJ)+";" );
-       
-   
-          if (testflags.equalTest)
-          {
-             ol.writeX("ASSUME(0, idealsAreEqual(gI,ggI ));");
-             ASSUME(0, idealsAreEqual(gI,ggI ));
+        if (testflags.repeatApplication)
+        { 
+            cmd =  "  ggI =  "+testeeName+"(gI);";
+            ol.writeX( cmd );
+            execute(cmd);
+            //ol.writeX( "//        ggI = "+string(ggI) +";");
+            
+            cmd =  "    ggJ =  "+testeeName+"(gJ);";
+            ol.writeX( cmd );
+            execute(cmd);
+            //ol.writeX( "//        ggJ = "+string(ggJ)+";" );
 
-             ol.writeX("ASSUME(0, idealsAreEqual(gJ,ggJ ));");
-             ASSUME(0, idealsAreEqual(gJ,ggJ ));
-             
-             
-             ol.writeX("ASSUME(0, idealsEqual(gI,ggI ));");
-             ASSUME(0, idealsEqual(gI,ggI ));
 
-             ol.writeX("ASSUME(0, idealsEqual(gJ,ggJ ));");
-             ASSUME(0, idealsEqual(gJ,ggJ ));
-          }
-      }
+            if (testflags.equalTest)
+            {
+                ol.writeX("ASSUME(0, idealsAreEqual(gI,ggI ));");
+                ASSUME(0, idealsAreEqual(gI,ggI ));
 
-     if (not testflags.optionflagTest)
-     {
-        continue;
-     }
-      if ( hasGlobalOrdering(basering))
-      {
+                ol.writeX("ASSUME(0, idealsAreEqual(gJ,ggJ ));");
+                ASSUME(0, idealsAreEqual(gJ,ggJ ));
+                
+                
+                ol.writeX("ASSUME(0, idealsEqual(gI,ggI ));");
+                ASSUME(0, idealsEqual(gI,ggI ));
+
+                ol.writeX("ASSUME(0, idealsEqual(gJ,ggJ ));");
+                ASSUME(0, idealsEqual(gJ,ggJ ));
+            }
+        }
+
+        if (not testflags.optionflagTest)
+        {
+            continue;
+        }
+        if ( hasGlobalOrdering(basering))
+        {
   
-          if ( optionIsSet("redSB") )
-          {
+            if ( optionIsSet("redSB") )
+            {
                
                 if (not idealRepresentationReducedTail(gI ) )
                 {
-                   ol.writeX( "//        gI = "+string(gI) );
+                    ol.writeX( "//        gI = "+string(gI) );
                 }
-               
+
                 if (not idealRepresentationReducedTail(gJ ) )
                 {
-                   ol.writeX( "//        gJ = "+string(gJ) );
+                    ol.writeX( "//        gJ = "+string(gJ) );
                 }
 
-               ol.writeX("ASSUME(0, idealRepresentationReducedTail( gI ));");
-               ASSUME(0, idealRepresentationReducedTail( gI ));
-               
-               ol.writeX("ASSUME(0, idealRepresentationReducedTail( gJ ));");
-               ASSUME(0, idealRepresentationReducedTail( gJ ));
+                ol.writeX("ASSUME(0, idealRepresentationReducedTail( gI ));");
+                ASSUME(0, idealRepresentationReducedTail( gI ));
+
+                ol.writeX("ASSUME(0, idealRepresentationReducedTail( gJ ));");
+                ASSUME(0, idealRepresentationReducedTail( gJ ));
 
 
-               ol.writeX("ASSUME(0, idealRepresentationReduced( gI ));");
-               ASSUME(0, idealRepresentationReduced( gI ));
-               ol.writeX("ASSUME(0, idealRepresentationReduced( gJ ));");
-               ASSUME(0, idealRepresentationReduced( gJ ));
-               
-               
-               if (testflags.repeatApplication)
-               { 
+                ol.writeX("ASSUME(0, idealRepresentationReduced( gI ));");
+                ASSUME(0, idealRepresentationReduced( gI ));
+                ol.writeX("ASSUME(0, idealRepresentationReduced( gJ ));");
+                ASSUME(0, idealRepresentationReduced( gJ ));
+
+            
+                if (testflags.repeatApplication)
+                { 
        
-                   ol.writeX("ASSUME(0, size(gJ)== size(ggJ) );");
-                   ASSUME(0, size(gJ)== size(ggJ) );
-                   
-                   ol.writeX("ASSUME(0, size(gI)== size(ggI) );");
-                   ASSUME(0, size(gI)== size(ggI) );
+                    ol.writeX("ASSUME(0, size(gJ)== size(ggJ) );");
+                    ASSUME(0, size(gJ)== size(ggJ) );
 
-                  if (not idealRepresentationReducedTail(ggI ) )
-                  {
-                     ol.writeX( "//        ggI = "+string(ggI) +";");
-                  }
+                    ol.writeX("ASSUME(0, size(gI)== size(ggI) );");
+                    ASSUME(0, size(gI)== size(ggI) );
+
+                    if (not idealRepresentationReducedTail(ggI ) )
+                    {
+                        ol.writeX( "//        ggI = "+string(ggI) +";");
+                    }
+
+                    if (not idealRepresentationReducedTail(ggJ ) )
+                    {
+                        ol.writeX( "//        ggJ = "+string(ggJ) +";");
+                    }
                   
-                  if (not idealRepresentationReducedTail(ggJ ) )
-                  {
-                     ol.writeX( "//        ggJ = "+string(ggJ) +";");
-                  }
-                  
-                 ol.writeX("ASSUME(0, idealRepresentationReducedTail( ggJ ));");
-                 ASSUME(0, idealRepresentationReducedTail( ggJ ));
-                 ol.writeX("ASSUME(0, idealRepresentationReduced( ggI ));");
-                 ASSUME(0, idealRepresentationReduced( ggI ));
-                 ol.writeX("ASSUME(0, idealRepresentationReduced( ggJ ));");
-                 ASSUME(0, idealRepresentationReduced( ggJ ));
+                    ol.writeX("ASSUME(0, idealRepresentationReducedTail( ggJ ));");
+                    ASSUME(0, idealRepresentationReducedTail( ggJ ));
+                    ol.writeX("ASSUME(0, idealRepresentationReduced( ggI ));");
+                    ASSUME(0, idealRepresentationReduced( ggI ));
+                    ol.writeX("ASSUME(0, idealRepresentationReduced( ggJ ));");
+                    ASSUME(0, idealRepresentationReduced( ggJ ));
                
                 
-                  ol.writeX("ASSUME(0, idealRepresentationReducedTail( ggI ));");
-                  ASSUME(0, idealRepresentationReducedTail( ggI ));
-             }
+                    ol.writeX("ASSUME(0, idealRepresentationReducedTail( ggI ));");
+                    ASSUME(0, idealRepresentationReducedTail( ggI ));
+                }
              
-               /* 
-               ol.writeX("ASSUME(0, idealRepresentationsEqual(gI,ggI ));");
-               ASSUME(0, idealRepresentationsEqual(gI,ggI ));
-               ol.writeX("ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));");
-               ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));
-               */
-         
-
+                /* 
+                ol.writeX("ASSUME(0, idealRepresentationsEqual(gI,ggI ));");
+                ASSUME(0, idealRepresentationsEqual(gI,ggI ));
+                ol.writeX("ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));");
+                ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));
+                */         
           }
 
       }
    
 
 
-      if (testflags.testIntersect)
-      {
-        ol.writeX( "ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );");
-        ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );
+        if (testflags.testIntersect)
+        {
+            ol.writeX( "ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );");
+            ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );
 
-        ol.writeX("ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );");
-        ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );
+            ol.writeX("ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );");
+            ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );
 
-        ol.writeX("ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );");
-        ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );
+            ol.writeX("ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );");
+            ASSUME(0, idealsAreEqual(intersect(I,J),intersect(gI,gJ) ) );
 
-        ol.writeX("ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );");
-        ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );
+            ol.writeX("ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );");
+            ASSUME(0, idealsAreEqual(intersect(J,I),intersect(gJ,gI) ) );
 
-   
-   }
+
+        }
 
        trial = trial+1;
     }
@@ -481,25 +592,28 @@ proc testGroebner( getRng, gens, optionlist, trials, testflags, ol )
  
 
 	 
-proc testGroebnerAppend( getRng, gens, optionlist, trials, testflags, ol )
-{
+proc testGroebnerAppend( testeeInfo, ringG, gens, optionlist, trials, testflags, finished, ol )
+{  
+    def testeeName = testeeInfo.name;
+    
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
-      def rng = getRng( );
+      def rng = ringG( );
       setring rng;
       option(warn);
       
     short = 0;
     int trial;
+    string cmd;
 
-    while( 1 )
+    while( not finished(trial) )
     {   
       option(nowarn);  
       kill rng;      
-      def rng = getRng( );
+      def rng = ringG( );
       setring rng;
-      ideal cs,  I, J,gI,IJ, gIJ, gI_J, Ip, gIp, gI_p; 
+      ideal cs,  I, J, gI, IJ, gIJ, gI_J, Ip, gIp, gI_p; 
       poly p ;
 
       if ( hasGlobalOrLocalOrdering(basering))
@@ -519,16 +633,7 @@ proc testGroebnerAppend( getRng, gens, optionlist, trials, testflags, ol )
        ol.writeX( "LIB \"primdec.lib\";");
        ol.writeX( "LIB \"wrappers.lib\";");
        ol.writeX( "LIB \"src/randomRing.lib\" ;");
-       ol.writeX( "ring rng = "  + string( basering)+";" );
-       ol.writeX( "short = 0 ;" );
-      if ( not ("0" == string(minpoly) ))
-       {
-         ol.writeX( "minpoly = " + string(minpoly) + ";");
-       }
-       ol.writeX( "intvec op = "+string( option(get) )+";");           
-       ol.writeX( " option(set, op) ;");
-       ol.writeX( " option() ;");
-       ol.writeX( " // option() ;" + option() );
+       ol.writeX(  ringToStringHack (basering) );
        ol.writeX( "int trial = " + string( trial) + ";" );
        short = 0;
        I = gens.idealG( );
@@ -539,25 +644,38 @@ proc testGroebnerAppend( getRng, gens, optionlist, trials, testflags, ol )
        ol.writeX( "ideal J = " + string( J ) + ";" );
        ol.writeX( "poly p = " + string( p ) + ";" );
        
-       ol.writeX( "   ideal gI   =  std(I);" );
-       ol.writeX( "   ideal IJ   = I+J;");
-       ol.writeX( "   ideal gIJ  = std(IJ);");
-       ol.writeX( "   ideal gI_J = std(gI,J);");
-       ol.writeX( "   ideal Ip   = I+p;");
-       ol.writeX( "   ideal gIp  = std(Ip);");
-       ol.writeX( "   ideal gI_p = std(gI,p);");
-
-       gI =  std(I);
+       ol.writeX( "  ideal cs,  I, J,gI,IJ, gIJ, gI_J, Ip, gIp, gI_p; ");
+       
+       cmd = "     gI   =  "+testeeName+"(I);";
+       ol.writeX( cmd );       
+       execute(cmd);
+       
+       ol.writeX( "     IJ   = I+J;");       
        IJ = I+J;
-       gIJ = std(IJ);
-       gI_J= std(gI,J);
+       
+       cmd = "     gIJ  = "+testeeName+"(IJ);";       
+       ol.writeX( cmd );
+       execute(cmd);
+       
+       cmd =  "     gI_J = "+testeeName+"(gI,J);";
+       ol.writeX( cmd);
+       execute(cmd);
+              
+       ol.writeX( "     Ip   = I+p;");
        Ip = I+p;
-       gIp  = std(Ip);
-       gI_p = std(gI,p);
 
+
+       cmd =   "     gIp  = "+testeeName+"(Ip);";
+       ol.writeX( cmd);
+       execute(cmd);
+       
+       cmd =  "     gI_p = "+testeeName+"(gI,p);";
+       ol.writeX( cmd);
+       execute(cmd);
+                          
           if (hasIntegerCoefficientRing(basering))
           {
-              ol.writeX( " testLeadCoeffsNotNegative(gI);" );
+              ol.writeX( "    testLeadCoeffsNotNegative(gI);" );
               ol.writeX( "    testLeadCoeffsNotNegative(gIp);" );
               ol.writeX( "    testLeadCoeffsNotNegative(gIJ);" );
               ol.writeX( "    testLeadCoeffsNotNegative(gI_p);" );
@@ -571,25 +689,34 @@ proc testGroebnerAppend( getRng, gens, optionlist, trials, testflags, ol )
 
        if (testflags.reduceTest)
        {
-           ol.writeX( "ASSUME(0, 0== size( std(reduce (I,gI ) ))  );");
-           ASSUME(0, 0== size( std(reduce (I,gI ) ))  );
+           cmd = "ASSUME(0, 0== size( "+testeeName+"(reduce (I,gI ) ))  );";
+           ol.writeX( cmd);
+           execute(cmd);
 
 
-           ol.writeX( " ASSUME(0, 0== size( std(reduce (IJ,gIJ ) ))  ); ");
-           ASSUME(0, 0== size( std(reduce (IJ,gIJ ) ))  );
-           ol.writeX( " ASSUME(0, 0== size( std(reduce (IJ,gI_J ) ))  );");
-           ASSUME(0, 0== size( std(reduce (IJ,gI_J ) ))  );
-           ol.writeX( "ASSUME(0, 0== size( std(reduce (gI_J, gIJ) ))  ); ");
-           ASSUME(0, 0== size( std(reduce (gI_J, gIJ) ))  );
-         
+           cmd =  " ASSUME(0, 0== size( "+testeeName+"(reduce (IJ,gIJ ) ))  ); ";
+           ol.writeX( cmd);
+           execute(cmd);
 
-           ol.writeX( " ASSUME(0, 0== size( std(reduce (Ip,gIp ) ))  ); ");
-           ASSUME(0, 0== size( std(reduce (Ip,gIp ) ))  );
+           cmd =  " ASSUME(0, 0== size( "+testeeName+"(reduce (IJ,gI_J ) ))  );" ;
+           ol.writeX( cmd);
+           execute(cmd);
+      
+            cmd =   "ASSUME(0, 0== size( "+testeeName+"(reduce (gI_J, gIJ) ))  ); " ;
+           ol.writeX( cmd);
+           execute(cmd);
+           
+           cmd =   " ASSUME(0, 0== size( "+testeeName+"(reduce (Ip,gIp ) ))  ); ";
+           ol.writeX( cmd);
+           execute(cmd);
 
-           ol.writeX( " ASSUME(0, 0== size( std(reduce (Ip,gI_p ) ))  );");
-           ASSUME(0, 0== size( std(reduce (Ip,gI_p ) ))  );
-           ol.writeX( "ASSUME(0, 0== size( std(reduce (gI_p, gIp) ))  ); ");
-           ASSUME(0, 0== size( std(reduce (gI_p, gIp) ))  );
+           cmd =   " ASSUME(0, 0== size( "+testeeName+"(reduce (Ip,gI_p ) ))  );";
+           ol.writeX( cmd);
+           execute(cmd);
+
+           cmd =   "ASSUME(0, 0== size( "+testeeName+"(reduce (gI_p, gIp) ))  ); ";
+           ol.writeX( cmd);
+           execute(cmd);          
        }
 
 
@@ -700,7 +827,7 @@ proc testGroebnerAppend( getRng, gens, optionlist, trials, testflags, ol )
        ol.writeX("ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));");
        ASSUME(0, idealRepresentationsEqual(gJ,ggJ ));
 
-    ol.writeX( "ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );");
+      ol.writeX( "ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );");
       ASSUME(0, idealsEqual(intersect(I,J),intersect(gI,gJ) ) );
 
          ol.writeX("ASSUME(0, idealsEqual(intersect(J,I),intersect(gJ,gI) ) );");

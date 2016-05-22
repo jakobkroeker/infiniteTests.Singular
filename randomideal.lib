@@ -3,7 +3,7 @@
 version="$Id: 7cc6f010cef8a7856a1c97482ac80ecedd0fb9d5 $";
 category="Test utilities";
 info="
-LIBRARY:  randomIdeal.lib      construction of 'random' generators, e.g. for variables, coefficients, ideals.
+LIBRARY:  randomideal.lib      construction of 'random' generators, e.g. for variables, coefficients, ideals.
 AUTHORS:  J. Kroeker, kroeker@math.uni-hannover.de
 
 PROCEDURES:
@@ -83,10 +83,10 @@ LIB "ring.lib";
 // define struct TIdealGeneratingParameters, used by the 'randomIdeal' library later on
 static proc mod_init()
 {
-    def randomIdealDebug = 0;
+    int randomIdealDebug = 0;
     export(randomIdealDebug);
     // randomIdealTestMemoryLeaks: a flag to enable/disable memory leak related test in the unit tests of this library.
-    def randomIdealTestMemoryLeaks = 1; 
+    int randomIdealTestMemoryLeaks = 1; 
     export(randomIdealTestMemoryLeaks);
 
     // TIdealGeneratingParameters: data type for holding options for random ideal generation. 
@@ -101,13 +101,16 @@ static proc mod_init()
     // maxGens: maximal number of generators for a random ideal 
     if (not defined(TIdealGeneratingParameters_def) )
     {
+      "not defined TIdealGeneratingParameters_def";
       int TIdealGeneratingParameters_def=0;
+      export(TIdealGeneratingParameters_def);
       newstruct("TIdealGeneratingParameters",                 "int absMaxCoeff,                  int bFractionsOn,                  int minParamFactorsPerCoeff,                  int maxParamFactorsPerCoeff,                  int minVarFactorsPerMonomial,                  int maxVarFactorsPerMonomial,                  int maxTermsPerGen,                  int bExcludeZeroCoeff,                 int maxGens ");
     }
  // TRandomGenerators: a struct to hold random generating functions for variables, coefficients, monomials, terms, polynomials and ideals.
     if (not defined(TRandomGenerators_def) )
     {
-      int TRandomGenerators_def=0;
+      int  TRandomGenerators_def=0;
+      export(TRandomGenerators_def);
       newstruct("TRandomGenerators", 
                 "                 def varG,                 def parG,                 def coeffG,                  def monomG,                 def termG,                 def polyG,                 def idealG ");
     }
@@ -115,7 +118,8 @@ static proc mod_init()
     // TRandomFactories: a struct to hold factories for random generating functions for coefficients, monomials, terms, polynomials and ideals.
     if (not defined(TRandomFactories_def) )
     {
-      int TRandomFactories_def=0;
+      int  TRandomFactories_def=0;
+      export(TRandomFactories_def);
       newstruct("TRandomFactories", 
                 "def coeffFactory,                  def monomFactory,                 def termFactory,                 def polyFactory,                 def idealFactory,                 def checkParamConsistancy ");
     }
@@ -123,6 +127,7 @@ static proc mod_init()
     if (not defined(TIdealInfo_def) )
     {
       int TIdealInfo_def=0;
+      export(TIdealInfo_def);
       newstruct("TIdealInfo", 
                 "int numGens, int maxTerms, int maxDeg, int numVars, def maxAbsCoeff ");
 

@@ -1,5 +1,6 @@
 
 option("nowarn");
+option("noredefine");
 
 LIB("ellipticcovers.lib");
 

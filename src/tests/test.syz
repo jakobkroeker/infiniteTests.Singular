@@ -8,7 +8,11 @@ LIB "primdecint.lib";
 LIB "randomideal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
- 
+
+/// syz test. Supports quotient rings.
+///
+/// trials: currently number of total trials. should be number of trials in the same ring
+///         also some bugs appear when repeating the same test twice
 proc testSyz( getRng, idealG, trials, optionlist, testflags, ol )
 {
     int warnIsSet = optionIsSet("warn");

@@ -10,7 +10,7 @@ LIB "primdec.lib";
 LIB "ehv.lib";
 
 
-proc adjustAssumeLevel()
+proc adjustAssumeLevel(ol)
 {
     if (not (defined(assumeLevel) ) ) 
     {
@@ -128,17 +128,12 @@ proc testPrimdecZeroDim( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTe
 }
 
 
-proc testPrimaryDecomp(ideal I, ol )
+proc testPrimaryDecomp(list methodsPairs, ideal I, ol)
 {
         if (defined(PL))  {kill PL; }
         list PL;
         int i;
-        
-        list methodsPairs = list( list("primdecGTZ",primdecGTZ),
-                                  list("primdecGTZkeepKomp",primdecGTZkeepKomp),
-                                  list("primdecSY",primdecSY),
-                                  list("primdecSYNoOptimalOrdering",primdecSYNoOptimalOrdering)
-                               );
+              
          list perms =  permute(methodsPairs);
          
          def perm =     perms[random(1,size( perms))];
@@ -170,16 +165,12 @@ proc testPrimaryDecomp(ideal I, ol )
 }
 
 
-proc testMinAssDecomp(ideal I, ol)
+proc testMinAssDecomp(list methodsPairs, ideal I, ol)
 {
             if (defined(ML))  {kill ML; }
             list ML;
             int i;
-            def minAss1,minAss1e;
-            list methodsPairs = list( list("minAssGTZ",minAssGTZ),
-                                  list("minAssGTZFacSTD",minAssGTZFacSTD),
-                                  list("minAssGTZGTZ",minAssGTZGTZ)
-                               );
+            def minAss1,minAss1e;          
 
              list perms =  permute(methodsPairs);
          
@@ -208,13 +199,43 @@ proc testMinAssDecomp(ideal I, ol)
                         minAss1  = minAss(I);
 }
 
+proc testPrimdec( getRng, genTable, trials, ol)
+{
+   list minAssMethodPairs = list( list("minAssGTZ",minAssGTZ),
+                                  list("minAssGTZFacSTD",minAssGTZFacSTD),
+                                  list("minAssGTZGTZ",minAssGTZGTZ)
+                               );
+                               
+   list primdecMethodPairs = list( list("primdecGTZ",primdecGTZ),
+                                  list("primdecGTZkeepKomp",primdecGTZkeepKomp),
+                                  list("primdecSY",primdecSY),
+                                  list("primdecSYNoOptimalOrdering",primdecSYNoOptimalOrdering)
+                               );
+        testPrimdec(       getRng, genTable, trials, ol, minAssMethodPairs, primdecMethodPairs       );
+        
+}
 
-proc testPrimdec( getRng, genTable, trials, ol )
+proc testPrimdecTimeout( getRng, genTable, trials, ol)
+{
+   list minAssMethodPairs = list( list("minAssGTZ",minAssGTZ),
+                                  list("minAssGTZFacSTD",minAssGTZFacSTD),
+                                  list("minAssGTZGTZ",minAssGTZGTZ)
+                               );
+                               
+   list primdecMethodPairs = list( list("primdecGTZ",primdecGTZ),
+                                  list("primdecGTZkeepKomp",primdecGTZkeepKomp),
+                                  list("primdecSY",primdecSY)                               );
+        testPrimdec(       getRng, genTable, trials, ol, minAssMethodPairs, primdecMethodPairs       );
+        
+}
+
+
+proc testPrimdec( getRng, genTable, trials, ol , minAssMethodPairs, primdecMethodPairs)
 {
     print ("// testPrimdec");
 
 
-    adjustAssumeLevel();
+    adjustAssumeLevel(ol);
     if (defined(basering) ) {   def BAS=basering; }
 
     intvec op ;
@@ -276,10 +297,7 @@ proc testPrimdec( getRng, genTable, trials, ol )
                ol.writeX( "system(\"random\","+string( system("random") ) + ");" );
                ol.writeX( "//random: "+ string( system("random") )  );
                ol.writeX( "LIB(\"src/tests/test.primdec.many.orig.mp\");");
-               ol.writeX( "intvec op = "+string( option(get) )+";");
-               ol.writeX( "ring rng = "+string(basering)+";");
-               ol.writeX( "minpoly = "+string(minpoly)+";");
-               ol.writeX( "ideal I = "+string(I)+";");
+               ol.writeX(  ringToStringHack (basering) );
                ol.writeX( "bigint trial = "+string(trial)+";");
                ol.writeX( "    def minAss1,minAss1e;");
 
@@ -288,19 +306,16 @@ proc testPrimdec( getRng, genTable, trials, ol )
                PDfirst = random(0,1);
                if (PDfirst)
                {
-                   testPrimaryDecomp(I,ol);
-                   testMinAssDecomp(I,ol);
+                   testPrimaryDecomp(primdecMethodPairs,I,ol);
+                   testMinAssDecomp(minAssMethodPairs, I,ol);
                }
                else
                {
-
-                   testMinAssDecomp(I,ol);
-                   testPrimaryDecomp(I,ol);
+                   testMinAssDecomp(minAssMethodPairs, I,ol);
+                   testPrimaryDecomp(primdecMethodPairs,I,ol);
                }
-     
-
-                trial++;
-
+               ol.writeX( "");
+               trial++;
            }
         //}
           
@@ -313,3 +328,78 @@ proc testPrimdec( getRng, genTable, trials, ol )
 
 
 
+// allgemein für timeout: procname(testee), parameter generator , optional result checker
+// der resultchecker erhält als input die originalen parameter und das result.
+
+proc testPrimdecTimeout( getRng, genTable, trials, procName, ol )
+{
+    print ("//testPrimdec");
+    adjustAssumeLevel();
+    if (defined(basering) ) {   def BAS=basering; }
+
+    intvec op ;
+
+    option(nowarn);
+    def rng = getRng();
+    setring rng;
+    option(warn);
+    export(rng);
+
+    list ideals;
+
+    int trial,i;
+ 
+    ideal I;
+    string emptystring="";
+    // while (trial<trials)
+    while(1)
+    {   
+      kill rng;
+
+      option(nowarn);
+
+      def rng = getRng();
+      setring rng;
+      option(warn);
+      ideal I;
+      if (defined(minAss1)) {kill minAss1;}
+      if (defined(minAss1e)) {kill minAss1e;}
+
+      export(rng);
+       //ol.writeX( "// get random ideal ");
+      trial = 0;
+      //while (trial<trials)
+      //{
+
+           I = genTable.idealG(  );    
+           //ol.writeX( "// got random ideal ");
+
+           if (not isZero(I) && not idealsAreEqual( ideal(1), I ) )
+           {
+               ol.clearX();
+               ol.writeX("");
+               ol.writeX("");
+               ol.writeX( "////////////////////////////////////////////////////////////////////////////////////////");
+               ol.writeX( "if (not defined(assumeLevel)) { def Top::assumeLevel ; } assumeLevel = "+string( assumeLevel ) + ";  " );
+               ol.writeX( "//  voice = "+string( voice ) + ";" );
+               ol.writeX( "system(\"random\","+string( system("random") ) + ");" );
+               ol.writeX( "//random: "+ string( system("random") )  );
+               ol.writeX( "LIB(\"src/tests/test.primdec.many.orig.mp\");");
+               ol.writeX(  ringToStringHack (basering) );
+               ol.writeX( "printIdealInfo( I ) ;");
+               printIdealInfo(I);
+               ol.writeX( "bigint trial = "+string(trial)+";");
+
+               ol.writeX( "def result= "+procName+"(I);");              
+               execute("def result="+procName+"(I);");    
+ 
+               trial++;
+           }
+        //}
+          
+    }
+
+
+    if (defined(BAS)) {  setring BAS; }
+    return(1);
+}

@@ -1,9 +1,11 @@
+/////////////////////
+version="version test.afaces.gitfan";
+category="Commutative Algebra";
+info="
+";
 
 
-option("redSB");
 
-
-echo = 1;
 LIB("primdec.lib");
 LIB("ringutils.lib");
 LIB("wrappers.lib");
@@ -11,35 +13,44 @@ LIB("gitfan.lib");
  
 
 
-proc testAfaces( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials ,cchar,cord)
-{
-    print ("testPrimdec");
+proc testAfaces( getRng, gens, ol )
+{  
+    int warnIsSet = optionIsSet("warn");
+     option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
 
-    def rng = createRing(cchar,cord, numVars) ;
+    def rng = getRng() ;
+        
     setring rng;
-    export(rng);
+    option("redSB");    
 
-    list ideals;
-
-    int trial;
-    list L1,L2,L3;
-    //for (trial = 1; trial<=trials; trial++)
     while(1)
     {   
+       option(nowarn);  
+       rng = getRng() ;
        setring rng;
-       print ("trial: "+string(trial));
-       if ( defined(j) ) { kill j; }
-       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
-       //system("random", random(0,5000000) ) ;
-       //system("random" ) ;
-       print ("j:");
-       j;
+       
+       if (warnIsSet)      {        option(warn);      }
+       
+       ol.clearX();
+       ol.writeX( "");
+       ol.writeX( "");
+      
+       ol.writeX( "LIB \"wrappers.lib\";");
+       ol.writeX( "LIB \"src/randomRing.lib\" ;");
+       ol.writeX( "LIB \"src/tests/test.afaces.gitfan\" ;");
+       ol.writeX(  ringToStringHack (basering) );
+       ol.writeX( "int trial = " + string( trial) + ";" );
+       if ( defined(I) ) { kill I; }
+       ideal I = gens.idealG();
+       ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
+       ol.writeX( "ideal I = " + string( I ) + ";" );
+       ol.writeX( "  ol.writeX( \"ideal I = \" + string( I ) + \";\" );" );
 
-       if (not isZero(j) && not idealsAreEqual(ideal(1),j) )
+       if (not isZero(j) && not idealsAreEqual(ideal(1),I) )
        {
-            L1 = afaces(j);
-     
+            ol.writeX( "L1 = afaces(I); " );
+            L1 = afaces(I);             
        }
     }
 
@@ -48,6 +59,7 @@ proc testAfaces( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGe
     return(1);
 }
 
+/*
 proc testAfacesWrapper(cchar,cord)
 {
 
@@ -65,8 +77,4 @@ printlevel = 0 ;
 TRACE=1;
 testAfacesWrapper("0","lp");
 testAfacesWrapper("0","dp");
-
-
-testPrimdecWrapper("7","dp");
-
-
+*/

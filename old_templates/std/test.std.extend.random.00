@@ -1,10 +1,24 @@
 
 
+/*
+
+string logfile = "/tmp/std04.log";
+
+string cmd = read("input/std/test.std.extend.random.00"); execute(cmd);
+
+run();
+
+// solche parameter sind gut, die 
+   bewirken, dass möglichst viele pfade/ quelltext
+   abgedeckt wird.
+
+*/
+
+
 LIB("src/tests/test.std.extend");
 
 LIB("src/randomRing.lib");
-//monitor("log/test.std.correct.00","io");
-
+LIB("src/testutils.lib");
 
 //////////////////////////////////////////////////////////////////////////////// 
 //////// adjust verbosity
@@ -67,12 +81,33 @@ def genTable = createRandomGeneratorsByParams( genParams  );
 
 option(warn);
 
-int trials = 10000000;
+int trialsPerRing = 10;
 
 
 int checkRedSB=1;
 
-testGroebnerAppend( rgens.getRing, genTable, optionlist, trials,checkRedSB, logfile);
+/*
+TGroebnerTestFlags flags = defaultGroebnerTestFlags();
+
+  flags.reduceTest = 1;
+  flags.repeatApplication = 1;
+  flags.equalTest = 0;
+  flags.optionflagTest = 1;
+  
+*/
+
+def ol = createDefaultOutputInterface(logfile);
+
+
+proc run()
+{
+     TProcInfo testeeInfo;   testeeInfo.name = "std";    
+     
+    option(warn);
+    //  testGroebner( testeeinfo, rgens.getRing, gens, optionlist, trialsPerRing, ol );
+    testGroebnerAppend( testeeInfo, rgens.getRing, genTable, optionlist, trialsPerRing, checkRedSB, infiniteTestsFinished, ol );      
+    
+}
 
 
 

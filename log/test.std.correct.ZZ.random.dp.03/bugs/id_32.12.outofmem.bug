@@ -12,3 +12,4 @@ system("random", 1018773084);
 ideal I = -2*x(2)^2*x(3)-13*x(1)^2-x(1),13*x(1)*x(2)^2+16,15*x(1)^3-14*x(1)*x(2)+4*x(1)*x(3);
   dbprint( 1, "ideal I = " + string( I ) + ";" );
        ideal gI =  std(I);
+quit;

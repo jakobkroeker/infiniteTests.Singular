@@ -22,6 +22,129 @@ LIB "stringutils.lib";
 LIB "listutils.lib";
 LIB "ring.lib";
 LIB "randomideal.lib";
+LIB "findifs.lib";
+
+
+proc removeBraces(string str)
+{
+   str = replace( str, "(", "" );
+   str = replace( str, ")", "" );
+   return(str);  
+}
+
+proc fetchMinpolyStr(def R)
+"USAGE: fetchMinpolyStr(R)
+RETURN:  the fetched minpoly string of ring R in current ring  in 'par()' notation
+EXAMPLE: example fetchMinpolyStr; shows an example
+"
+{
+   ring B = basering;
+   setring R;
+   short = 0;
+   string mp = string(minpoly);
+   string pstr = string( par(1) ) ;
+   pstr = removeBraces(pstr);
+   string cmd = "mp = replace(mp, \"" + pstr + "\", \"par(1)\" );";
+   execute(cmd);
+   setring B;
+   return (mp);  
+}
+example
+{
+  ring R = (0, p), x, dp;
+  minpoly = p^2-1;
+  ring S = (0, a), p, dp; 
+  string cmd = "poly p = " + fetchMinpolyStr(R) + ";";
+  execute(cmd);
+  // no problem with variable shadowing (ring variable p shadowed)
+  p;
+}
+
+
+proc minpolyToParVarStr(R, string parvar, int varnr)
+"USAGE: minpolyToParVarStr(R)
+PARAMETERS:  parvar: 'par' or 'var'
+             parvarnr : the dst ring parameter id or variable id.
+RETURN:  the mapped minpoly string of ring R in current ring 
+EXAMPLE: example fetchMinpolyStr; shows an example
+"
+{
+   ASSUME(1, parvar=="var" ||  parvar=="par");
+   ring B = basering;
+   setring R;
+   short = 0;
+   string mp = string(minpoly);
+   string pstr = string( par(1) ) ;
+   pstr = replace( pstr, "(", "" );
+   pstr = replace( pstr, ")", "" );
+   string cmd = "mp = replace(mp, \"" + pstr + "\", \"" + parvar + "("+string(varnr)+")\" );";
+   execute(cmd);
+   setring B;
+   return (mp);  
+}
+example
+{
+  ring R = (0,p), x, dp;
+  minpoly = p^2-1;
+  ring S = (0,p),(y,a),dp;
+  string cmd = "poly p = " + minpolyToVarStr(R,2) + ";";
+  execute(cmd);
+  // mapped minpoly(R) to variable a ( in ring S)
+  // no problem with variable shadowing (ring variable p shadowed)
+  dbprint(1, "p = "+string(p) ); 
+}
+
+proc minpolyToVarStr(R, int varnr)
+{
+  return ( minpolyToParVarStr(R, "var", varnr) );
+}
+
+proc minpolyToParStr(R, int varnr)
+{
+  return ( minpolyToParVarStr(R, "var", varnr) );
+}
+
+
+
+proc exportGensStr(def R)
+{
+  string cmdExport = "";
+  int i;
+  string parname, varname;
+  string cmdname;
+  for (i=1;i<=npars(R);i++)
+  {
+     execute("parname = string(par("+string(i)+"));");
+     cmdExport = cmdExport+ "poly " +    removeBraces(parname) + " = par("+string(i)+") ;";
+  }
+  for (i=1;i<=nvars(R);i++)
+  {
+     execute("varname = string(var("+string(i)+"));");
+     cmdExport = cmdExport +  "poly "+string(var(i))+ " = var("+string(i)+") ;";
+  }
+  return (cmdExport);  
+}
+
+proc varIdealStr(def R)
+{
+  string result;
+  if ( nvars(R)>0 ) 
+  {
+    
+    for (int i=1; i<= nvars(R); i++)
+    {
+       if (1==i)
+       {
+         result = "var("+string(i)+")";
+       }
+       else
+       {
+          result = result +",var("+string(i)+")";
+       }
+    }
+  }
+  return(result);
+}
 
 
 // newstruct("TGenerator","proc fkt,list  params");
@@ -1098,4 +1221,47 @@ proc testRandomGen()
    return(i);
 }
 
-
+// TODO: ring needs serialising.
+proc ringToStringHack(def rng)
+{
+   if (defined(basering) ) {   def BAS=basering; }
+   setring rng;
+    
+  string result = "";
+  
+  result =  "ring rng1 = "  + string( basering )+";";
+  result = result + "short = 0 ;";  
+  
+  if ( not ("0" == string(minpoly) ))
+  {
+      result = result + "minpoly = " + string(minpoly) + ";";
+  }
+       
+  if (isQuotientRing(basering))
+  {
+      result = result + "ideal  QQQ = "  + string( ideal(basering))+";";
+      result = result + "qring rng2 = QQQ;";
+      result = result + "ring rng = rng2;";
+  }
+  else
+  {
+      result = result + "ring rng = rng1;";
+  }
+  
+  result = result + "intvec op = "+string( option(get) )+";" ;           
+  result = result + " option(set, op) ;" ;
+  result = result + " option() ;" ;
+  result = result + " // option() ;" + option() ;
+       
+  if ( defined(BAS) ) {  setring BAS; }
+  return (result);
+}
+example
+{
+    ring rng1 = (3),(x),(lp(1),C);
+    short = 0 ;
+    ideal  QQQ = x;
+    qring rng2 = QQQ;
+    ring rng = rng2;
+    ringToStringHack(basering);
+}

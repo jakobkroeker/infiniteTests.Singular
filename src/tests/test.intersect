@@ -1,5 +1,5 @@
 /////////////////////
-version="version test.intersect.vs.intersect.via.eliminate";
+version="version test.intersect";
 category="Commutative Algebra";
 info="
 ";
@@ -152,10 +152,7 @@ proc testIntersect( getRng, idealG, trials, testflags, optionlist, ol )
            chooseRandomOptionsFromList(optionlist);
         }
       }
-      if (warnIsSet)
-      {
-        option(warn);
-      }
+      if (warnIsSet)       {         option(warn);      }
       
        ol.clearX();
        ol.writeX( "");
@@ -166,22 +163,7 @@ proc testIntersect( getRng, idealG, trials, testflags, optionlist, ol )
        ol.writeX( "LIB(\"src/tests/test.intersect\");");
        
       
-       ol.writeX( "ring rng = "  + string( basering)+";" );
-       ol.writeX( "short = 0 ;" );
-       
-       if ( not ("0" == string(minpoly) ))
-       {
-         ol.writeX( "minpoly = " + string(minpoly) + ";");
-       }
-       if (isQuotientRing(rng))
-       {
-         ol.writeX( "ideal  QQQ = "  + string( ideal(basering))+";" );
-         ol.writeX( "qring QR = QQQ;" );
-       }
-       ol.writeX( "intvec op = "+string( option(get) )+";");     
-       ol.writeX( " option(set, op) ;");
-       ol.writeX( " option() ;");
-       ol.writeX( " // option() ;" + option() );
+       ol.writeX(  ringToStringHack (basering) );
 
        if (defined(qrng)) {kill qrng; }
        

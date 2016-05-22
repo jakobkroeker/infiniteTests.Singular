@@ -9,28 +9,50 @@ LIB "randomIdeal.lib";
 
  
 
-proc testFinduni( rng, idealG, trials )
+proc testFinduni( getRng, idealG, trials )
 {
-    print ("testFinduni");
+    int warnIsSet = optionIsSet("warn");
+    option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
-
+    def rng = getRng( );
     setring rng;
-    export(rng);
-
-    int trial;
-    ideal I,IS;
+    option(warn);
+      
+    int trial;    
     while(1)
     {   
-       dbprint(1, "trial: ", trial );
-       setring rng;
-       basering;
-       kill I;
-       kill IS;
+       option(nowarn);  
+        kill rng;      
+
+        ol.writeX( " // getRng() ;");
+
+        def rng = getRng( );
+        setring rng;
+        
+       ol.writeX( "");
+       ol.writeX( "");
+      
+       ol.writeX( "LIB \"wrappers.lib\";");
+       ol.writeX( "LIB \"src/randomRing.lib\" ;");
+       ol.writeX( "LIB \"src/tests/test.finduni\" ;"); 
+       ol.writeX(  ringToStringHack (basering) );
+      
        ideal I = idealG( );
-       ideal IS = std(I);
+
+       ol.writeX( "system(\"random\", " + string( system("random") ) +         ");" );
+       ol.writeX( "ideal I = " + string( I ) + ";" );
+
+       ol.writeX( "  ol.writeX( \"ideal I = \" + string( I ) + \";\" );" );          
+
+
+       ol.writeX( "   ideal IS = std(I);" );       
+       ideal IS = std(I);      
+       
        if (dim(IS) !=0 ) { continue;}
-       I;
+       
+       ol.writeX( "   finduni(IS); ");
        finduni(IS);
+       
        trial = trial + 1;
     }
 

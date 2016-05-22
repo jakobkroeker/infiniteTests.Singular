@@ -1,39 +1,65 @@
+/////////////////////
+version="version test.blowup2.resolve.lib";
+category="Commutative Algebra";
+info="
+";
 
-echo = 1;
 LIB("primdec.lib");
 LIB("ringutils.lib");
 LIB("wrappers.lib");
 LIB("resolve.lib");
 
-proc testBlowUp2( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, trials )
+proc testBlowUp2( getRng, gens, trialsPerRing, ol  )
 {
-    print ("testFacstd");
+
+    int warnIsSet = optionIsSet("warn");
+    option(nowarn);
     if (defined(basering) ) {   def BAS=basering; }
-
-    def rng = createRing("0","dp", numVars) ;
+    def rng = getRng( );
     setring rng;
-    export(rng);
-
-    list ideals;
-
+    option(warn);
+    short = 0;
     int trial;
-    for (trial = 1; trial<=trials; trial++)
-    {   
-       setring rng;
-       print ("trial: "+string(trial));
-       if ( defined(j) ) { kill j; }
-       ideal j = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
-       print ("j:");
-       j;
-      ideal i = randomIdeal(  random(1, maxGens) , random(1, absMaxCoeff) , random(0, maxMonomialDegree), random(1, maxTermsPerGen)  );
-       print ("i:");
-       i;
-       
-       i = i+j;
-       if (dimIdeal(i)>=0)
-       {
-           blowUp2(j,i);
-       }
+
+    while(1)
+    {
+        option(nowarn);  
+        kill rng;   
+        if (defined(basering) ) {   def BAS=basering; }
+
+        def rng = getRng() ;
+        setring rng;    
+
+        ideal I, J;       
+
+        if (warnIsSet)       {        option(warn);      }
+        
+        ol.clearX();
+        ol.writeX( "");
+        ol.writeX( "");
+        
+        ol.writeX( "LIB \"wrappers.lib\";");
+        ol.writeX( "LIB \"src/randomRing.lib\" ;");
+        ol.writeX( "LIB \"src/tests/test.blowup2.resolve.lib\" ;");
+        
+        ol.writeX(  ringToStringHack (basering) );
+        
+        I = gens.idealG( );
+        J = gens.idealG( );            
+            
+        ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
+        ol.writeX( "ideal I = " + string( I ) + ";" );
+        ol.writeX( "  ol.writeX( \"ideal I = \" + string( I ) + \";\" );" );
+        ol.writeX( "ideal J = " + string( J ) + ";" );
+        ol.writeX( "  ol.writeX( \"ideal J = \" + string( J ) + \";\" );" );
+        
+        ol.writeX("  I = I+J; ");     
+        I = I+J;
+        if (dimIdeal(I)>=0)
+        {
+            ol.writeX("  blowUp2(J,I); ");     
+            blowUp2(J,I);
+        }
     }
 
 
@@ -41,6 +67,7 @@ proc testBlowUp2( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerG
     return(1);
 }
 
+/*
 proc testBlowUp2rapper()
 {
 	printlevel = 0 ;
@@ -56,4 +83,5 @@ proc testBlowUp2rapper()
 }
 
 testBlowUp2rapper();
+*/
 

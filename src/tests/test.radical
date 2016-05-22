@@ -5,10 +5,15 @@ info="
 ";
 
 LIB "primdecint.lib";
+LIB "ehv.lib";
 LIB "randomIdeal.lib";
 LIB "ringutils.lib";
 LIB "wrappers.lib";
  
+
+// todo: test radEHV? (ehv.lib)
+// what about using function isRadical as a test?
+
 proc testRadical( getRng, gens, optionlist, trials, ol )
 {
     int warnIsSet = optionIsSet("warn");
@@ -27,7 +32,7 @@ proc testRadical( getRng, gens, optionlist, trials, ol )
       kill rng;      
       def rng = getRandomRing(gens);
       setring rng;
-      ideal I, rSLI, rSLI2, rKLI, rKLI2, rEHVI, rEHVI2;
+      ideal I, rSLI, rSLI2, rKLI, rKLI2, rEHVI, rEHVI2, rehv;
 
       if ( hasGlobalOrdering(basering))
       {
@@ -79,17 +84,21 @@ proc testRadical( getRng, gens, optionlist, trials, ol )
        
        if ( hasGlobalOrdering(basering) && (char(basering)==0 || char(basering)>100) )
        {
-          ol.writeX( "       idealrEHVI =  radicalEHV(I);" );
+          ol.writeX( "       ideal rEHVI =  radicalEHV(I);" );
           rEHVI = radicalEHV(I);
          
-          ol.writeX( "       idealrEHVI2 =  radicalEHV(rEHVI);" );
+          ol.writeX( "       ideal rEHVI2 =  radicalEHV(rEHVI);" );
           rEHVI2 = radicalEHV(rEHVI);
          
-         
+          ol.writeX( "       ideal rehv =  radEHV(I);" );
+          rehv = radEHV(I);
+          
           ol.writeX( "  ASSUME(0, idealsAreEqual(rEHVI, rEHVI2));");
           ol.writeX( "  ASSUME(0, idealsAreEqual(rKLI, rEHVI));");
+          ol.writeX( "  ASSUME(0, idealsAreEqual(rehv, rEHVI));");
           ASSUME(0, idealsAreEqual(rKLI, rEHVI));
           ASSUME(0, idealsAreEqual(rEHVI, rEHVI2));
+          ASSUME(0, idealsAreEqual(rehv, rEHVI));
        }
        
               

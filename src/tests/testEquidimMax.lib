@@ -1,80 +1,140 @@
 /////////////////////
-version="version test.equidimMax.ehv";
+version="version testEuidimMax.lib";
 category="Commutative Algebra";
 info="
 ";
 
 
-LIB "ringutils.lib";
+LIB "src/tests/testseveral.lib";
 LIB "primdec.lib";
 LIB "ehv.lib";
-//LIB "wrappers.lib";
-LIB "randomIdeal.lib";
- 
+LIB "wrappers.lib";
+LIB "src/testutils.lib";
+// LIB "randomideal.lib";
 
-proc testEquidimMax( rng, idealG, trials )
+
+proc equidimInputIsGood(input)
 {
-    print ("testEquidimMax");
-    if ( defined(basering) ) {   def BAS=basering; }
-
-    setring rng;
-    export(rng);
-    basering;
-    list ideals;
-
-    int trial;
-    def rI, rIehv,eIMEHV, eiMehv, eIM, IR, I;
-    for (trial = 1; trial<=trials; trial++)
-    {   
-       setring rng;
-       dbprint (1, "trial: ", trial );
-
-       I = idealG();
-       I;
-       IR = radical(I);
-       IR;
-       basering;
-       if ( not idealsAreEqual( IR, ideal(1) ) && not  isZero(IR) )
-       {
-           //if ( defined(eIMEHV) ) { kill eIMEHV; }
-           //if ( defined(eiMehv) ) { kill eiMehv; }
-           //if ( defined(eIM) ) { kill eIM; }
-           eIMEHV = equidimMaxEHV(IR);;    
-           eiMehv = equiMaxEHV(IR);
-           eIM    = equidimMax(IR);;
-           ASSUME(   0, idealsAreEqual( radical(eiMehv),  (eIMEHV) )   );
-           ASSUME(   0, idealsAreEqual( (eIM),     (eIMEHV) )   );            
-       }
-
+    if (idealsAreEqual( input, ideal(1) ))
+    {
+        return (0);
     }
-    if (defined(BAS)) {  setring BAS; }
-    return(1);
+    
+    if ( isZero(input) ) 
+    {
+        return (0);
+    }
+    
+    /*if (not isRadical(input) ) 
+    {     
+        return (0);
+    }
+    */
+    ideal RI = radical(input);    
+    if (not idealsAreEqual(input,RI))
+    {
+            return (0);
+    }
+    
+    
+    return (1);
+    
+}
+
+proc equiMaxEHVRad(def input1)
+{
+    return ( radical( equiMaxEHV(input1) ) );
 }
 
 
-proc testEquidimMaxWrapper(cchar, ordering)
+
+// do not compute radical for I (=>example growth), instead check that I is radical 
+// and we do not want example growth since we try to minimize the failing example!
+
+proc testEquidimMax( getRng, idealG, trialsPerRing, finished, ol )
 {
-    echo = 0;
-    def assumeLevel = 3;
+    export (equiMaxEHVRad); // hack
+    
+    string requiredLibEscapedStr="LIB \"src/tests/testEquidimMax.lib\"; ";        
+    
+    list methodInfoList;    
 
-    init_randomIdeal();
-    int numVars = 2;
-    def rng = createRing(cchar,ordering, numVars) ;
-    setring rng;
+    
+    methodInfoList[1] = newProcInfo("Primdec::equidimMax"); 
+    methodInfoList[2] = newProcInfo("Ehv::equiMaxEHV");
+    methodInfoList[3] = newProcInfo("Primdec::equidimMaxEHV");
+    
+    string resultCheckName =   "noResultCheck";              
+    string resultEquivFktName = "idealsAreEqual";  
+        
+    def sbIdealG = constructSBIdealG(idealG);    
+    
+    testSeveralMethods(requiredLibEscapedStr, getRng, unchangedOptions, sbIdealG, serializeObj, inputIsAlwaysGood, trialsPerRing,  methodInfoList, resultCheckName, resultEquivFktName, finished, ol);
+}
 
-    def genParams = defaultIdealGeneratorParams();
-    // adjust random ideal generator params:
+
+
+
+
+proc testEquiRadEHV( getRng, inputG, trialsPerRing, finished, ol )
+{           
+    string requiredLibEscapedStr="LIB \"src/tests/testEquidimMax.lib\"; ";       
+    
+    list methodInfoList;    
+
+    
+    methodInfoList[1] = newProcInfo("Primdec::equidimMax"); 
+    methodInfoList[2] = newProcInfo("Ehv::equiRadEHV");
+    // methodInfoList[3] = newProcInfo("Ehv::equiMaxEHV");    
+    // methodInfoList[4] = newProcInfo("Primdec::equidimMaxEHV");
+    
+    string resultCheckName =   "noResultCheck";              
+    string resultEquivFktName = "radicalsAreEqual";  
+   
+    
+    testSeveralMethods(requiredLibEscapedStr, getRng, unchangedOptions, inputG, serializeObj, inputIsAlwaysGood, trialsPerRing,  methodInfoList, resultCheckName, resultEquivFktName, finished, ol);
+    
+}
+
+
+
+// test equiRadEHV only with  radical input because of this bug:
+// https://github.com/jakobkroeker/test_singular/issues/239
+
+proc testEquiRadEHVRadicalInput( getRng, idealG, trialsPerRing,finished, ol )
+{           
+    def radicalG = constructRadicalG(idealG);
+    testEquiRadEHV( getRng, radicalG, trialsPerRing, finished, ol );
+}
+
+// test only radical input because of this bug:
+// https://github.com/jakobkroeker/test_singular/issues/239
+
+proc testEquidimMaxRadicalInput( getRng, idealG, trialsPerRing, finished, ol )
+{
+    def radicalG = constructRadicalG(idealG);
+    
+    testEquidimMax( getRng, radicalG, trialsPerRing, finished, ol );
+}
+
+
+/*
+ used test parameters: (dp,lp)
+-    int numVars = 3; 
+-    genParams.absMaxCoeff = 15;
+-    genParams.maxMonomialDegree = 3;
+-    genParams.maxTermsPerGen = 3;
+-    genParams.maxGens = 3;
+
+
+    testEquidimMax: used test parameters: 
+    int numVars = 2; 
     genParams.absMaxCoeff = 15;
     genParams.maxMonomialDegree = 2;
     genParams.maxTermsPerGen = 3;
     genParams.maxGens = 2;
-    int trials = 1000000;
-    def idealG = idealGeneratorFromParams( genParams  );
 
-	testEquidimMax( rng, idealG, trials );
-}
-
-
+*/
 
 
 

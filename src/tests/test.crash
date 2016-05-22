@@ -1,17 +1,16 @@
 /////////////////////
-version="version test.slocus.lib";
-category="Commutative Algebra";
+version="version test.crash";
+category="";
 info="
 ";
 
 
 LIB "ringutils.lib";
 LIB "wrappers.lib";
-LIB "sing.lib";
 
-proc slocusCrashTest( getRng , inputG, trialsPerRing, ol  )
+proc crashTest( loadingLibsAsEscapedStr, getRng , inputG, trialsPerRing, nameOfTestee, inputToString, ol  )
 {
-    ol.writeX( " // testSlocus");
+    ol.writeX( " // crashTest for " + nameOfTestee );
          
     int warnIsSet = optionIsSet("warn");
     option(nowarn);
@@ -23,6 +22,8 @@ proc slocusCrashTest( getRng , inputG, trialsPerRing, ol  )
     short = 0;
 
     int trial;
+    
+    string cmd;
     
     while(1)
     {   
@@ -36,26 +37,20 @@ proc slocusCrashTest( getRng , inputG, trialsPerRing, ol  )
         
         if (warnIsSet)      {        option(warn);      }
         
-        ol.writeX( "LIB \"wrappers.lib\";");
-        ol.writeX( "LIB \"src/randomRing.lib\" ;");
-        ol.writeX( "LIB \"src/tests/test.slocus.lib\" ;"); 
+        ol.writeX( loadingLibsAsEscapedStr );     
         ol.writeX(  ringToStringHack (basering) );
         ol.writeX( "int trial = " + string( trial) + ";" );
         
-        if ( defined(J) ) { kill J; }
-        ideal J = inputG();
-        
-        if ( defined(I) ) { kill I; }
-        ideal  I = inputG();
-        
-        
-        I = I+J; // why this???
-        I = groebner(I);
+        if ( defined(input) ) { kill input; }
+        def input = inputG();        
+       
         ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
-        ol.writeX( "ideal I = " + string( I ) + ";" );
-        ol.writeX( "  ol.writeX( \"ideal I = \" + string( I ) + \";\" );" );
-        ol.writeX( "      slocus(I);");
-        slocus(I);
+        ol.writeX( typeof(input)+" input = " + inputToString( input ) + ";" );
+      
+        cmd = nameOfTestee+"(input);";      
+        ol.writeX( cmd );
+        
+        execute(cmd);
     }
 
 

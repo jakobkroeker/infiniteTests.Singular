@@ -1,13 +1,18 @@
+/////////////////////
+version="version test.primdecZ";
+category="Commutative Algebra";
+info="
+";
 
-echo = 1;
-option("redSB");
+
+// LIB "ringutils.lib" ;
+
+LIB "primdecint.lib";
+// LIB "wrappers.lib" ;
+// LIB "randomIdeal.lib";
+LIB "src/tests/testsingle.lib";
 
 
-LIB("primdecint.lib");
-LIB("ringutils.lib");
-LIB("wrappers.lib");
-LIB("ehv.lib");
- 
  
 proc testPrimaryZ(list pr, ideal k)
 "USAGE:   testPrimary(pr,k); pr a list, k an ideal.
@@ -16,21 +21,34 @@ RETURN:  int, 1 if the intersection of the ideals in pr is k, 0 if not
 EXAMPLE: example testPrimary; shows an example
 "
 {
+   list L1;
+   
+    dbprint(1, "k",k);
    int i;
    pr=Primdec::reconvList(pr);
+   dbprint(1, "pr",pr);
    ideal j=pr[1];
+   L1 = primdecZ(j);
+   ASSUME(0, size(L1)==1);
+       
    int tstRes;
    for (i=2;i<=size(pr) div 2;i++)
    {
+       L1 = primdecZ(pr[2*i-1]);
+       ASSUME(0, size(L1)==1);
        ASSUME(0, (2*i-1) >0 && (2*i-1)<=size(pr));
        ASSUME(0, (2*i-1) >0 && (2*i-1)<=size(pr));
-       dbprint(printlevel-voice,"intersectZ(j,pr[2*i-1]), j=",j);
-       dbprint(printlevel-voice,"intersectZ(j,pr[2*i-1]), pr[2*i-1]=",pr[2*i-1]);
-       j=intersectZ(j,pr[2*i-1]);
-       tstRes = idealsEqual(j, intersect(j,pr[2*i-1]) );
+       dbprint(printlevel-voice,"// intersectZ(j,pr[2*i-1]), j="+string(j));
+       dbprint(printlevel-voice,"// intersectZ(j,pr[2*i-1]), pr[2*i-1]="+string(pr[2*i-1]));
+       j=intersect(j,pr[2*i-1]);
+       tstRes = idealsEqual(j, intersectZ(j,pr[2*i-1]) );
        ASSUME(0, tstRes );
    }
-   return(Primdec::idealsEqual(j,k));
+   //return(Primdec::idealsEqual(j,k));
+   dbprint(1, "reduce(j,std(k)" ,reduce(j, std(k)));
+   dbprint(1, "reduce(k,std(j))", reduce(k,std(j)) );
+   ASSUME(0, idealsAreEqual(j,k) );
+   return(1);
 }
 
 proc testPrimdecZ( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPerGen, orderingStr,trials )
@@ -76,6 +94,19 @@ proc testPrimdecZ( numVars, maxGens, absMaxCoeff, maxMonomialDegree, maxTermsPer
 }
 
 
+proc testPrimdecZEx( ringG, randomOptionFlags, gens, trialsPerRing, finished, ol)
+{
+ string requiredLibEscapedStr = "LIB \"src/tests/test.primdecZ\"; ";        
+    
+    string testeeName =   "primdecZ";              
+    string checkResultName = "testPrimaryZ";
+    def serializeInput =  serializeObj;  
+          
+    testSingleProc( requiredLibEscapedStr, ringG, randomOptionFlags,  gens.idealG,    serializeInput, inputIsNotUnit,    trialsPerRing,   testeeName,         checkResultName,   finished,  ol );
+
+}
+
+/*
 proc testPrimdecZWrapper(orderingStr)
 {
 	// seems doable
@@ -100,7 +131,7 @@ testPrimdecZWrapper("lp");
 
 testPrimdecZWrapper("Dp");
 
-
+*/
 
 
 

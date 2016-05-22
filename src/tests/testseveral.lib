@@ -1,29 +1,37 @@
 /////////////////////
-version="version test.several";
+version="version testseveral.lib";
 category="Commutative Algebra";
 info="
 ";
 
+LIB "src/randomRing.lib";
+// LIB "randomIdeal.lib";
+LIB "src/testutils.lib";
+LIB "ringutils.lib";
+LIB "wrappers.lib";
+// LIB "findifs.lib" ;
+LIB "ellipticcovers.lib";
 
 
+//test several methods doing the same computation by comparing the result and checking 
+// the first one. The methods are executed in random order.
 proc testSeveralMethodsOnce(list methodsPairs, input, resultCheckFktName, resultEquivFktName, ol)
 {
-            if (defined(ML))  {kill ML; }
+            if ( size(methodsPairs)==0 )      {    return;    }
+                
+            if ( defined(ML) )  {   kill ML; }
             list ML;
             ol.writeX( "   list ML;");
-            int i;
-                 
+            int i;                 
             string cmd;
 
-            list perms =  permute(methodsPairs);
+            // todo: do not compute all permutations every time! (permute is naively implemented)
+            list perms =  permute(methodsPairs); 
          
-            def perm =     perms[random(1,size( perms))];
+            def perm =     perms[ random(1, size( perms) ) ];
             
-            i = 1;
-            proc foo ;
-            ol.writeX( "  ML["+string(i)+"] = "+perm[i][1]+"(input);");
-            foo =  perm[i][2];
-            ML[i] =  foo (I) ;
+            ol.writeX( "  ML[1] = " + perm[1].name + "(input);");
+            ML[1] =  perm[1].procedure(input) ;
 
             cmd = " ASSUME(0, "+resultCheckFktName+"(ML[1],input));";
             ol.writeX( cmd );
@@ -31,11 +39,11 @@ proc testSeveralMethodsOnce(list methodsPairs, input, resultCheckFktName, result
          
             for (i=2;i<=size(perm);i++)
             { 
-                  ol.writeX( "  ML["+string(i)+"] = "+perm[i][1]+"(input);");
-                  foo =  perm[i][2];
-                  ML[i] =  foo (I) ;
+                  cmd = "  ML["+string(i)+"] = " + perm[i].name + "(input);";
+                  ol.writeX( cmd);
+                  execute(cmd);          
                   
-                  cmd =  "ASSUME(0, "+resultEquivFktName+"(ML["+string(i-1)+"],ML["+string(i)+"]));";
+                  cmd =  "ASSUME(0, "+resultEquivFktName+"( ML["+string(i-1)+"], ML["+string(i)+"] )  );";
                   ol.writeX(cmd);                   
                   execute(cmd);                        
             }
@@ -44,8 +52,10 @@ proc testSeveralMethodsOnce(list methodsPairs, input, resultCheckFktName, result
 }
 
 
-proc testSeveralMethods(/*requiredLibStr ,*/requiredLibEscapedStr, getRng, inputG, inputToStr,  trialsPerSameRing,  methodsPairs, resultCheckFktName, resultEquivFktName, ol)
+proc testSeveralMethodsMultipleInput(requiredLibEscapedStr, getRng, randomOptions, inputCollectionG, serializeInput, inputIsGood, trialsPerRing,  methodsPairs, resultCheckFktName, resultEquivFktName, finished, ol)
 {
+    intvec op = option("get");
+    
     string cmd;
 
     // cmd = requiredLibStr;
@@ -56,12 +66,11 @@ proc testSeveralMethods(/*requiredLibStr ,*/requiredLibEscapedStr, getRng, input
     if (defined(basering) ) {   def BAS=basering; }
     def rng = getRng( );
     setring rng;
-    option(warn);
 
     short = 0;
     int trial;
-    
-    while( 1 )
+    int inputPos=1;
+    while( not finished(trial) )
     {   
         option(nowarn);  
         kill rng;      
@@ -70,29 +79,62 @@ proc testSeveralMethods(/*requiredLibStr ,*/requiredLibEscapedStr, getRng, input
 
         def rng = getRng( );
         setring rng;
-        if (warnIsSet)      {        option(warn);      }
+        
+        randomOptions();
+        
+        if (warnIsSet)      {        option(warn);      }    
   
-       ol.clearX();
-       ol.writeX( "");
-       ol.writeX( "");
-      
-       ol.writeX( requiredLibEscapedStr );
-       ol.writeX(  ringToStringHack (basering) );
-       ol.writeX( "int trial = " + string( trial) + ";" );
-       short = 0;
-       def input = inputG();
-       ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
-       ol.writeX( "def  input = " + inputToStr( input ) + ";" );
-       testSeveralMethodsOnce(methodsPairs, input, resultCheckFktName, resultEquivFktName, ol);
+        ol.clearX();
+        ol.writeX( "");
+        ol.writeX( "");
+        ol.writeX( " option(noredefine);");
+        ol.writeX( requiredLibEscapedStr );
+        ol.writeX(  ringToStringHack (basering) );
+        ol.writeX( "int trial = " + string( trial) + ";" );
+        ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
+        ol.writeX( "// list inputList = inputCollectionG();");
+        short = 0;
+        list inputList = inputCollectionG();
+        def input;
+        for (inputPos = 1; inputPos<=size(inputList); inputPos=inputPos+1)
+        {                    
+            input = inputList[inputPos];
+            if ( inputIsGood(input) )
+            {
+                ol.clearX();
+                ol.writeX( "");
+                ol.writeX( "");
 
-       trial = trial+1;
-
+                ol.writeX( requiredLibEscapedStr );
+                ol.writeX(  ringToStringHack (basering) );
+                ol.writeX( "int trial = " + string( trial) + ";" );
+                ol.writeX( "system(\"random\", " + string( system("random") ) + ");" );
+                ol.writeX( serializeInput(input,"input") );
+                ol.writeX( " option(redefine);");
+                option(redefine);
+                testSeveralMethodsOnce(methodsPairs, input, resultCheckFktName, resultEquivFktName, ol);
+                ol.writeX( "quit;");
+                trial = trial+1;
+            }
+            option(noredefine);
+        }
     }
 
     if ( defined(BAS) ) {  setring BAS; }
+    option("set",op);  
     return(1);
 }
 
+// testInput is:  += methodsPairs , resultEquivFktName
 
+proc testSeveralMethods(requiredLibEscapedStr, getRng, randomOptions, inputG, serializeInput, inputIsGood, trialsPerRing,  testeeInfoList, resultCheckFktName, resultEquivFktName, finished, ol)
+{
+    intvec op = option("get");
+       
+    def inputCollectionG1 = singleInputToCollectionG(inputG);
+    
 
+    testSeveralMethodsMultipleInput(requiredLibEscapedStr, getRng, randomOptions, inputCollectionG1, serializeInput, inputIsGood, trialsPerRing,  testeeInfoList, resultCheckFktName, resultEquivFktName, finished, ol);
+    option("set",op);  
+}
 
